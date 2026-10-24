@@ -43,6 +43,12 @@ export function createComplete(settings: Settings, db: Store, request: typeof fe
     };
     if (tools?.length) Object.assign(payload, { tools, tool_choice: "auto" });
     if (jsonMode) payload.response_format = { type: "json_object" };
+    // Bound hidden reasoning so it does not consume the whole output budget before
+    // the JSON answer. reasoning_effort covers OpenAI-style gateways; extraBody is the
+    // escape hatch for provider-specific controls and may override the convenience knob.
+    if (settings.reasoningEffort) payload.reasoning_effort = settings.reasoningEffort;
+    if (settings.extraBody) for (const [key, value] of Object.entries(settings.extraBody))
+      if (!["model", "messages", "stream"].includes(key)) payload[key] = value;
     try {
       const response = await request(settings.baseUrl + "/chat/completions", {
         method: "POST",

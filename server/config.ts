@@ -27,6 +27,8 @@ export interface Settings {
   maxCalls: number;
   maxOutputTokens: number;
   maxPlanningTokens: number;
+  reasoningEffort?: string;
+  extraBody?: Record<string, unknown>;
   timeout: number;
   maxContextBytes?: number;
   maxResponseBytes?: number;
@@ -64,6 +66,23 @@ export function loadSettings(env: NodeJS.ProcessEnv = process.env): Settings {
   if (!Array.isArray(allowed) || !allowed.every(m => typeof m === "string" && m.trim()) || !allowed.includes(model))
     throw new Error("Модель отсутствует в списке разрешённых");
 
+  // Reasoning models spend the output budget on hidden reasoning tokens before any
+  // JSON is emitted; these knobs bound or disable that so a valid answer fits the limit.
+  const reasoningEffort = (values.LLM_REASONING_EFFORT ?? "").trim() || undefined;
+  if (reasoningEffort && !["none", "minimal", "low", "medium", "high"].includes(reasoningEffort))
+    throw new Error("LLM_REASONING_EFFORT должен быть none|minimal|low|medium|high");
+  // Escape hatch for provider-specific knobs (e.g. {\"chat_template_kwargs\":{\"enable_thinking\":false}}
+  // or {\"reasoning\":{\"max_tokens\":1024}}) merged shallowly into the request body.
+  let extraBody: Record<string, unknown> | undefined;
+  if ((values.LLM_EXTRA_BODY_JSON ?? "").trim()) {
+    const parsed: unknown = JSON.parse(values.LLM_EXTRA_BODY_JSON!);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+      throw new Error("LLM_EXTRA_BODY_JSON должен быть JSON-объектом");
+    for (const key of ["model", "messages", "stream"])
+      if (key in (parsed as object)) throw new Error("LLM_EXTRA_BODY_JSON не может переопределять " + key);
+    extraBody = parsed as Record<string, unknown>;
+  }
+
   const feeds: unknown = JSON.parse(values.NEWS_FEEDS_JSON ?? "[]");
   if (
     !Array.isArray(feeds) ||
@@ -86,6 +105,8 @@ export function loadSettings(env: NodeJS.ProcessEnv = process.env): Settings {
     maxCalls: integer(values.MAX_DAILY_LLM_CALLS, 100),
     maxOutputTokens: integer(values.LLM_MAX_OUTPUT_TOKENS, 6000, 256),
     maxPlanningTokens: integer(values.LLM_MAX_PLANNING_TOKENS, 6000, 256),
+    reasoningEffort,
+    extraBody,
     timeout: integer(values.LLM_TIMEOUT_SECONDS, 120, 1) * 1000,
     maxContextBytes: integer(values.LLM_MAX_CONTEXT_BYTES, 200000, 1000),
     maxResponseBytes: integer(values.LLM_MAX_RESPONSE_BYTES, 1000000, 1000),

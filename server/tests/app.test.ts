@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
 import type { Server } from 'node:http';
 import { createApplication } from '../app.js';
-import { ROOT, ROLES, type Settings } from '../config.js';
+import { ROOT, ROLES, loadSettings, type Settings } from '../config.js';
 import { createComplete, parseJson, type Complete } from '../llm.js';
 import { validate, Agent } from '../agent.js';
 import { Store } from '../db.js';
@@ -148,6 +148,29 @@ describe('Node.js prototype: data, API and agent contracts', { concurrency: fals
     assert.deepEqual(JSON.parse(String(seen[1].options.body)).response_format,{ type: 'json_object' });
     assert.equal(body.max_tokens,4000); assert.equal(JSON.parse(String(seen[1].options.body)).max_tokens,6000);
     assert.equal(seen[0].options.redirect,'error'); assert.equal(runtime.db.get('SELECT sum(prompt_tokens+completion_tokens) n FROM llm_calls')!.n,32);
+  });
+  it('applies the reasoning budget and extra body fields without overriding model/messages/stream', async () => {
+    settings.apiKey = 'test-placeholder'; settings.reasoningEffort = 'low';
+    settings.extraBody = { chat_template_kwargs: { enable_thinking: false }, top_p: 0.9, model: 'HACK', messages: [], stream: true };
+    const seen: RequestInit[] = [];
+    const fake = (async (_url, options) => { seen.push(options!); return Response.json({ choices: [{ message: { role: 'assistant', content: '{}' } }], usage: { prompt_tokens: 1, completion_tokens: 1 } }); }) as typeof fetch;
+    await createComplete(settings, runtime.db, fake)([{ role: 'user', content: 'Контекст' }], undefined, true);
+    const body = JSON.parse(String(seen[0].body));
+    assert.equal(body.reasoning_effort, 'low');
+    assert.deepEqual(body.chat_template_kwargs, { enable_thinking: false });
+    assert.equal(body.top_p, 0.9);
+    // Protected fields come from the request, never from extraBody.
+    assert.equal(body.model, settings.model); assert.notEqual(body.stream, true);
+    assert.deepEqual(body.messages, [{ role: 'user', content: 'Контекст' }]);
+  });
+  it('loads and validates reasoning/extra-body settings from the environment', () => {
+    const base = { NEWS_FEEDS_JSON: '[]', LLM_ALLOWED_MODELS_JSON: JSON.stringify(['qwen/qwen3.6-35b-a3b']) };
+    const ok = loadSettings({ ...base, LLM_REASONING_EFFORT: 'none', LLM_EXTRA_BODY_JSON: '{"reasoning":{"max_tokens":512}}' } as NodeJS.ProcessEnv);
+    assert.equal(ok.reasoningEffort, 'none'); assert.deepEqual(ok.extraBody, { reasoning: { max_tokens: 512 } });
+    assert.equal(loadSettings(base as NodeJS.ProcessEnv).reasoningEffort, undefined);
+    assert.throws(() => loadSettings({ ...base, LLM_REASONING_EFFORT: 'turbo' } as NodeJS.ProcessEnv), /LLM_REASONING_EFFORT/);
+    assert.throws(() => loadSettings({ ...base, LLM_EXTRA_BODY_JSON: '[1,2]' } as NodeJS.ProcessEnv), /JSON-объект/);
+    assert.throws(() => loadSettings({ ...base, LLM_EXTRA_BODY_JSON: '{"model":"x"}' } as NodeJS.ProcessEnv), /не может переопределять/);
   });
   it('reserves local limits before parallel requests and counts failed attempts', async () => {
     settings.apiKey = 'test'; settings.maxCalls = 1; let calls = 0;
