@@ -31,11 +31,22 @@ function numbers(text: string) {
  * Token membership alone would accept "company loses 14%" from a 14% policy rate.
  * This deliberately conservative lexical guard is not a general semantic validator.
  */
-export function hasFinancialFigure(text: string): boolean {
+export function hasFinancialFigure(text: string, verifiedOkvedCodes: readonly string[] = []): boolean {
   if (!/\d/.test(text)) return false;
-  return /\d\s*(?:%|₽|\$|€|₣|£|руб|доллар|евро|юан|процент|б\.?\s*п\.?|базисн|п\.?\s*п\.?)/iu.test(text)
+  // Explicit money/rate units are never exempt, even beside a verified code label.
+  if (/\d\s*(?:%|₽|\$|€|₣|£|руб|доллар|евро|юан|процент|б\.?\s*п\.?|базисн|п\.?\s*п\.?)/iu.test(text)
     || /(?:₽|\$|€|£)\s*\d/u.test(text)
-    || text.split(/[.!?;\n]+/).some(part => /\d/.test(part)
+  ) return true;
+  const codes = new Set(verifiedOkvedCodes);
+  const prose = text.replace(
+    /(?<![\p{L}\p{N}_])((?:ОКВЭД|OKVED)\s*[:№]?\s*)(\d{2}(?:\.\d{1,2}){0,2})(?![\p{L}\p{N}_]|[.,]\d)/giu,
+    (match: string, label: string, code: string, offset: number) => {
+      // Do not let a classification label disguise a monetary multiplier.
+      const suffix = text.slice(offset + match.length);
+      return codes.has(code) && !/^\s*(?:тыс|млн|млрд|трлн)/iu.test(suffix)
+        ? label + "[код]" : match;
+    });
+  return prose.split(/[.!?;\n]+/).some(part => /\d/.test(part)
       && /(?:выручк|прибыл|убыт|потер|экономи[яюи]|расход|затрат|доход|стоимост|себестоимост|ставк|долг|кредит|плат[её]ж|финансир|процент)/iu.test(part));
 }
 /** Structural/provenance checks, not a proof of factual truth or economic causality. */
@@ -51,6 +62,7 @@ export function validateGrounding(answer: Json, context: PreparedContext, server
   const withoutCompanyId = (text: string) => /[A-Za-z_:]/.test(companyId) ? text.split(companyId).join(" ") : text;
   const scan = (text: string) => numbers(withoutCompanyId(text));
   const supports: string[] = [];
+  const okvedByClaim: string[][] = [];
   for (const [index, c] of (answer.claims as Json[]).entries()) {
     const path = "/claims/" + index;
     if (!nonblank(c.text)) reject("Blank claim text", path + "/text");
@@ -63,6 +75,7 @@ export function validateGrounding(answer: Json, context: PreparedContext, server
       if (!c.source_ids.every((id: string) => sources.get(id)!.kind === kind)) reject("Quote source has the wrong evidence kind", path + "/source_ids");
       if (!c.source_ids.every((id: string) => sources.get(id)!.excerpt.includes(c.quote))) reject("Quote not found in selected evidence", path + "/quote");
       supports.push(c.quote);
+      okvedByClaim.push([]);
     } else {
       if (c.quote !== "") reject("AI claim quote must be empty", path + "/quote");
       if (!c.source_ids.includes("company:" + context.input.company_id)) reject("AI claim needs the selected company source", path + "/source_ids");
@@ -70,6 +83,12 @@ export function validateGrounding(answer: Json, context: PreparedContext, server
       if (!c.profile_paths?.length) reject("AI claim needs business profile paths", path + "/profile_paths");
       if (!c.conditions?.length || !c.conditions.every(nonblank)) reject("AI claim needs nonblank conditions", path + "/conditions");
       const values = c.profile_paths.map((pointer: string, i: number) => profileValue(context.input.profile, pointer, path + "/profile_paths/" + i));
+      // Only typed code leaves explicitly selected by this claim qualify. Code-shaped
+      // strings elsewhere in the profile or in news are not classification evidence.
+      const okvedCodes = values.filter((value: unknown, i: number): value is string =>
+        /\/(?:okved_code|okved_division)$/.test(c.profile_paths[i]) && typeof value === "string"
+        && /^\d{2}(?:\.\d{1,2}){0,2}$/.test(value));
+      okvedByClaim.push(okvedCodes);
       if (values.some((v: unknown) => v === null || v === "unknown" || v === "" || Array.isArray(v) && !v.length)
         && (!answer.missing_data.some(nonblank) || !answer.limitations.some(nonblank))) reject("Unknown business field needs missing data and limitation", !answer.missing_data.some(nonblank) ? "/missing_data" : "/limitations");
       // Only selected news/bank excerpts and selected business values may supply numbers.
@@ -77,7 +96,7 @@ export function validateGrounding(answer: Json, context: PreparedContext, server
       supports.push(evidence + " " + JSON.stringify(values));
       const allowed = new Set(scan(supports.at(-1)!));
       if (scan(c.text + " " + c.conditions.join(" ")).some(n => !allowed.has(n))) reject("Unsupported numeric assertion", path);
-      if (hasFinancialFigure(withoutCompanyId(c.text + " " + c.conditions.join(" ")))) reject("AI financial figures must be verbatim fact/bank quotes, not company impact", path);
+      if (hasFinancialFigure(withoutCompanyId(c.text + " " + c.conditions.join(" ")), okvedCodes)) reject("AI financial figures must be verbatim fact/bank quotes, not company impact", path);
     }
   }
   const used = new Set<number>();
@@ -92,7 +111,7 @@ export function validateGrounding(answer: Json, context: PreparedContext, server
     // Only the exact quoted passage can carry a financial figure. Reusing its number elsewhere is not support.
     const generated = indexes.filter(i => answer.claims[i].kind !== "ai")
       .reduce((value, i) => value.split(answer.claims[i].quote).join(" "), text);
-    if (hasFinancialFigure(withoutCompanyId(generated))) reject("Section financial figures must be verbatim fact/bank quotes", path);
+    if (hasFinancialFigure(withoutCompanyId(generated), indexes.flatMap(i => okvedByClaim[i]))) reject("Section financial figures must be verbatim fact/bank quotes", path);
   }
   const g = answer.grounding;
   section(answer.summary, g.summary, "fact", "/summary", "/grounding/summary"); section(answer.why_relevant, g.why_relevant, "ai", "/why_relevant", "/grounding/why_relevant");
@@ -118,7 +137,7 @@ export function validateGrounding(answer: Json, context: PreparedContext, server
   for (const key of ["limitations", "missing_data"]) for (const [i, note] of answer[key].entries()) {
     const path = "/" + key + "/" + i;
     if (scan(note).some(n => !allowedNotes.has(n))) reject("Unsupported limitation or missing-data number", path);
-    if (hasFinancialFigure(withoutCompanyId(note))) reject("Financial figures are not allowed in limitations or missing_data", path);
+    if (hasFinancialFigure(withoutCompanyId(note), okvedByClaim.flat())) reject("Financial figures are not allowed in limitations or missing_data", path);
   }
   if (used.size !== answer.claims.length) reject("Unused claim", "/claims/" + answer.claims.findIndex((_: Json, i: number) => !used.has(i)));
 }
