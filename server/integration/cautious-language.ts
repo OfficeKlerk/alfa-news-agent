@@ -1,4 +1,5 @@
 import type { Json } from "../types.js";
+import { profileFactRules } from "./profile-facts.js";
 
 export function rankingEvidence(input: Json) {
   const rows: Json[] = input.ranked_item?.feature_contributions ?? [];
@@ -13,7 +14,7 @@ export function rankingEvidence(input: Json) {
 
 /** Narrow, conservative language guard, not a general semantic verifier. Quoted evidence is excluded by the caller. */
 export function cautiousLanguageRules(text: string, input: Json): string[] {
-  const issues = new Set<string>();
+  const issues = new Set<string>(profileFactRules(text, input));
   const clauses = text.split(/(?<=[.!?;])\s+|\n/);
   for (const clause of clauses) {
     const scoped = /не\s+(?:подтвержд|установлен|доказан|означает|доказывает|следует)|нельзя\s+(?:утверждать|считать|сделать)|нет\s+оснований\s+утверждать|предоставленн[а-яё]*\s+данн|имеющ[а-яё]*\s+данн|подтвержд[её]нн|^\s*если\s/iu.test(clause);
