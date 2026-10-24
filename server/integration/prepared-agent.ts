@@ -10,7 +10,7 @@ import { prepareContext } from "./context.js";
 import { ANALYSIS_PROMPT, QUESTION_PROMPT, PROMPT_VERSION } from "./analysis-prompts.js";
 import { analysisDraft, validateGrounding, validateQuestionGrounding } from "./grounding.js";
 import { adviceConstraints } from "./advice-policy.js";
-import { generatedResponseSchema } from "./response-schema.js";
+import { joinStrictClaims, strictResponseSchema, STRICT_CLAIMS_LAYOUT } from "./response-schema.js";
 import { describeDiagnostics, safeDiagnostics, safeDraft, saveRejectedDraft } from "./diagnostics.js";
 import { repairInstruction, repairPlan, responseGuidance } from "./repair-guidance.js";
 import { generationBudgetIssues } from "./generation-budget.js";
@@ -38,14 +38,14 @@ async function generate(settings: Settings, db: Store, prompt: string, data: Jso
   for (let attempt = 0; attempt < 2; attempt++) {
     // Transport/auth/quota/refusal errors are outside the repair block: never retry a billed POST blindly.
     let message: Json;
-    try { message = await complete(messages, undefined, true, responseSchema); }
+    try { message = await complete(messages, undefined, true, responseSchema, settings.generationMaxTokens); }
     catch (error) {
       if (error instanceof ModelError && diagnostics) error.diagnostics = { ...diagnostics, attempts: attempt + 1 };
       throw error;
     }
     let draft: Json | undefined;
     try {
-      draft = parseJson(message); check(draft); return { draft, attempts: attempt + 1, diagnostics };
+      draft = joinStrictClaims(parseJson(message)); check(draft); return { draft, attempts: attempt + 1, diagnostics };
     } catch (error) {
       if (!(error instanceof ApiFault || error instanceof ModelError)) throw error;
       const current = safeDiagnostics({ issues: error instanceof ApiFault && error.diagnostics
@@ -77,9 +77,10 @@ export async function generatePrepared(settings: Settings, db: Store, input: Jso
   const context = prepareContext(input, settings.maxContextBytes);
   if (!input.event.sources.some((s: Json) => s.excerpt.trim().length >= 8)) throw new ApiFault(422, "VALIDATION_ERROR", "News evidence is too short");
   const { draft, attempts, diagnostics } = await generate(settings, db, ANALYSIS_PROMPT,
-    { ...generationContext(context), advice_constraints: adviceConstraints(context.input), response_guidance: responseGuidance(context, settings.apiKey) },
+    { ...generationContext(context), advice_constraints: adviceConstraints(context.input), response_guidance: responseGuidance(context, settings.apiKey),
+      ...(settings.responseFormat === "json_schema" ? { strict_claims_layout: STRICT_CLAIMS_LAYOUT } : {}) },
     withBudget(value => validateGrounding(value, context, false, true)), request,
-    generatedResponseSchema("GeneratedAnalysis"));
+    strictResponseSchema("GeneratedAnalysis", settings.strictMaxClaimString));
   const notices = [
     ...input.research.limitations,
     ...(!input.research.items.length ? ["Банковские материалы отсутствуют: позиция банка не подтверждена."] : []),
@@ -116,9 +117,10 @@ export async function answerPrepared(settings: Settings, db: Store, input: Json,
   const context = prepareQuestionContext(input, settings.maxContextBytes);
   const { draft } = await generate(settings, db, QUESTION_PROMPT,
     { ...generationContext(context, input),
-      advice_constraints: adviceConstraints(context.input), response_guidance: responseGuidance(context, settings.apiKey, "question") },
+      advice_constraints: adviceConstraints(context.input), response_guidance: responseGuidance(context, settings.apiKey, "question"),
+      ...(settings.responseFormat === "json_schema" ? { strict_claims_layout: STRICT_CLAIMS_LAYOUT } : {}) },
     withBudget(value => validateQuestionGrounding(value, context, true)), request,
-    generatedResponseSchema("GeneratedAnswer"));
+    strictResponseSchema("GeneratedAnswer", settings.strictMaxClaimString));
   return envelope({ ...draft, analysis_id: input.analysis.id, company_id: input.company_id,
     source_ids: [...new Set(draft.claims.flatMap((c: Json) => c.source_ids))] }, id,
     context.input.is_mock || context.sources.some(s => s.is_mock) ? "mock" : "live");

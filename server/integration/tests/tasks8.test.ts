@@ -64,8 +64,9 @@ test("a complete draft with a repeated claim gets one compact rebuild", () => {
   assert.equal(repairPlan(issues, d, false, { input: s.input }).mode, "rebuild_compact");
 });
 
-test("prompt v12 asks for the industry wording once instead of in every claim", () => {
-  assert.equal(PROMPT_VERSION, "company-news-grounded-v12");
+test("prompt v12+ asks for the industry wording once instead of in every claim", () => {
+  // v13/v14 (TASKS8) rewrote copyable rules and added loop guidance; the v12 industry-wording guarantees below still hold.
+  assert.equal(PROMPT_VERSION, "company-news-grounded-v14");
   assert.ok(!ANALYSIS_PROMPT.includes("одинаково в каждом ai-claim"));
   assert.ok(ANALYSIS_PROMPT.includes("не повторяй её в каждом claim"));
   // REPORT8 transport-carrier copied the unconditional mismatch rule into limitations under relation=match.

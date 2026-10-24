@@ -27,8 +27,14 @@ export interface Settings {
   maxCalls: number;
   maxOutputTokens: number;
   maxPlanningTokens: number;
+  /** Cap for grounded analysis/question JSON; accepted REPORT8 answers used at most 1767 output tokens. */
+  generationMaxTokens?: number;
   reasoningEffort?: string;
   extraBody?: Record<string, unknown>;
+  /** Extra body fields for json_schema (strict) requests only, e.g. a provider route confirmed by the gateway owner. */
+  strictExtraBody?: Record<string, unknown>;
+  /** Optional provider-schema maxLength for claim text/quote; unset until a provider confirms support. */
+  strictMaxClaimString?: number;
   timeout: number;
   maxContextBytes?: number;
   maxResponseBytes?: number;
@@ -43,6 +49,18 @@ function integer(value: string | undefined, fallback: number, min = 0) {
   if (!Number.isSafeInteger(number) || number < min)
     throw new Error("Неверное целое число в конфигурации");
   return number;
+}
+
+export const RESERVED_BODY_KEYS = ["model", "messages", "stream", "response_format", "max_tokens", "max_completion_tokens"];
+/** Provider-specific body fields from configuration. Core request fields and the token caps stay under our control. */
+function extraBodyJson(values: NodeJS.ProcessEnv, name: string): Record<string, unknown> | undefined {
+  if (!(values[name] ?? "").trim()) return undefined;
+  const parsed: unknown = JSON.parse(values[name]!);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+    throw new Error(name + " должен быть JSON-объектом");
+  for (const key of RESERVED_BODY_KEYS)
+    if (key in (parsed as object)) throw new Error(name + " не может переопределять " + key);
+  return parsed as Record<string, unknown>;
 }
 
 export function loadSettings(env: NodeJS.ProcessEnv = process.env): Settings {
@@ -77,15 +95,8 @@ export function loadSettings(env: NodeJS.ProcessEnv = process.env): Settings {
     throw new Error("LLM_REASONING_EFFORT должен быть none|minimal|low|medium|high");
   // Escape hatch for provider-specific knobs (e.g. {\"chat_template_kwargs\":{\"enable_thinking\":false}}
   // or {\"reasoning\":{\"max_tokens\":1024}}) merged shallowly into the request body.
-  let extraBody: Record<string, unknown> | undefined;
-  if ((values.LLM_EXTRA_BODY_JSON ?? "").trim()) {
-    const parsed: unknown = JSON.parse(values.LLM_EXTRA_BODY_JSON!);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
-      throw new Error("LLM_EXTRA_BODY_JSON должен быть JSON-объектом");
-    for (const key of ["model", "messages", "stream", "response_format"])
-      if (key in (parsed as object)) throw new Error("LLM_EXTRA_BODY_JSON не может переопределять " + key);
-    extraBody = parsed as Record<string, unknown>;
-  }
+  const extraBody = extraBodyJson(values, "LLM_EXTRA_BODY_JSON");
+  const strictExtraBody = extraBodyJson(values, "LLM_STRICT_EXTRA_BODY_JSON");
 
   const feeds: unknown = JSON.parse(values.NEWS_FEEDS_JSON ?? "[]");
   if (
@@ -110,8 +121,11 @@ export function loadSettings(env: NodeJS.ProcessEnv = process.env): Settings {
     maxCalls: integer(values.MAX_DAILY_LLM_CALLS, 100),
     maxOutputTokens: integer(values.LLM_MAX_OUTPUT_TOKENS, 6000, 256),
     maxPlanningTokens: integer(values.LLM_MAX_PLANNING_TOKENS, 6000, 256),
+    generationMaxTokens: integer(values.LLM_GENERATION_MAX_TOKENS, 2500, 256),
     reasoningEffort,
     extraBody,
+    strictExtraBody,
+    strictMaxClaimString: values.LLM_STRICT_MAX_CLAIM_STRING ? integer(values.LLM_STRICT_MAX_CLAIM_STRING, 0, 900) : undefined,
     timeout: integer(values.LLM_TIMEOUT_SECONDS, 120, 1) * 1000,
     maxContextBytes: integer(values.LLM_MAX_CONTEXT_BYTES, 200000, 1000),
     maxResponseBytes: integer(values.LLM_MAX_RESPONSE_BYTES, 1000000, 1000),

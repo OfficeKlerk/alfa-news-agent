@@ -10,6 +10,7 @@ import { ModelError, type Json } from "../server/types.js";
 import { prepareContext } from "../server/integration/context.js";
 import { generatePrepared, answerPrepared } from "../server/integration/prepared-agent.js";
 import { PROMPT_VERSION } from "../server/integration/analysis-prompts.js";
+import { withForecastResearch } from "../server/integration/bank-forecast-case.js";
 
 const args=process.argv.slice(2), value=(flag:string)=>args.includes(flag)?args[args.indexOf(flag)+1]:undefined;
 assert.ok(args.every(a=>!a.startsWith("--")||["--live","--plan","--dir","--out","--cases","--questions","--max-calls","--basis"].includes(a)),"Unknown option");
@@ -39,11 +40,15 @@ bank.input.research={...bank.input.research,items:bank.input.research.items.filt
 assert.equal(bank.input.research.items.length,2,"Reviewed bank pages are missing");
 for(const r of bank.input.research.items)assert.ok(r.published_at<bank.input.as_of,"Bank page must predate as_of");
 prepareContext(bank.input);analyses.push(bank);
+// TASKS8 item 5: same news and company, with the dated 11 September chunk that forecasts this 23 October meeting.
+const forecast={...structuredClone(analyses.find(c=>c.id==="rate-hold-leasing")!),id:"rate-hold-leasing-bank-forecast",origin:"rate-hold-leasing input + data/research.json chunk c4200"};
+forecast.input=withForecastResearch(forecast.input);prepareContext(forecast.input);analyses.push(forecast);
 // REPORT7 planned three questions; two never ran, so their text comes from its run metadata.
 const allQuestions=(read("run-metadata.json").questions as Json[]).map(q=>({id:q.id,format:q.format,question:q.question,origin:"REPORT7 run-metadata.json"}));
 assert.equal(allQuestions.length,3);
 // Bounded reruns (REPORT8): only the named cases, in REPORT7 order, under a hard call budget.
-const list=(flag:string)=>value(flag)===undefined?undefined:value(flag)!.split(",").map(v=>v.trim()).filter(Boolean);
+// "none" selects nothing (PowerShell 5.1 drops empty-string arguments).
+const list=(flag:string)=>value(flag)===undefined?undefined:value(flag)==="none"?[]:value(flag)!.split(",").map(v=>v.trim()).filter(Boolean);
 const caseFilter=list("--cases"),questionFilter=list("--questions");
 for(const id of caseFilter??[])assert.ok(analyses.some(c=>c.id===id),"Unknown case: "+id);
 for(const id of questionFilter??[])assert.ok(allQuestions.some(q=>q.id===id),"Unknown question: "+id);
@@ -62,7 +67,7 @@ function basisAnalysis(id:string){
   assert.equal(prepareContext(input).sha256,prepareContext(original).sha256,"Basis input differs from REPORT7: "+id);
   return {input,analysis:envelope.data,origin:relative(process.cwd(),basisRoot)+"/"+id+"-response.json"};
 }
-const plan={execution:"plan",analyses:analyses.map(c=>({case:c.id,format:c.format,origin:c.origin,synthetic_control:c.synthetic_control,as_of:c.input.as_of,context_bytes:prepareContext(c.input).serialized_bytes})),questions:questions.map(q=>({...q,basis:analyses.some(c=>c.id===q.id)?"this run if accepted, else --basis":basisAnalysis(q.id)?.origin??"none"})),max_external_calls:Math.min(maxCalls,(analyses.length+questions.length)*2),approved_call_cap:40,max_output_tokens:6000,reasoning_effort:"none",timeout_seconds:120,route:"direct native prepared-agent functions; not an HTTP gateway/UI test"};
+const plan={execution:"plan",analyses:analyses.map(c=>({case:c.id,format:c.format,origin:c.origin,synthetic_control:c.synthetic_control,as_of:c.input.as_of,context_bytes:prepareContext(c.input).serialized_bytes})),questions:questions.map(q=>({...q,basis:analyses.some(c=>c.id===q.id)?"this run if accepted, else --basis":basisAnalysis(q.id)?.origin??"none"})),max_external_calls:Math.min(maxCalls,(analyses.length+questions.length)*2),approved_call_cap:40,max_output_tokens:Math.min(6000,loadSettings().generationMaxTokens??6000),reasoning_effort:"none",timeout_seconds:120,route:"direct native prepared-agent functions; not an HTTP gateway/UI test"};
 if(!args.includes("--live")){console.log(JSON.stringify(plan,null,2));process.exit(0);}
 const out=resolve(value("--out")??"var/llm-evaluation/tasks8-live");
 assert.ok(!existsSync(out),"Choose a fresh output folder; never overwrite or silently repeat a live run");
@@ -78,7 +83,7 @@ const save=(name:string,data:unknown)=>writeFileSync(resolve(out,name),redact(ty
 const db=new Store(settings);
 db.connection.exec("CREATE TABLE IF NOT EXISTS llm_calls(id INTEGER PRIMARY KEY,day TEXT,model TEXT,prompt_tokens INTEGER DEFAULT 0,completion_tokens INTEGER DEFAULT 0)");
 const results:Json[]=[],calls:Json[]=[];let current:Json={},halt=false;
-const metadata={...plan,execution:"live",prompt_version:PROMPT_VERSION,model:settings.model,base_url:settings.baseUrl,started_at:new Date().toISOString(),head:git(["rev-parse","HEAD"]),git_status:git(["status","--short"]),source_files:sourceHashes(),comparison:"Same REPORT7 prepared inputs and limits (6000 output tokens, 2 attempts). Null control is synthetic; the bank case narrows research to two dated pages. Gateway/UI are checked separately without paid calls."};
+const metadata={...plan,execution:"live",prompt_version:PROMPT_VERSION,model:settings.model,base_url:settings.baseUrl,started_at:new Date().toISOString(),head:git(["rev-parse","HEAD"]),git_status:git(["status","--short"]),source_files:sourceHashes(),comparison:"Same REPORT7 prepared inputs, 2 attempts; output capped by LLM_GENERATION_MAX_TOKENS (see max_output_tokens), not 6000 as in REPORT8. Null control is synthetic; the bank case narrows research to two dated pages. Gateway/UI are checked separately without paid calls."};
 save("run-metadata.json",metadata);
 const capturedFetch:typeof fetch=async(url,init)=>{
   assert.ok(calls.length<plan.max_external_calls,"Run call cap reached");

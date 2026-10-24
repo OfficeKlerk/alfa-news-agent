@@ -1579,7 +1579,9 @@
             "Too many claims for a compact answer",
             "Too many bank claims",
             "Repeated claim text",
-            "Project participation or budget funding is not established"
+            "Speculative absence enumeration",
+            "Project participation or budget funding is not established",
+            "Prompt rule copied into the answer"
           ]
         },
         "expected": {

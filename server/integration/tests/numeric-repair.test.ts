@@ -62,7 +62,7 @@ for (const format of ["json_object", "json_schema"]) for (const company of ["U_3
         const input = realInput(company, article); let calls = 0;
         const accepted = await generatePrepared(l.settings, l.db, input, "numeric-positive", (async (_url, init) => {
           calls++; const payload = JSON.parse(String(init?.body)), data = JSON.parse(payload.messages[1].content);
-          assert.equal(payload.reasoning_effort, "none"); assert.equal(payload.max_tokens, 6000);
+          assert.equal(payload.reasoning_effort, "none"); assert.equal(payload.max_tokens, 2500); // LLM_GENERATION_MAX_TOKENS caps grounded JSON below LLM_MAX_OUTPUT_TOKENS.
           const example = data.response_guidance.numeric_fact_example;
           assert.ok(input.event.sources[0].excerpt.includes(example.summary));
           return reply(good(input, example));
