@@ -11,6 +11,7 @@ import { normalizePublicationDate } from "../server/news-events.js";
 import { LegacyRetrieval } from "../server/integration/retrieval.js";
 import { validate } from "../server/integration/contracts.js";
 import { aggregateMetrics, eligibleGroundTruth, percentile, uniqueDocuments, validateEvaluationInputs, validateReference, type RankedEvidence } from "../server/integration/retrieval-evaluation.js";
+import { freshnessSummary, diversitySummary, fresherRelevantAvailable, meanOf } from "../server/integration/retrieval-freshness.js";
 import type { Json } from "../server/types.js";
 
 const options=new Map<string,string>();
@@ -59,17 +60,30 @@ try {
    const ground=eligibleGroundTruth(q,pages,asOf), targets=mode==="server_as_of"?ground.expected:q.expected;
    const distinct=uniqueDocuments(ranked);
    const relevantRank=ranked.findIndex(r=>targets.includes(r.filename));
+   // Recency/diversity of the returned top-5 window, and whether a fresher relevant
+   // review existed but was not surfaced (TEAM_TASKS2 #5). Dates come from the corpus.
+   const top5=ranked.slice(0,5);
+   const eligibleRelevantDates=pages.filter(p=>ground.expected.includes(p.filename)).map(p=>normalizePublicationDate(p.published_at??p.published??p.date).value);
    perQuery.push({id:q.id,query:q.query,topic:q.topic??null,expected:q.expected,eligible_expected:ground.expected,blocked_expected:ground.blocked,
     evaluation_targets:targets,status:targets.length?"answerable":"unanswerable_under_as_of",ranked_sources:ranked,ranked_distinct_documents:distinct,
     first_relevant_source_rank:relevantRank<0?null:relevantRank+1,
-    distinct_documents_in_first5_sources:new Set(ranked.slice(0,5).map(r=>r.filename)).size,
-    duplicate_crowding_miss_at5:targets.length>0&&!ranked.slice(0,5).some(r=>targets.includes(r.filename))&&distinct.slice(0,5).some(r=>targets.includes(r.filename)),
+    distinct_documents_in_first5_sources:new Set(top5.map(r=>r.filename)).size,
+    duplicate_crowding_miss_at5:targets.length>0&&!top5.some(r=>targets.includes(r.filename))&&distinct.slice(0,5).some(r=>targets.includes(r.filename)),
+    freshness_top5:freshnessSummary(top5,asOf),diversity_top5:diversitySummary(top5),
+    fresher_relevant_available:mode==="server_as_of"?fresherRelevantAvailable(top5,targets,eligibleRelevantDates,asOf):null,
     timing_ms:{samples,median:percentile(samples,0.5)}});
   }
   const summarize=(key:string,eligibleOnly:boolean)=>Object.fromEntries([1,3,5].map(k=>[k,aggregateMetrics(perQuery.map(q=>({ranked:q[key].map((r:RankedEvidence)=>r.filename),expected:eligibleOnly?q.evaluation_targets:q.expected})),k)]));
+  const fdRows=perQuery.filter(q=>q.evaluation_targets.length).map(q=>({median_age_days:q.freshness_top5.median_age_days,
+   top_document_share:q.diversity_top5.top_document_share,distinct_documents:q.diversity_top5.distinct_documents,stale_share:q.freshness_top5.stale_share}));
   results[mode]={query_count:perQuery.length,answerable_query_count:perQuery.filter(q=>q.evaluation_targets.length).length,
    actual_source_window:{strict_original_labels:summarize("ranked_sources",false),available_targets_only:summarize("ranked_sources",true)},
    document_projection_from_top20_sources:{strict_original_labels:summarize("ranked_distinct_documents",false),available_targets_only:summarize("ranked_distinct_documents",true)},
+   freshness_and_diversity_top5:{queries:fdRows.length,stale_threshold_days:90,
+    mean_median_age_days:meanOf(fdRows,"median_age_days"),mean_top_document_share:meanOf(fdRows,"top_document_share"),
+    mean_distinct_documents:meanOf(fdRows,"distinct_documents"),mean_stale_share:meanOf(fdRows,"stale_share"),
+    single_document_crowded_queries:perQuery.filter(q=>q.evaluation_targets.length&&typeof q.diversity_top5.top_document_share==="number"&&q.diversity_top5.top_document_share>=0.6).length,
+    fresher_relevant_available_queries:perQuery.filter(q=>q.fresher_relevant_available===true).length},
    source_resolution_checked:mode==="server_as_of",quote_match_checked:true,
    timing_ms:{sample_count:allSamples.length,median:percentile(allSamples,0.5),p95:percentile(allSamples,0.95)},queries:perQuery};
  }
@@ -88,7 +102,7 @@ let commit:string|null=null;try{commit=execFileSync("git",["rev-parse","HEAD"],{
 const evaluation={schema_version:"server_retrieval_evaluation_v1",generated_at:new Date().toISOString(),as_of:asOf,base_commit:commit,
  provenance:{corpus_sha256:hash(read("data/research.json")),queries_sha256:hash(read("data/demo/rag/queries.json")),
   retrieval_code_sha256:hash(read("server/retrieval.ts")),adapter_code_sha256:hash(read("server/integration/retrieval.ts")),
-  bm25_code_sha256:hash(read("scripts/rag_reference_retriever.py")),evaluator_code_sha256:hash(read("scripts/evaluate_server_retrieval.ts")),metrics_code_sha256:hash(read("server/integration/retrieval-evaluation.ts")),eligible_corpus_sha256:hash(readFileSync(eligibleCorpusPath)),reference_sha256:hash(readFileSync(referencePath))},
+  bm25_code_sha256:hash(read("scripts/rag_reference_retriever.py")),evaluator_code_sha256:hash(read("scripts/evaluate_server_retrieval.ts")),metrics_code_sha256:hash(read("server/integration/retrieval-evaluation.ts")),freshness_code_sha256:hash(read("server/integration/retrieval-freshness.ts")),eligible_corpus_sha256:hash(readFileSync(eligibleCorpusPath)),reference_sha256:hash(readFileSync(referencePath))},
  protocol:{query_count:queries.length,corpus_pages:pages.length,corpus_documents:new Set(pages.map(p=>p.document_id)).size,
  eligible_pages:eligiblePages.length,eligible_documents:new Set(eligiblePages.map(p=>p.document_id)).size,source_pool_depth:depth,repeats,warmup_per_query:1,node:process.version,platform:process.platform,
  timing_scope:"SQLite in-memory + in-process retrieval; no HTTP, source audit, Python process or LLM in search timings",page_relevance_labels_available:false,
@@ -99,9 +113,11 @@ const evaluation={schema_version:"server_retrieval_evaluation_v1",generated_at:n
  "Document projection uses only the actual top-20 source pool; it is not an exhaustive document ranker.",
  "Available-target metrics omit queries with no dated relevant document; strict metrics retain all original targets. Both are reported.",
  "Reference uses full pages and different tokenization. A difference is not proof that replacing just the scoring formula will improve serving.",
- "Exact quote/source resolution is a mechanical check, not proof of relevance or financial correctness.","Timings are single-process warmed observations, not production latency or a load test."]};
+ "Exact quote/source resolution is a mechanical check, not proof of relevance or financial correctness.","Timings are single-process warmed observations, not production latency or a load test.",
+ "Freshness/diversity describe the returned top-5 window relative to as_of; the 90-day stale threshold is a reporting choice, not a serving filter, and recency is not relevance.","top_document_share near 1 means results are crowded into one document; it does not by itself prove a worse answer."]};
 writeFileSync(resolve(out,"evaluation.json"),JSON.stringify(evaluation,null,2)+"\n");
 console.log(JSON.stringify({out,queries:queries.length,eligible_queries:results.server_as_of.answerable_query_count,
  runtime_chunks:results.server_as_of.actual_source_window.available_targets_only,
  runtime_document_projection:results.server_as_of.document_projection_from_top20_sources.available_targets_only,
+ freshness_and_diversity_top5:results.server_as_of.freshness_and_diversity_top5,
  bm25_documents:referenceMetrics,source_audit:"passed",llm_calls:0},null,2));

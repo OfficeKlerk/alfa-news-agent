@@ -27,7 +27,7 @@
 | Папка | Что внутри |
 |---|---|
 | [`docs/architecture/`](architecture/) | `ARCHITECTURE_OVERVIEW` (гибрид Python+Node), `ARCHITECTURE` (Node-прототип), `SECURITY`, `SCALABILITY` |
-| [`docs/reports/`](reports/) | метрики: `BASELINE_REPORT` (ранжирование), `RETRIEVAL_REPORT` (RAG), `MONITORING` (критерий №12), `MODEL_SETTINGS` (подбор настроек LLM) |
+| [`docs/reports/`](reports/) | метрики: `BASELINE_REPORT` (ранжирование), `RETRIEVAL_REPORT` (RAG), `SERVER_RETRIEVAL_EVAL` (ретрив), `RETRIEVAL_FRESHNESS` (свежесть/разнообразие), `MONITORING` (критерий №12), `MODEL_SETTINGS` (подбор настроек LLM) |
 | [`docs/guides/`](guides/) | `DEMO_SCRIPT` (сценарий защиты), `DEMO_COMPANIES` (матрица), `LABELING_GUIDE`, `DEPLOY`, `V1_MIGRATION` |
 | [`docs/process/`](process/) | `DECISIONS` (решения), `TASKS` (план по ролям), `TEAM_GUIDE`, `ROLE_3_BACKEND_RAG` |
 | [`docs/integration/`](integration/) | контракты, интеграция, адаптивное обучение LLM |
