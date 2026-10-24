@@ -1,4 +1,5 @@
 import type { Json } from "../types.js";
+import { eventInterpretation } from "./event-interpretation.js";
 
 /** Conservative output scope derived from typed event/ranking facts, never from a score threshold.
  * This is a guardrail for a review, not a model of loss or an instruction to transact.
@@ -19,6 +20,7 @@ export function adviceConstraints(input: Json) {
     : "conditional_review";
   return {
     version: "conditional-news-advice-v1", review_mode: mode,
+    event_interpretation: eventInterpretation(input),
     no_new_risk_or_opportunity: mode === "applicability_check" || mode === "monitoring_only",
     financing_products_marked: ["loan", "leasing", "factoring"].filter(name => products[name] === true),
     missing_financing_flags: ["loan", "leasing", "factoring"].filter(name => products[name] == null),
