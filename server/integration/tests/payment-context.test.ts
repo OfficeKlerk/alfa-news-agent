@@ -1,3 +1,4 @@
+import { generationProfile } from "../generation-context.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, mkdtempSync, rmSync } from "node:fs";
@@ -82,7 +83,8 @@ test("legacy projection and mocked live transport carry the full new context wit
     await generatePrepared(live, db, sample.input, "payment-live-fixture", (async (_url, init) => {
       called = true; const payload = JSON.parse(String(init?.body));
       const supplied = JSON.parse(payload.messages[1].content);
-      assert.deepEqual(supplied.input.profile.payment_summary, sample.input.profile.payment_summary);
+      assert.deepEqual(supplied.input.profile.payment_summary, generationProfile(sample.input.profile).payment_summary);
+      assert.equal(supplied.input.profile.payment_summary.currency, sample.input.profile.payment_summary.currency);
       assert.match(payload.messages[0].content, /включая неизвестных контрагентов/);
       return Response.json({ choices: [{ message: { content: JSON.stringify(referenceDraft(sample)) }, finish_reason: "stop" }] });
     }) as typeof fetch);

@@ -1,4 +1,5 @@
 import type { Json } from "../types.js";
+import { eventInterpretation } from "./event-interpretation.js";
 import { profileFactRules } from "./profile-facts.js";
 import { assertionClauses, qualifiedAssertion } from "./assertion-language.js";
 
@@ -17,7 +18,25 @@ export function rankingEvidence(input: Json) {
 export function cautiousLanguageRules(text: string, input: Json): string[] {
   const issues = new Set<string>(profileFactRules(text, input));
   const clauses = assertionClauses(text);
+  // Compare explicit industry statements with sourced event interpretation, not the rank score.
+  const relation = input.event ? eventInterpretation(input).industry.relation : "unknown";
   for (const clause of clauses) {
+    const industry = /отрасл[а-яё]*[^.!?;]{0,90}?(не\s+совпада[а-яё]*|совпада[а-яё]*)[^.!?;]{0,60}(?:тематик|новост|событи)/iu.exec(clause);
+    if (industry && !qualifiedAssertion(clause)) {
+      const asserted = /^не\s/iu.test(industry[1]) ? "mismatch" : "match";
+      if (relation !== asserted) issues.add("Industry relation assertion contradicts prepared event");
+    }
+    // Noun forms: "отраслевое несоответствие" is the same claim as "не совпадает".
+    const noun = /отраслев[а-яё]*\s+(не)?соответстви[а-яё]*/iu.exec(clause);
+    // Qualify the noun phrase itself: "несоответствие ...: новость не доказывает Y" still asserts it.
+    const nounPhrase = noun ? clause.slice(noun.index).split(/[:,—–]/)[0] : "";
+    if (noun && !industry && !/(?:^|[\s,])если\s/iu.test(clause.slice(0, noun.index + 1)) && !/не\s+(?:установлен|подтвержд|определ|выявлен|доказан)[а-яё]*|неизвест/iu.test(nounPhrase)) {
+      if (relation !== (noun[1] ? "mismatch" : "match")) issues.add("Industry relation assertion contradicts prepared event");
+    }
+    // Industry match never establishes participation in a programme, contracts or budget funding.
+    const participation = /(?:компани[яиюей]*|предприяти[еяю]*|организаци[яиюей]*)[^.!?;\n]{0,60}(?<!не\s)(?:получа[а-яё]*|получит|участву[а-яё]*|является\s+(?:участник|получател|исполнител)[а-яё]*|заключил[а-яё]*|име[а-яё]*|выполня[а-яё]*)[^.!?;\n]{0,40}(?:бюджетн[а-яё]*\s+(?:средств|финансировани|субсиди)|госконтракт|государственн[а-яё]*\s+(?:контракт|заказ|программ|субсиди))/iu.test(clause);
+    if (participation && !qualifiedAssertion(clause) && !/не\s+(?:подтвержд|установлен|доказан|известн)[а-яё]*|неизвест|требует\s+проверк|нужно\s+провер/iu.test(clause))
+      issues.add("Project participation or budget funding is not established");
     const scoped = qualifiedAssertion(clause) || /не\s+(?:подтвержд[а-яё]*|установлен[а-яё]*|доказан[а-яё]*)\s*,?\s*(?:что\s+)?(?:отсутств|нет\s+связ)|в\s+(?:предоставленных|имеющихся)\s+данных[^.!?;]{0,30}связ|(?:подтвержд[её]нн|доказанн|установленн)[а-яё]*\s+(?:прям[а-яё]*\s+)?связ/iu.test(clause);
     const absence = /(?:прям[а-яё]*\s+)?связ[а-яё]*[^.!?;\n]{0,100}(?:отсутству[а-яё]*|не\s+существу[а-яё]*|исключен[а-яё]*)|(?:нет|не\s+имеется)\s+(?:прям[а-яё]*\s+)?связ[а-яё]*|компани[а-яё]*[^.!?;\n]{0,60}(?:не\s+связан[а-яё]*|не\s+име[а-яё]*\s+связ)|(?:новост[а-яё]*|событи[а-яё]*)[^.!?;\n]{0,60}не\s+влияет\s+на\s+компани[а-яё]*/iu.test(clause);
     const reverseAbsence = /(?:отсутству[а-яё]*|исключен[а-яё]*)\s+(?:прям[а-яё]*\s+)?связ[а-яё]*/iu.test(clause);

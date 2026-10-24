@@ -10,7 +10,7 @@ export function qualifiedAssertion(clause: string): boolean {
 const aliases: Record<string, RegExp> = {
   rko: /(?<![\p{L}_])(?:rko|рко)(?![\p{L}_])|расч[её]тно[- ]кассов/iu,
   guarantee: /(?<![\p{L}_])guarantee(?![\p{L}_])|гаранти[а-яё]*/iu,
-  loan: /(?<![\p{L}_])loan(?![\p{L}_])|кредитн[а-яё]*\s+продукт[а-яё]*|(?:отметк[а-яё]*|отмечен[а-яё]*)\s+(?:по\s+)?кредит[а-яё]*/iu,
+  loan: /(?<![\p{L}_])loan(?![\p{L}_])|кредитн[а-яё]*\s+продукт[а-яё]*|продукт[а-яё]*\s+кредитован[а-яё]*|(?:отметк[а-яё]*|отмечен[а-яё]*)\s+(?:по\s+)?кредит[а-яё]*/iu,
   leasing: /(?<![\p{L}_])leasing(?![\p{L}_])|лизинг[а-яё]*/iu,
   deposit: /(?<![\p{L}_])deposit(?![\p{L}_])|депозит[а-яё]*/iu,
   payroll: /(?<![\p{L}_])payroll(?![\p{L}_])|зарплатн[а-яё]*\s+проект[а-яё]*/iu,
@@ -26,7 +26,7 @@ export function productMark(text: string, product: string): boolean | undefined 
   if (local) text = local;
   const assignment = new RegExp(`(?<![a-z_])${product}\\s*=\\s*(true|false|0|1)\\b`, "iu").exec(text);
   if (assignment) return /^(true|1)$/i.test(assignment[1]);
-  if (/не\s+отмечен[а-яё]*|отметк[а-яё]*[^.!?;]{0,30}отсутству[а-яё]*/iu.test(text)) return false;
+  if (/(?:отсутству[а-яё]*|нет)\s+отметк[а-яё]*|не\s+отмечен[а-яё]*|отметк[а-яё]*[^.!?;]{0,30}отсутству[а-яё]*/iu.test(text)) return false;
   if (/отмечен[а-яё]*/iu.test(text)) return true;
   return undefined;
 }

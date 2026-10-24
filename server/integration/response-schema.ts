@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { ROOT } from "../config.js";
 import type { Json } from "../types.js";
 import type { ResponseSchema } from "../llm.js";
+import { GENERATION_CLAIM_LIMIT } from "./generation-budget.js";
 
 const definitions = JSON.parse(readFileSync(resolve(ROOT, "contracts/v1/schema.json"), "utf8")).$defs;
 
@@ -32,6 +33,15 @@ function project(node: Json): Json {
       : value && typeof value === "object" ? project(value) : value]));
 }
 
+/** Strict providers enforce the live claim budget; local validators enforce it for json_object. */
+function capClaims(node: Json, limit: number, key = ""): Json {
+  if (Array.isArray(node)) return node.map(item => item && typeof item === "object" ? capClaims(item, limit) : item);
+  const value: Json = Object.fromEntries(Object.entries(node).map(([k, v]) => [k, v && typeof v === "object" ? capClaims(v, limit, k) : v]));
+  if (key === "claims" && value.type === "array") value.maxItems = Math.min(value.maxItems ?? limit, limit);
+  if (value.type === "array" && value.items?.type === "integer" && value.items.maximum !== undefined)
+    value.items = { ...value.items, maximum: Math.min(value.items.maximum, limit - 1) }, value.maxItems = Math.min(value.maxItems ?? limit, limit);
+  return value;
+}
 export function generatedResponseSchema(name: "GeneratedAnalysis" | "GeneratedAnswer"): ResponseSchema {
-  return { name, schema: project(definitions[name]) };
+  return { name, schema: capClaims(project(definitions[name]), GENERATION_CLAIM_LIMIT) };
 }

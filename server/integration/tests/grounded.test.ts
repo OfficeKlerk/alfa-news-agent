@@ -1,3 +1,4 @@
+import { generationProfile } from "../generation-context.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
@@ -94,7 +95,7 @@ test("live generation sends full original context, repairs once and exposes dete
     assert.ok(result.data.limitations.some((s: string) => s.includes("Банковские материалы отсутствуют")));
     assert.ok(result.data.limitations.some((s: string) => s.includes("синтетические")));
     const prepared = JSON.parse(seen[0].messages[1].content);
-    assert.deepEqual(prepared.input.profile, scenario.input.profile); assert.equal(prepared.sha256, prepareContext(scenario.input).sha256);
+    assert.deepEqual(prepared.input.profile, generationProfile(scenario.input.profile)); assert.equal(prepared.sha256, prepareContext(scenario.input).sha256);
     assert.deepEqual(prepared.input.ranked_item, scenario.input.ranked_item);
     assert.equal(prepared.advice_constraints.review_mode, "needs_event_details");
     assert.ok(result.data.trace[1].detail.includes(PROMPT_VERSION)); assert.doesNotMatch(JSON.stringify(seen), /local-test-secret/);
