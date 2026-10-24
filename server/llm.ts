@@ -1,7 +1,8 @@
 import type { Store } from "./db.js";
 import type { Settings } from "./config.js";
 import { ModelError, type Json } from "./types.js";
-export type Complete = (messages: Json[], tools?: Json[], jsonMode?: boolean) => Promise<Json>;
+export type ResponseSchema = { name: string; schema: Json };
+export type Complete = (messages: Json[], tools?: Json[], jsonMode?: boolean, responseSchema?: ResponseSchema) => Promise<Json>;
 export function parseJson(message: Json): Json {
   try {
     const text = (message.content ?? "")
@@ -16,7 +17,7 @@ export function parseJson(message: Json): Json {
   }
 }
 export function createComplete(settings: Settings, db: Store, request: typeof fetch = fetch): Complete {
-  return async (messages, tools, jsonMode = false) => {
+  return async (messages, tools, jsonMode = false, responseSchema) => {
     if (!settings.apiKey.trim()) throw new ModelError("Нет LLM_API_KEY. Укажите ключ в .env и перезапустите сервер.", "MODEL_AUTH_ERROR");
     let base: URL;
     try { base = new URL(settings.baseUrl); } catch { throw new ModelError("Некорректный адрес LLM API."); }
@@ -42,13 +43,13 @@ export function createComplete(settings: Settings, db: Store, request: typeof fe
       temperature: 0.2,
     };
     if (tools?.length) Object.assign(payload, { tools, tool_choice: "auto" });
-    if (jsonMode) payload.response_format = { type: "json_object" };
-    // Bound hidden reasoning so it does not consume the whole output budget before
-    // the JSON answer. reasoning_effort covers OpenAI-style gateways; extraBody is the
-    // escape hatch for provider-specific controls and may override the convenience knob.
+    if (jsonMode) payload.response_format = settings.responseFormat === "json_schema" && responseSchema
+      ? { type: "json_schema", json_schema: { ...responseSchema, strict: true } }
+      : { type: "json_object" };
+    // Preserve the master branch's reasoning controls alongside the response contract.
     if (settings.reasoningEffort) payload.reasoning_effort = settings.reasoningEffort;
     if (settings.extraBody) for (const [key, value] of Object.entries(settings.extraBody))
-      if (!["model", "messages", "stream"].includes(key)) payload[key] = value;
+      if (!["model", "messages", "stream", "response_format"].includes(key)) payload[key] = value;
     try {
       const response = await request(settings.baseUrl + "/chat/completions", {
         method: "POST",

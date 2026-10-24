@@ -32,6 +32,7 @@ export interface Settings {
   timeout: number;
   maxContextBytes?: number;
   maxResponseBytes?: number;
+  responseFormat?: "json_object" | "json_schema";
   host: string;
   port: number;
   feeds: string[];
@@ -62,6 +63,9 @@ export function loadSettings(env: NodeJS.ProcessEnv = process.env): Settings {
   const model = values.LLM_MODEL ?? "qwen/qwen3.6-35b-a3b";
   if (mode !== "demo" && mode !== "live")
     throw new Error("LLM_MODE должен быть demo или live");
+  const responseFormat = values.LLM_RESPONSE_FORMAT ?? "json_object";
+  if (responseFormat !== "json_object" && responseFormat !== "json_schema")
+    throw new Error("LLM_RESPONSE_FORMAT должен быть json_object или json_schema");
   const allowed: unknown = JSON.parse(values.LLM_ALLOWED_MODELS_JSON ?? JSON.stringify(MODELS));
   if (!Array.isArray(allowed) || !allowed.every(m => typeof m === "string" && m.trim()) || !allowed.includes(model))
     throw new Error("Модель отсутствует в списке разрешённых");
@@ -78,7 +82,7 @@ export function loadSettings(env: NodeJS.ProcessEnv = process.env): Settings {
     const parsed: unknown = JSON.parse(values.LLM_EXTRA_BODY_JSON!);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
       throw new Error("LLM_EXTRA_BODY_JSON должен быть JSON-объектом");
-    for (const key of ["model", "messages", "stream"])
+    for (const key of ["model", "messages", "stream", "response_format"])
       if (key in (parsed as object)) throw new Error("LLM_EXTRA_BODY_JSON не может переопределять " + key);
     extraBody = parsed as Record<string, unknown>;
   }
@@ -101,6 +105,7 @@ export function loadSettings(env: NodeJS.ProcessEnv = process.env): Settings {
       values.LLM_BASE_URL ?? "https://changellenge.up.railway.app/v1"
     ).replace(/\/+$/, ""),
     apiKey: values.LLM_API_KEY ?? "",
+    responseFormat,
     model,
     maxCalls: integer(values.MAX_DAILY_LLM_CALLS, 100),
     maxOutputTokens: integer(values.LLM_MAX_OUTPUT_TOKENS, 6000, 256),

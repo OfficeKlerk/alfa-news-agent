@@ -44,7 +44,7 @@
 |---|---|
 | `LLM_MAX_OUTPUT_TOKENS` | Лимит на финальный JSON (было). |
 | `LLM_REASONING_EFFORT` | `none\|minimal\|low\|medium\|high` — ограничить/выключить reasoning, чтобы бюджет дошёл до JSON. Пусто = на усмотрение модели. Пробрасывается как `reasoning_effort`. |
-| `LLM_EXTRA_BODY_JSON` | Эскейп-хатч для провайдер-специфичных полей тела запроса (shallow-merge). Не может переопределять `model`/`messages`/`stream`. Примеры: vLLM/Qwen `{"chat_template_kwargs":{"enable_thinking":false}}`; OpenRouter-стиль `{"reasoning":{"max_tokens":1024}}`. |
+| `LLM_EXTRA_BODY_JSON` | Эскейп-хатч для провайдер-специфичных полей тела запроса (shallow-merge). Не может переопределять `model`/`messages`/`stream`/`response_format`. Формат ответа задаётся через `LLM_RESPONSE_FORMAT`. Примеры: vLLM/Qwen `{"chat_template_kwargs":{"enable_thinking":false}}`; OpenRouter-стиль `{"reasoning":{"max_tokens":1024}}`. |
 | `LLM_TIMEOUT_SECONDS`, `LLM_MAX_CONTEXT_BYTES`, `LLM_MODEL` | Время, размер контекста, модель (было). |
 
 Разные шлюзы принимают разные поля управления reasoning, поэтому единый «правильный» параметр не существует — рабочую комбинацию выбираем замером через харнес ниже, а `LLM_EXTRA_BODY_JSON` позволяет подставить нужное поле без правок кода.

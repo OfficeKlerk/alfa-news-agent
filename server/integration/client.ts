@@ -1,4 +1,5 @@
 import { ApiFault, validate, type Envelope } from "./contracts.js";
+import { safeDiagnostics, diagnosticFailureMessage } from "./diagnostics.js";
 
 /** Role 5 transport: no automatic POST retries and no redirects to a different host. */
 export class ContractClient {
@@ -30,7 +31,11 @@ export class ContractClient {
       catch { throw new ApiFault(502, "CONTRACT_VIOLATION", "Provider returned invalid JSON"); }
       if (!response.ok) {
         validate("Error", value, true);
-        throw new ApiFault([400, 403, 404, 409, 413, 415, 422, 429, 503, 504].includes(response.status) ? response.status : 502, value.error.code, value.error.message);
+        if (value.request_id !== requestId) throw new ApiFault(502, "CONTRACT_VIOLATION", "Provider lost request ID");
+        const diagnostics = value.error.diagnostics ? safeDiagnostics(value.error.diagnostics) : undefined;
+        if (diagnostics && !diagnostics.issues.length) throw new ApiFault(502, "CONTRACT_VIOLATION", "Provider returned invalid diagnostics");
+        throw new ApiFault([400, 403, 404, 409, 413, 415, 422, 429, 503, 504].includes(response.status) ? response.status : 502,
+          value.error.code, diagnostics?.issues.length ? diagnosticFailureMessage(value.error.code, diagnostics) : value.error.message, diagnostics);
       }
       validate(responseSchema, value, true);
       if (value.meta.request_id !== requestId) throw new ApiFault(502, "CONTRACT_VIOLATION", "Provider lost request ID");

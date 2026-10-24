@@ -5,6 +5,7 @@ import { Store } from '../server/db.js';
 import { generatePrepared } from '../server/integration/prepared-agent.js';
 import { evaluationCases, referenceDraft, evaluateResult, REVIEW_CRITERIA } from '../server/integration/evaluation.js';
 import { PROMPT_VERSION } from '../server/integration/analysis-prompts.js';
+import { ModelError } from '../server/types.js';
 const args = process.argv.slice(2);
 const value = (flag: string) => args.includes(flag) ? args[args.indexOf(flag) + 1] : undefined;
 if (args.some(a => a.startsWith('--') && !['--live','--out','--review'].includes(a))) throw new Error('Usage: npm run llm:evaluate -- [--live] [--out file] [--review report.json]');
@@ -58,7 +59,8 @@ if (reviewFile) {
         console.log(test.id + ': mechanical checks passed; semantic review pending');
       } catch (error) {
         failed = true;
-        report.cases.push({case_id:test.id,mechanical_checks:'failed',semantic_review:'not_run',error:error instanceof Error ? error.message : 'Evaluation failed'});
+        report.cases.push({case_id:test.id,mechanical_checks:'failed',semantic_review:'not_run',error:error instanceof Error ? error.message : 'Evaluation failed',
+          ...(error instanceof ModelError && error.diagnostics ? {diagnostics:error.diagnostics} : {})});
         console.log(test.id + ': failed');
         // Authentication/quota/transport failures should not burn calls on the remaining cases.
         if(live) break;

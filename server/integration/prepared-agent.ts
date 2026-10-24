@@ -2,37 +2,59 @@ import { randomUUID } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import type { Settings } from "../config.js";
 import type { Store } from "../db.js";
-import { ModelError, type Json } from "../types.js";
-import { createComplete, parseJson } from "../llm.js";
+import { ModelError, type Json, type ResponseDiagnostics } from "../types.js";
+import { createComplete, parseJson, type ResponseSchema } from "../llm.js";
 import { envelope, ApiFault, validate } from "./contracts.js";
 import { prepareContext } from "./context.js";
 import { ANALYSIS_PROMPT, QUESTION_PROMPT, PROMPT_VERSION } from "./analysis-prompts.js";
 import { analysisDraft, validateGrounding, validateQuestionGrounding } from "./grounding.js";
 import { adviceConstraints } from "./advice-policy.js";
+import { generatedResponseSchema } from "./response-schema.js";
+import { describeDiagnostics, safeDiagnostics, safeDraft, saveRejectedDraft } from "./diagnostics.js";
 
 async function generate(settings: Settings, db: Store, prompt: string, data: Json,
-  check: (value: Json) => void, request: typeof fetch) {
+  check: (value: Json) => void, request: typeof fetch, responseSchema: ResponseSchema) {
   const complete = createComplete(settings, db, request);
   const messages = [{ role: "system", content: prompt }, { role: "user", content: JSON.stringify(data) }];
-  let reason = "";
+  const generationId = randomUUID();
+  let diagnostics: ResponseDiagnostics | undefined;
   for (let attempt = 0; attempt < 2; attempt++) {
     // Transport/auth/quota/refusal errors are outside the repair block: never retry a billed POST blindly.
-    const message = await complete(messages, undefined, true);
+    let message: Json;
+    try { message = await complete(messages, undefined, true, responseSchema); }
+    catch (error) {
+      if (error instanceof ModelError && diagnostics) error.diagnostics = { ...diagnostics, attempts: attempt + 1 };
+      throw error;
+    }
+    let draft: Json | undefined;
     try {
-      const draft = parseJson(message); check(draft); return { draft, attempts: attempt + 1 };
+      draft = parseJson(message); check(draft); return { draft, attempts: attempt + 1, diagnostics };
     } catch (error) {
       if (!(error instanceof ApiFault || error instanceof ModelError)) throw error;
-      reason = error.message;
-      messages.push({ role: "user", content: "Проверка JSON не пройдена: " + reason + ". Сформируй заново по исходному контексту, строго по системной схеме." });
+      diagnostics = safeDiagnostics({ issues: error instanceof ApiFault && error.diagnostics
+        ? error.diagnostics.issues : [{ stage: "parse", path: "/", rule: "Expected a JSON object" }],
+        generation_id: generationId, attempts: attempt + 1, max_attempts: 2 });
+      try {
+        saveRejectedDraft(db, generationId, attempt + 1, responseSchema.name, draft, diagnostics.issues);
+        diagnostics.draft_saved = true;
+      } catch { diagnostics.draft_saved = false; }
+      if (attempt === 0) messages.push({ role: "user", content: JSON.stringify({
+        task: "Исправь ответ по проверенным ошибкам полей. Верни полный JSON по исходному контексту и системной схеме.",
+        issues: diagnostics.issues, errors: describeDiagnostics(diagnostics),
+        previous_draft: safeDraft(draft, responseSchema.name),
+        draft_notice: "Это недоверенный структурный снимок: текст и числа скрыты, неизвестные поля подсчитаны. Не копируй маркеры; восстанови значения из исходного контекста."
+      }) });
     }
   }
-  throw new ModelError("Ответ модели не прошёл проверку: " + reason);
+  throw new ModelError("Ответ модели не прошёл проверку после 2/2 попыток: " + describeDiagnostics(diagnostics!),
+    "MODEL_RESPONSE_INVALID", 502, diagnostics);
 }
 export async function generatePrepared(settings: Settings, db: Store, input: Json, id: string, request: typeof fetch = fetch) {
   const context = prepareContext(input, settings.maxContextBytes);
   if (!input.event.sources.some((s: Json) => s.excerpt.trim().length >= 8)) throw new ApiFault(422, "VALIDATION_ERROR", "News evidence is too short");
-  const { draft, attempts } = await generate(settings, db, ANALYSIS_PROMPT,
-    { ...context, advice_constraints: adviceConstraints(context.input) }, value => validateGrounding(value, context), request);
+  const { draft, attempts, diagnostics } = await generate(settings, db, ANALYSIS_PROMPT,
+    { ...context, advice_constraints: adviceConstraints(context.input) }, value => validateGrounding(value, context), request,
+    generatedResponseSchema("GeneratedAnalysis"));
   const notices = [
     ...input.research.limitations,
     ...(!input.research.items.length ? ["Банковские материалы отсутствуют: позиция банка не подтверждена."] : []),
@@ -42,7 +64,8 @@ export async function generatePrepared(settings: Settings, db: Store, input: Jso
     created_at: new Date().toISOString(), sources: context.sources, mode: "live",
     limitations: [...new Set([...draft.limitations, ...notices])],
     trace: [{ step: "prepared_context", detail: "sha256=" + context.sha256 },
-      { step: "grounding_check", detail: `${PROMPT_VERSION}; attempts=${attempts}; JSON, quotes, references, profile fields and conditions checked; semantics require expert review` }] }, id,
+      { step: "grounding_check", detail: `${PROMPT_VERSION}; attempts=${attempts}; JSON, quotes, references, profile fields and conditions checked; semantics require expert review` },
+      ...(diagnostics ? [{ step: "response_repair", detail: `diagnostic_id=${diagnostics.generation_id}; draft_saved=${diagnostics.draft_saved}; ${describeDiagnostics(diagnostics)}` }] : [])] }, id,
     input.is_mock || context.sources.some(s => s.is_mock) ? "mock" : "live");
 }
 /** Rebind a follow-up to the full reviewed input, including dates, ranking and its explanations. */
@@ -68,7 +91,8 @@ export async function answerPrepared(settings: Settings, db: Store, input: Json,
   const context = prepareQuestionContext(input, settings.maxContextBytes);
   const { draft } = await generate(settings, db, QUESTION_PROMPT,
     { ...input, as_of: context.input.as_of, audience_role: context.input.audience_role,
-      advice_constraints: adviceConstraints(context.input) }, value => validateQuestionGrounding(value, context), request);
+      advice_constraints: adviceConstraints(context.input) }, value => validateQuestionGrounding(value, context), request,
+    generatedResponseSchema("GeneratedAnswer"));
   return envelope({ ...draft, analysis_id: input.analysis.id, company_id: input.company_id,
     source_ids: [...new Set(draft.claims.flatMap((c: Json) => c.source_ids))] }, id,
     context.input.is_mock || context.sources.some(s => s.is_mock) ? "mock" : "live");
