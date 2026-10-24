@@ -1,6 +1,9 @@
 /** Topic classification, not legal applicability, company activity or a learned coefficient. */
 export const SUBJECT_TAXONOMY_VERSION = "business-subjects-v1";
 const SUBJECT_RULES: { phrase: RegExp; prefixes: string[] }[] = [
+  // Broad subject matches identify a sector, never a company's contracts or legal scope.
+  { phrase: /(?:транспортн[а-я]*\s+(?:бюджет[а-я]*|систем[а-я]*|комплекс[а-я]*|отрасл[а-я]*|инфраструктур[а-я]*)|развитие\s+транспорта)/i, prefixes: ["49", "50", "51", "52"] },
+  { phrase: /электроэнергетик[а-я]*/i, prefixes: ["35"] },
   { phrase: /(?<![а-я])(?:зерн(?:о|а|у|ом|е|ов[а-я]*)(?![а-я])|пшениц[а-я]*|кукуруз[а-я]*|ячмен[а-я]*)/i, prefixes: ["01.11", "46.21"] },
   { phrase: /(?:удобрени[а-я]*|удобрен[а-я]*)/i, prefixes: ["20.15", "46.75"] },
   { phrase: /(?:генерирующ[а-я]*\s+(?:оборудован[а-я]*|мощност[а-я]*|объект[а-я]*)|производств[а-я]*\s+электроэнергии|(?<![а-я])(?:гидро|тепло)?электростанци[а-я]*|электроэнергетическ[а-я]*\s+генераци[а-я]*)/i, prefixes: ["35.11"] },

@@ -9,6 +9,7 @@ import { ContractClient } from "./client.js";
 import { companySource, type AgentPort } from "./agent.js";
 import type { RetrievalPort } from "./retrieval.js";
 import { prepareContext } from "./context.js";
+import { prepareEventForRanking } from "./event-interpretation.js";
 import { analysisDraft, validateGrounding, validateQuestionGrounding } from "./grounding.js";
 import { safeDiagnostics, diagnosticFailureMessage } from "./diagnostics.js";
 
@@ -95,7 +96,8 @@ export function createGateway(options: { ml: ContractClient; retrieval: Retrieva
         throw new ApiFault(422, "VALIDATION_ERROR", "News evidence is later than the ranking date");
       }
     }
-    const result = await options.ml.call("/v1/rank", "RankDataResponse", res.locals.requestId, req.body);
+    const rankRequest = { ...req.body, events: req.body.events.map(prepareEventForRanking) };
+    const result = await options.ml.call("/v1/rank", "RankDataResponse", res.locals.requestId, rankRequest);
     binding(result.data.company_id === req.body.company_id && result.data.as_of === req.body.as_of, "Wrong rank context");
     binding(result.data.items.every((item: Json) => req.body.events.some((event: Json) => event.news_id === item.news_id && event.event_id === item.event_id)), "Rank returned an unknown event");
     send(res, "RankDataResponse", result);
@@ -139,7 +141,8 @@ export function createGateway(options: { ml: ContractClient; retrieval: Retrieva
       ]);
       validate("SearchDataResponse", news, true);
       binding(profile.data.company_id === body.company_id, "Wrong company from ML");
-      const event = news.data.items[0];
+      const sourceEvent = news.data.items[0];
+      const event = sourceEvent ? prepareEventForRanking(sourceEvent) : undefined;
       if (!event) throw new ApiFault(404, "NOT_FOUND", "News not found at as_of");
       if (Date.parse(event.published_at) > Date.parse(body.as_of)) throw new ApiFault(422, "VALIDATION_ERROR", "News is later than analysis date");
       binding(event.news_id === (body.event?.news_id ?? body.news_id), "Wrong event");
