@@ -117,10 +117,8 @@ def test_manual_baseline_is_not_forced_into_probability_range():
         validate("RankedItem", item)
 
 
-def test_checked_news_module_adapter(tmp_path, monkeypatch):
-    path = ROOT / "var/sources/news-analysis"
-    if not path.exists():
-        pytest.skip("Run scripts/prepare_news_source.py for the checked branch adapter test")
+def test_bundled_news_module_adapter(tmp_path, monkeypatch):
+    path = ROOT
     monkeypatch.setenv("CONTEXT_DB", str(tmp_path / "context.sqlite3"))
     monkeypatch.setenv("CONTEXT_MODE", "fixture")
     monkeypatch.setenv("RANK_MODE", "news-analysis")
@@ -129,5 +127,7 @@ def test_checked_news_module_adapter(tmp_path, monkeypatch):
         response = client.post("/v1/rank", json=rank_request())
         assert response.status_code == 200, response.text
         data = validate("RankDataResponse", response.json())["data"]
+        assert data["items"]
+        assert all(x["feature_version"] == "company_event_v2" for x in data["items"])
         assert all(x["score_kind"] == "manual_feature_baseline" for x in data["items"])
         assert any(x["profile_paths"] for x in data["items"][0]["reasons"])

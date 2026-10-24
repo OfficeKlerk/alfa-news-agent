@@ -1,8 +1,6 @@
-# Explicit opt-in to the checked, read-only Python module overlay. No branch merge.
+# Opt in to the bundled news module already included in the Python image.
 services:
   ml:
     environment:
       RANK_MODE: news-analysis
-      NEWS_MODULE_PATH: /opt/news-analysis
-    volumes:
-      - ./var/sources/news-analysis:/opt/news-analysis:ro
+      NEWS_MODULE_PATH: /app

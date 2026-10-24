@@ -108,6 +108,8 @@ python -m pytest tests/integration -q
 python scripts/dev.py --smoke
 ```
 
+`prepare_news_source.py` проверяет встроенный модуль, профили и ранжирование по JSON-контрактам без Git-истории и сети.
+
 `llm:evaluate` без флагов проверяет пять сценариев на подготовленных эталонах без сети и сохраняет отчёт в `var/llm-evaluation/offline.json`. Реальная генерация: `npm run llm:evaluate -- --live`, затем содержательное ревью. Исходный `test_llm.py` — отдельная ручная сетевая проверка. Подробный отчёт объединения: [MERGE_TO_MASTER.md](docs/integration/MERGE_TO_MASTER.md).
 
 ## Docker — дополнительный способ запуска
@@ -116,7 +118,7 @@ python scripts/dev.py --smoke
 docker compose up --build --wait
 ```
 
-Он запускает общий стенд с моками. Проверенный overlay Python-ветки можно подключить по [первоначальной инструкции интеграции](docs/integration/START_HERE.md). Docker необязателен для локальной разработки; контейнерный запуск в среде подготовки не проверялся.
+Он запускает общий стенд с моками. Встроенное ранжирование включается через `docker compose -f compose.yaml -f compose.news.yaml up --build --wait`. Модуль `news_analysis` включён в Python-образ; старый overlay не требуется. Docker необязателен для локальной разработки.
 
 ## Ограничения
 

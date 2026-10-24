@@ -30,7 +30,8 @@ jobs:
       - run: python scripts/build_contracts.py --check
       - run: npm run typecheck && npm test && npm run build
       - run: npm run llm:evaluate
-      - run: python scripts/prepare_news_source.py
+      - name: Validate bundled news module and contracts
+        run: python scripts/prepare_news_source.py
       - run: python -m pytest tests -q
       - run: python scripts/dev.py --smoke
       - run: RANK_MODE=news-analysis AGENT_MODE=legacy python scripts/dev.py --smoke
