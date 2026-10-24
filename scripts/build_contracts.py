@@ -31,6 +31,18 @@ def generate():
     d["Error"] = obj({"schema_version": {"const": "1.0.0"}, "request_id": ID,
                       "error": obj({"code": {"enum": ["VALIDATION_ERROR", "NOT_FOUND", "CONFLICT", "BUSY", "DEPENDENCY_UNAVAILABLE", "DEPENDENCY_TIMEOUT", "CONTRACT_VIOLATION", "INTERNAL_ERROR", "PAYLOAD_TOO_LARGE", "UNSUPPORTED_MEDIA_TYPE", "FORBIDDEN"]},
                                     "message": STR, "retryable": {"type": "boolean"}})})
+    rules = json.loads((ROOT / "contracts/diagnostic-rules.json").read_text(encoding="utf-8"))
+    d["FieldIssue"] = obj({"stage": {"enum": list(rules)},
+        "path": {**STR, "maxLength": 500, "pattern": "^/"},
+        "rule": {"enum": [rule for group in rules.values() for rule in group]},
+        "expected": {"enum": ["string", "object", "array", "integer", "number", "boolean", "null"]},
+        "limit": {"type": "number", "minimum": -1e9, "maximum": 1e9}},
+        ["stage", "path", "rule"])
+    d["ResponseDiagnostics"] = obj({"issues": array(REF("FieldIssue"), minItems=1, maxItems=10),
+        "generation_id": {"type": "string", "format": "uuid"},
+        "attempts": {"type": "integer", "minimum": 1, "maximum": 2},
+        "max_attempts": {"const": 2}, "draft_saved": {"type": "boolean"}}, ["issues"])
+    d["Error"]["properties"]["error"]["properties"]["diagnostics"] = REF("ResponseDiagnostics")
     d["Evidence"] = obj({"id": ID, "kind": {"enum": ["company", "news", "bank"]}, "title": STR,
                          "url": {"type": ["string", "null"], "format": "uri", "pattern": "^https?://"},
                          "excerpt": STR, "document_id": {"type": ["string", "null"]},

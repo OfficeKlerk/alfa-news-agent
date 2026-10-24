@@ -10,6 +10,7 @@ import { companySource, type AgentPort } from "./agent.js";
 import type { RetrievalPort } from "./retrieval.js";
 import { prepareContext } from "./context.js";
 import { analysisDraft, validateGrounding, validateQuestionGrounding } from "./grounding.js";
+import { safeDiagnostics, diagnosticFailureMessage } from "./diagnostics.js";
 
 export function boundary(app: ReturnType<typeof express>) {
   app.disable("x-powered-by");
@@ -39,12 +40,17 @@ export function send(res: Response, schema: string, value: Envelope) {
   res.json(value);
 }
 export function errorBoundary(error: Json, _req: Request, res: Response, _next: NextFunction) {
-  const fault = error instanceof ApiFault ? error : error instanceof ModelError ? new ApiFault(error.status, error.code, error.message)
+  const fault = error instanceof ApiFault ? error : error instanceof ModelError ? new ApiFault(error.status, error.code, error.message, error.diagnostics)
     : error instanceof AppError ? new ApiFault(error.status, error.status === 404 ? "NOT_FOUND" : "VALIDATION_ERROR", error.message)
     : new ApiFault(error.type === "entity.too.large" ? 413 : error.type === "entity.parse.failed" ? 400 : 500,
       error.type === "entity.too.large" ? "PAYLOAD_TOO_LARGE" : error.type === "entity.parse.failed" ? "VALIDATION_ERROR" : "INTERNAL_ERROR", "Request failed");
+  const diagnostics = fault.diagnostics ? safeDiagnostics(fault.diagnostics) : undefined;
+  const details = diagnostics?.issues.length ? diagnostics : undefined;
   res.status(fault.status).json({ schema_version: "1.0.0", request_id: res.locals.requestId,
-    error: { code: fault.code, message: fault.message, retryable: [429, 503, 504].includes(fault.status) } });
+    error: { code: fault.code, message: details
+      ? diagnosticFailureMessage(fault.code, details)
+      : fault.diagnostics ? "Response validation failed: invalid diagnostics" : fault.message,
+      retryable: [429, 503, 504].includes(fault.status), ...(details ? { diagnostics: details } : {}) } });
 }
 function combine(values: Envelope[], data: Json, id: string): Envelope {
   const mode = values.some(v => v.meta.mode === "mock") ? "mock" : values.some(v => v.meta.mode === "demo") ? "demo" : "live";

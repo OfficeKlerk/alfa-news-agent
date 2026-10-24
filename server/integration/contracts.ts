@@ -4,21 +4,27 @@ import { Ajv2020 } from "ajv/dist/2020.js";
 import { createRequire } from "node:module";
 import type { FormatsPlugin } from "ajv-formats";
 import { ROOT } from "../config.js";
-import type { Json } from "../types.js";
+import type { Json, ResponseDiagnostics } from "../types.js";
+import { schemaIssues, describeDiagnostics } from "./diagnostics.js";
 import { validateEventDetails } from "../news-events.js";
 import { validatePaymentContext } from "./payment-context.js";
 
 export class ApiFault extends Error {
-  constructor(public status: number, public code: string, message: string) { super(message); }
+  constructor(public status: number, public code: string, message: string,
+    public diagnostics?: ResponseDiagnostics) { super(message); }
 }
 const schema = JSON.parse(readFileSync(resolve(ROOT, "contracts/v1/schema.json"), "utf8"));
-const ajv = new Ajv2020({ strict: false, allErrors: false });
+const ajv = new Ajv2020({ strict: false, allErrors: true });
 (createRequire(import.meta.url)("ajv-formats") as FormatsPlugin)(ajv);
 ajv.addSchema(schema);
 export function validate(name: string, value: unknown, output = false): asserts value is Json {
   const check = ajv.getSchema(`urn:alfa:integration:v1#/$defs/${name}`);
   if (!check) throw new Error("Unknown contract: " + name);
-  if (!check(value)) throw new ApiFault(output ? 502 : 422, output ? "CONTRACT_VIOLATION" : "VALIDATION_ERROR", "JSON violates " + name);
+  if (!check(value)) {
+    const diagnostics = { issues: schemaIssues(check.errors) };
+    throw new ApiFault(output ? 502 : 422, output ? "CONTRACT_VIOLATION" : "VALIDATION_ERROR",
+      "JSON violates " + name + ": " + describeDiagnostics(diagnostics), diagnostics);
+  }
   const visit = (node: unknown): void => {
     if (!node || typeof node !== "object") return;
     if (Array.isArray(node)) { node.forEach(visit); return; }

@@ -5,7 +5,7 @@ export class AlfaApi {
     const response = await fetch(this.base + path, { method: body === undefined ? "GET" : "POST", signal,
       headers: { "Content-Type": "application/json" }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
     const value = await response.json();
-    if (!response.ok) { const error = new Error(value.error?.message ?? "API error"); error.code = value.error?.code; error.requestId = value.request_id; error.status = response.status; throw error; }
+    if (!response.ok) { const error = new Error(value.error?.message ?? "API error"); error.code = value.error?.code; error.requestId = value.request_id; error.status = response.status; error.diagnostics = value.error?.diagnostics; throw error; }
     return value;
   }
   companies(signal, offset = 0) { return this.request(`/v1/companies?offset=${offset}&limit=100`, undefined, signal); }

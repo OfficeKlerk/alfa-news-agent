@@ -5,6 +5,8 @@ import { Store } from "../server/db.js";
 import { generatePrepared } from "../server/integration/prepared-agent.js";
 import { evaluationCases } from "../server/integration/evaluation.js";
 import { PROMPT_VERSION } from "../server/integration/analysis-prompts.js";
+import { ModelError, type ResponseDiagnostics } from "../server/types.js";
+import { safeDiagnostics } from "../server/integration/diagnostics.js";
 
 // Model-settings tuning harness (TEAM_TASKS #3). Sweeps a small grid of model x
 // output-token limit x reasoning budget over a few evaluation cases, runs the REAL
@@ -28,6 +30,7 @@ const contextBytes = Number(flag("--context-bytes", String(settings.maxContextBy
 const maxCalls = Number(flag("--max-calls", "12"));
 const timeoutSec = Number(flag("--timeout", String(settings.timeout / 1000)));
 const out = resolve(flag("--out", "var/model-tuning/results.json"));
+if (!Number.isSafeInteger(maxCalls) || maxCalls < 1) throw new Error("--max-calls: целое >=1");
 if (outputs.some(n => !Number.isInteger(n) || n < 256)) throw new Error("--max-output: целые >=256");
 if (reasonings.some(r => !["default", "none", "minimal", "low", "medium", "high"].includes(r))) throw new Error("--reasoning: default|none|minimal|low|medium|high");
 
@@ -61,20 +64,29 @@ try {
     for (const caseId of caseIds) {
       if (spent() >= maxCalls) { console.log(`Достигнут лимит вызовов (${maxCalls}); остановка.`); break outer; }
       const test = allCases.get(caseId)!;
+      // A run may repair once; reserve only the remaining CLI budget for both calls.
+      const day = new Date(Date.now() + 3 * 3600000).toISOString().slice(0, 10);
+      const today = db.get("SELECT count(*) n FROM llm_calls WHERE day=?", day)!.n as number;
       const runSettings = { ...settings, model: combo.model, maxOutputTokens: combo.maxOutput,
+        maxCalls: Math.min(settings.maxCalls, today + maxCalls - spent()),
         maxContextBytes: contextBytes, timeout: timeoutSec * 1000,
         reasoningEffort: combo.reasoning === "default" ? undefined : combo.reasoning };
       const before = (db.get("SELECT max(id) m FROM llm_calls")!.m as number) ?? 0;
       const started = Date.now();
       let ok = false, error: string | null = null;
+      let diagnostics: ResponseDiagnostics | undefined;
       try { await generatePrepared(runSettings, db, structuredClone(test.input), `tune-${combo.model}-${caseId}`); ok = true; }
-      catch (e) { error = e instanceof Error ? e.message : String(e); }
+      catch (e) {
+        error = e instanceof Error ? e.message : "Model tuning failed";
+        if (e instanceof ModelError && e.diagnostics) diagnostics = safeDiagnostics(e.diagnostics);
+      }
       const latency_ms = Date.now() - started;
       const used = db.all("SELECT prompt_tokens,completion_tokens FROM llm_calls WHERE id>?", before) as any[];
       const prompt_tokens = used.reduce((s, r) => s + (r.prompt_tokens ?? 0), 0);
       const completion_tokens = used.reduce((s, r) => s + (r.completion_tokens ?? 0), 0);
       const run = { ...combo, case: caseId, ok, error, latency_ms, calls: used.length,
-        prompt_tokens, completion_tokens, est_cost_rub: cost(combo.model, prompt_tokens, completion_tokens) };
+        prompt_tokens, completion_tokens, est_cost_rub: cost(combo.model, prompt_tokens, completion_tokens),
+        ...(diagnostics ? { diagnostics } : {}) };
       report.runs.push(run);
       writeFileSync(out, JSON.stringify(report, null, 2) + "\n");
       console.log(`${ok ? "OK  " : "FAIL"} ${combo.model} out=${combo.maxOutput} reason=${combo.reasoning} ${caseId} | ${latency_ms}ms | tok ${prompt_tokens}+${completion_tokens} | ${run.est_cost_rub ?? "?"}₽${error ? " | " + error : ""}`);

@@ -6,7 +6,7 @@ const node = (tag, text, className) => { const n = document.createElement(tag); 
 const localDate = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0,16);
 $('as-of').value = localDate(); $('news-form').elements.published.value = localDate();
 function status(message, error = false) { $('status').textContent = message; $('status').dataset.error = String(error); }
-function fail(e) { if(e.name !== 'AbortError') status(`${e.code || 'ERROR'}: ${e.message}${e.requestId ? ' · запрос ' + e.requestId : ''}`, true); }
+function fail(e) { if(e.name !== 'AbortError') status(`${e.code || 'ERROR'}: ${e.message}${e.requestId ? ' · запрос ' + e.requestId : ''}${e.diagnostics?.generation_id ? ' · диагностика ' + e.diagnostics.generation_id : ''}${e.diagnostics?.draft_saved === false ? ' · снимок черновика не сохранён' : ''}`, true); }
 function controls() { $('prepare').disabled = !company || !selected || busy; $('generate').disabled = busy || !state.preview; $('ask').disabled = busy || !state.result; $('cancel').hidden = !busy; }
 function invalidate(message) {
   state.reset(); busy = false; $('preview').hidden = true; $('answer').hidden = true; $('empty').hidden = false;

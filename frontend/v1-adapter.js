@@ -46,7 +46,14 @@
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
     const v = await r.json();
-    if (!r.ok) throw new Error(v.error?.message || "Ошибка /v1 сервера");
+    if (!r.ok) {
+      const diagnostics = v.error?.diagnostics;
+      const error = new Error((v.error?.message || "Ошибка /v1 сервера") +
+        (diagnostics?.generation_id ? " · диагностика " + diagnostics.generation_id : "") +
+        (diagnostics?.draft_saved === false ? " · снимок черновика не сохранён" : ""));
+      error.code = v.error?.code; error.status = r.status; error.requestId = v.request_id;
+      error.diagnostics = diagnostics; throw error;
+    }
     return v;
   }
 
