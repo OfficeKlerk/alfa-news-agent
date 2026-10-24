@@ -2,29 +2,39 @@
   "files": [
     {
       "file": "demo_news.json",
-      "bytes": 4137,
-      "sha256": "c9e5a1a56657bd1f4953727f1ebd738d720cff02be18cacd298747d70b429d9e"
+      "bytes": 4390,
+      "sha256": "15e1257609eb017b736b0106cd35bf8111bb61538497cb4b835a0173d76d66ba"
     },
     {
       "file": "df_Fid_Uid_link_hack.csv.gz",
-      "bytes": 116980,
-      "sha256": "f4c80e3984f63f32973bcc3ead9ede3992788388bbfd702f5511df34d836d45e"
+      "bytes": 84,
+      "sha256": "85463c506bc7d76f3e5809432437747336e98a45ec369db53bbf347eeedc98bb"
     },
     {
       "file": "df_Uid_data_hack.csv.gz",
-      "bytes": 3070962,
-      "sha256": "8fc533ae57c37730b1843fd608f0e29bff7466d92488377947f801ecfe230d18"
+      "bytes": 363,
+      "sha256": "a5bec3e68fb0bd31a1b1562a878c2e86c6913a3546b6e2d76256cb00f7df720f"
     },
     {
       "file": "df_Uid_payment_hack.csv.gz",
-      "bytes": 13752705,
-      "sha256": "469d4c146aab5b824591509caeb74a393cd8f5c9b14ef8c6849f145e816a4a9a"
+      "bytes": 115,
+      "sha256": "2d341645ce3001cab0db0aef8d58ecc3fd0421352a61a686bc6ad211e2a0cbb0"
     },
     {
       "file": "research.json",
-      "bytes": 299367,
-      "sha256": "0a1b9a428b7e004874495e4ecb9fbb601f6038c4477418049e86b4584f7c8b75"
+      "bytes": 314012,
+      "sha256": "2266f32eb9bd7273829ab5b802dd7ea21c73c75721f564c0b9fd14da6f416f05"
+    },
+    {
+      "file": "reviewed_news.json",
+      "bytes": 5658,
+      "sha256": "2c9be386a6276bc1c1bee48c05a211be9c378a1fd38c89e948dec342f8841f7b"
+    },
+    {
+      "file": "demo/rag/corpus_manifest.json",
+      "bytes": 7741,
+      "sha256": "55b3893c5553d2161d5ff300b0a0ccd397ae4691a4d1209a69635e189b402b8b"
     }
   ],
-  "note": "Original organizer CSV gzip and automatic OCR. See README and THIRD_PARTY_NOTICES."
+  "note": "Actual checked-in data bytes. CSV gzip files in this clone are synthetic fixtures; real organizer CSV/PDF are external. OCR text is unchanged; publication metadata is verified separately. Reviewed real-news excerpts are explicitly separate from demo_news.json."
 }

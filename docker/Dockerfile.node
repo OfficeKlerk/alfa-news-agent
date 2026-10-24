@@ -17,7 +17,7 @@ COPY integration/analysis_ui/ integration/analysis_ui/
 COPY integration/learning_ui/ integration/learning_ui/
 COPY integration/fixtures/ integration/fixtures/
 COPY contracts/ contracts/
-COPY data/*.gz data/research.json data/demo_news.json data/
+COPY data/*.gz data/research.json data/demo_news.json data/reviewed_news.json data/
 RUN mkdir -p var && chown node:node var
 USER node
 ENV HOST=0.0.0.0 PORT=8000 LLM_MODE=demo
