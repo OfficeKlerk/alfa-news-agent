@@ -18,7 +18,8 @@
     "integration:dev": "npm run build && python scripts/dev.py",
     "integration:smoke": "npm run build && python scripts/dev.py --smoke",
     "llm:evaluate": "node --import tsx scripts/evaluate_llm.ts",
-    "llm:tune": "node --import tsx scripts/tune_model.ts"
+    "llm:tune": "node --import tsx scripts/tune_model.ts",
+    "rag:evaluate": "node --import tsx scripts/evaluate_server_retrieval.ts"
   },
   "dependencies": {
     "ajv": "8.17.1",
