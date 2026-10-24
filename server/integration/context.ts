@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { ApiFault, validate } from "./contracts.js";
 import type { Json } from "../types.js";
-import { validateEventDetails } from "../news-events.js";
+import { groundRateTyping, validateEventDetails } from "../news-events.js";
 
 /** Sort object keys only: arrays, null, false and numeric values keep their meaning. */
 export function canonicalJson(value: unknown): string {
@@ -17,6 +17,10 @@ export function companySource(input: Json): Json {
 }
 export function prepareContext(input: Json, maxBytes = 200_000) {
   validate("AgentRequest", input, true);
+  // Derive a confirmed key-rate decision's typing from the quoted evidence before
+  // any guardrail reads it, so a rate hold supplied as event_type "other" (or with
+  // no direction) still engages monitoring_only instead of inviting an invented shock.
+  input = { ...input, event: groundRateTyping(input.event) };
   const fail = (condition: boolean, message: string) => {
     if (!condition) throw new ApiFault(502, "CONTRACT_VIOLATION", message);
   };

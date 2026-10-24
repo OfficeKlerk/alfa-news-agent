@@ -6,6 +6,7 @@ import { prepareContext } from "../context.js";
 import { validateGrounding, validateQuestionGrounding } from "../grounding.js";
 import { prepareQuestionContext } from "../prepared-agent.js";
 import { adviceConstraints } from "../advice-policy.js";
+import { groundRateTyping } from "../../news-events.js";
 
 // Synthetic adversarial fixtures test validation only; no generated/model-quality result is claimed.
 function rateCase() {
@@ -70,6 +71,37 @@ test("rate hold and known target mismatch restrict output; score alone does not 
   assert.equal(adviceConstraints(unrelated.input).review_mode, "indirect_exposure_check");
   delete unrelated.input.ranked_item.feature_contributions; unrelated.input.ranked_item.score = 0;
   assert.equal(adviceConstraints(unrelated.input).review_mode, "conditional_review");
+});
+test("an under-typed rate hold is grounded from its quoted evidence, not trusted as typed, before guardrails run", () => {
+  // The live run reported a confirmed rate hold arriving as event_type "other"
+  // with no direction, which let a draft invent a rate increase. prepareContext
+  // must re-derive the typing from the source text so monitoring_only engages.
+  const scenario = rateCase();
+  const event = scenario.input.event;
+  const quote = event.sources[0].excerpt as string; // "Банк России сохранил ключевую ставку..."
+  event.event_type = "other";
+  event.event_details = { direction: "unknown", magnitude: null, magnitude_unit: "unknown", effective_at: null,
+    decision_status: "unknown", target_roles: [], target_okved_codes: [], evidence: [] };
+  const context = prepareContext(scenario.input);
+  assert.equal(context.input.event.event_type, "rate_change");
+  assert.equal(context.input.event.event_details.direction, "unchanged");
+  assert.equal(context.input.event.event_details.magnitude, 0);
+  assert.equal(adviceConstraints(context.input).review_mode, "monitoring_only");
+  assert.ok(adviceConstraints(context.input).no_new_risk_or_opportunity);
+  // Grounded evidence must still quote the source exactly, and the quote carries 14%.
+  assert.ok(context.input.event.event_details.evidence.every((row: Json) => quote.includes(row.quote)));
+  // A draft that invents a shock on the normalized hold is rejected.
+  const draft = referenceDraft(scenario);
+  draft.risks = ["Новое повышение ставки удорожает финансирование."]; draft.grounding.risks = [[1]];
+  assert.throws(() => validateGrounding(draft, context), /review only/);
+});
+test("grounding a rate hold leaves non-rate events untouched (no over-classification)", () => {
+  const park = evaluationCases()[2]; // "unrelated_region", a regional_event about a municipal park
+  assert.equal(groundRateTyping(park.input.event).event_type, "regional_event");
+  // An already-typed hold is trusted as-is (idempotent, no duplicate evidence rows).
+  const held = rateCase().input.event;
+  const before = JSON.stringify(held);
+  assert.equal(JSON.stringify(groundRateTyping(held)), before);
 });
 test("unknown direction, forecast, disputed facts and absent product flags retain uncertainty", () => {
   const input = evaluationCases()[3].input;

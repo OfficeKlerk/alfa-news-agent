@@ -205,6 +205,43 @@ export function extractEventDetails(input: Json): Json {
   return event;
 }
 
+/** Re-derive a confirmed key-rate decision's typing from the event's own quoted
+ * evidence, so the monitoring_only / direction guardrails cannot be silently
+ * skipped by a caller that supplied an under-typed event (event_type "other" or a
+ * rate_change with no direction). Scope is deliberately narrow: only the rate
+ * fields are touched, and only when the quoted text confirms a definite direction
+ * and the caller left the rate typing weaker than that evidence. Other event
+ * classifications are left to the ranking service that produced the event. */
+export function groundRateTyping(event: Json): Json {
+  const RATE_FIELDS = ["direction", "magnitude", "magnitude_unit", "decision_status"];
+  // Extract purely from the quoted evidence, ignoring whatever typing the caller
+  // supplied, so the result reflects only what the source text actually supports.
+  const probe = structuredClone(event);
+  probe.event_type = "other";
+  probe.event_details = { evidence: [] };
+  const derived = extractEventDetails(probe);
+  const dd = derived.event_details ?? {};
+  if (derived.event_type !== "rate_change" || !dd.direction || dd.direction === "unknown") return event;
+  const current = event.event_details?.direction;
+  const underTyped = event.event_type !== "rate_change" || !current || current === "unknown";
+  if (!underTyped) return event; // caller already typed the direction; trust it
+  const out = structuredClone(event);
+  out.event_type = "rate_change";
+  const details = out.event_details && typeof out.event_details === "object"
+    ? { ...out.event_details } : { evidence: [] };
+  if (!Array.isArray(details.evidence)) details.evidence = [];
+  for (const field of RATE_FIELDS) if (dd[field] !== undefined) details[field] = dd[field];
+  const rateRows = (dd.evidence ?? []).filter((row: Json) => RATE_FIELDS.includes(row.field) || row.field === "event_type");
+  details.evidence = [...details.evidence.filter((row: Json) => !RATE_FIELDS.includes(row.field) && row.field !== "event_type"), ...rateRows];
+  if (!out.event_at && derived.event_at) {
+    out.event_at = derived.event_at;
+    const dateRow = (dd.evidence ?? []).find((row: Json) => row.field === "event_at");
+    if (dateRow) details.evidence.push(dateRow);
+  }
+  out.event_details = details;
+  return out;
+}
+
 function eventIdentity(event: Json): string {
   // Deliberately limited to unambiguous CBR decisions; broad topic similarity is not identity.
   const details = event.event_details;
