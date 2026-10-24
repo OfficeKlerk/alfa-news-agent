@@ -1,3 +1,4 @@
+import { importReviewedNews } from "./reviewed-news.js";
 import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 import { createReadStream, mkdirSync, readFileSync } from 'node:fs';
 import { createGunzip } from 'node:zlib';
@@ -55,6 +56,7 @@ export class Store {
       }
       this.connection.exec('COMMIT');
     } catch (error) { this.connection.exec('ROLLBACK'); throw error; }
+    importReviewedNews(this, join(this.settings.data, 'reviewed_news.json'));
   }
   private async importCsv(filename: string, sql: string, convert: (row: Json) => SQLInputValue[]) {
     const input = createReadStream(join(this.settings.data, filename + '.gz'));
