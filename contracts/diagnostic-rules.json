@@ -58,6 +58,8 @@
     "Unknown product flag must remain unknown",
     "Trade flags do not establish direction or payment currency",
     "Unknown payment metadata must remain unknown",
-    "Product mark contradicts the snapshot"
+    "Product mark contradicts the snapshot",
+    "Question profile assertion needs matching claim and profile path",
+    "Payment assertion contradicts the snapshot"
   ]
 }

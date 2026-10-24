@@ -4,6 +4,7 @@ import type { prepareContext } from "./context.js";
 import { adviceConstraints } from "./advice-policy.js";
 import { profileValue, paymentCoveragePaths } from "./profile-paths.js";
 import { cautiousLanguageRules } from "./cautious-language.js";
+import { questionProfileIssues } from "./question-profile-grounding.js";
 export { profileValue } from "./profile-paths.js";
 
 export type PreparedContext = ReturnType<typeof prepareContext>;
@@ -168,14 +169,19 @@ export function analysisDraft(value: Json) {
 }
 export function validateQuestionGrounding(draft: Json, context: PreparedContext, collectAll = false) {
   validate("GeneratedAnswer", draft, true);
+  const issues: FieldIssue[] = [];
   try { validateGrounding({ summary: draft.answer, why_relevant: draft.answer, claims: draft.claims,
     risks: [], opportunities: [], recommendations: [], limitations: draft.limitations, missing_data: draft.missing_data,
     grounding: { summary: draft.claim_indexes, why_relevant: draft.claim_indexes, risks: [], opportunities: [], recommendations: [] } }, context, false, collectAll);
   } catch (error) {
     if (!(error instanceof ApiFault) || !error.diagnostics) throw error;
-    const issues = error.diagnostics.issues.map(issue => ({ ...issue,
+    issues.push(...error.diagnostics.issues.map(issue => ({ ...issue,
       path: issue.path.replace(/^\/(summary|why_relevant)(?=\/|$)/, "/answer")
-        .replace(/^\/grounding\/(summary|why_relevant)(?=\/|$)/, "/claim_indexes") }));
-    throw new ApiFault(error.status, error.code, issues.map(i => i.path + ": " + i.rule).join("; "), { issues });
+        .replace(/^\/grounding\/(summary|why_relevant)(?=\/|$)/, "/claim_indexes") })));
+  }
+  issues.push(...questionProfileIssues(draft, context.input));
+  if (issues.length) {
+    const unique = [...new Map(issues.map(i => [i.path + ":" + i.rule, i])).values()].slice(0, 10);
+    throw new ApiFault(502, "CONTRACT_VIOLATION", unique.map(i => i.path + ": " + i.rule).join("; "), { issues: unique });
   }
 }

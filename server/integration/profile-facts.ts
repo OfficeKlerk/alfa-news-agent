@@ -1,4 +1,5 @@
 import type { Json } from "../types.js";
+import { assertionClauses, qualifiedAssertion, mentionedProducts, productMark } from "./assertion-language.js";
 
 const unknown = (value: unknown) => value === null || value === undefined || value === "unknown" || value === "" || Array.isArray(value) && value.length === 0;
 const products = ["rko", "guarantee", "loan", "leasing", "deposit", "payroll", "factoring"] as const;
@@ -29,10 +30,10 @@ export function profileFacts(input: Json) {
 export function profileFactRules(text: string, input: Json): string[] {
   const issues = new Set<string>(), profile = input.profile;
   const payment = profile.payment_summary ?? {}, trade = profile.foreign_trade ?? {};
-  for (const clause of text.split(/(?<=[.!?;])\s+|\n/)) {
+  for (const clause of assertionClauses(text)) {
     // Conditional scenarios, questions and explicit warnings do not assert a fact.
-    if (/(?:^|[\s,])если\s|^\s*(?:при условии|уточни[а-яё]*|провер[а-яё]*|неизвест[а-яё]*)(?=\s|[,:]|$)|не\s+(?:означает|доказывает|следует)|нельзя\s+(?:утверждать|считать)|не\s+подтвержд[а-яё]*/iu.test(clause)) continue;
-    const absence = /(?:нет|не\s+имеет|отсутству[а-яё]*|не\s+использует)\s+(?:(?:всех|никаких|действующих|кредитных|долговых)\s+){0,3}(?:долг|кредит(?![а-яё]*\s+продукт)|займ|за[её]м|обязательств)/iu.test(clause);
+    if (qualifiedAssertion(clause) || /^\s*неизвест[а-яё]*(?=\s|[,:]|$)/iu.test(clause)) continue;
+    const absence = /(?:нет|не\s+имеет|отсутству[а-яё]*|не\s+использует)\s+(?:(?:всех|никаких|действующих|кредитных|долговых)\s+){0,3}(?:долг|кредит(?![а-яё]*\s+продукт)|займ|за[её]м|обязательств)|(?:долг[а-яё]*|кредит[а-яё]*|займ[а-яё]*|за[её]м[а-яё]*|обязательств[а-яё]*)\s+(?:(?:у\s+компании|полностью)\s+)?отсутству[а-яё]*/iu.test(clause);
     const marked = /(?:в\s+(?:профиле|снимке)|отметк|отмечен|флаг)/iu.test(clause);
     const actualContract = /(?:компания|предприятие|организация)[^.!?;]{0,35}(?:имеет|использует|обслуживает)[^.!?;]{0,35}(?:кредит|лизинг|долг|за[её]м)/iu.test(clause);
     const actualTerms = /(?:договор[а-яё]*|кредит[а-яё]*|лизинг[а-яё]*)[^.!?;]{0,35}(?:имеют|имеет|предусматрива[а-яё]*|привязан[а-яё]*)[^.!?;]{0,30}(?:плавающ|фиксирован|ключев)/iu.test(clause);
@@ -51,8 +52,12 @@ export function profileFactRules(text: string, input: Json): string[] {
     const leasingMark = /(?:продукт\s+лизинга|лизинг)\s+(не\s+)?отмечен/iu.exec(clause);
     if (loanMark) checkMark("loan", !loanMark[1]);
     if (leasingMark) checkMark("leasing", !leasingMark[1]);
+    for (const product of mentionedProducts(clause)) {
+      const mark = productMark(clause, product);
+      if (mark !== undefined) checkMark(product, mark);
+    }
     const direction = /(?:компания|предприятие|организация)\s+(?:является\s+)?(?:импорт[её]р|экспорт[её]р|импортирует|экспортирует)|компания\s+осуществляет\s+(?:импорт|экспорт)/iu.test(clause);
-    const noCurrency = /(?:нет|отсутству[а-яё]*|не\s+имеет)\s+валютн[а-яё]*\s+(?:плат[её]ж|операци|расч[её]т)/iu.test(clause);
+    const noCurrency = /(?:нет|отсутству[а-яё]*|не\s+имеет)\s+валютн[а-яё]*\s+(?:плат[её]ж|операци|расч[её]т)|валютн[а-яё]*\s+(?:плат[её]ж[а-яё]*|операци[а-яё]*|расч[её]т[а-яё]*)\s+(?:(?:у\s+компании|полностью)\s+)?отсутству[а-яё]*/iu.test(clause);
     if (unknown(trade.trade_direction) && direction || unknown(trade.currencies) && unknown(payment.currency) && noCurrency)
       issues.add("Trade flags do not establish direction or payment currency");
     const currency = /(?:плат[её]ж[а-яё]*|расч[её]т[а-яё]*|операци[а-яё]*)[^.!?;]{0,25}(?:в|только\s+в|исключительно\s+в)\s+(?:рубл|доллар|евро|юан)/iu.test(clause);
