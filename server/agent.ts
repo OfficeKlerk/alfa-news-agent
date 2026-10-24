@@ -13,7 +13,7 @@ import {
   type Json,
   type Source,
 } from "./types.js";
-export const VERSION = "2.0.2-node";
+export const VERSION = "2.0.3-node";
 export const TOOLS: Json[] = [
   [
     "get_company_profile",
