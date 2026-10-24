@@ -16,6 +16,14 @@ export function parseJson(message: Json): Json {
     throw new ModelError("Модель не вернула JSON по схеме.");
   }
 }
+/** Name the usual cause of a truncated JSON without keeping its untrusted text. */
+export function truncationCause(content: unknown): string {
+  const texts = typeof content === "string" ? [...content.matchAll(/"text":"((?:[^"\\]|\\.){8,})"/g)].map(m => m[1]) : [];
+  const repeats = texts.length - new Set(texts).size;
+  return repeats > 0
+    ? "Причина — зацикливание: в обрезанном тексте " + texts.length + " claim-текстов, из них " + repeats + " повторов."
+    : "Обычная причина — разрастание claims или пересказ контекста, а не малый лимит; проверьте размер контекста и число claims.";
+}
 export function createComplete(settings: Settings, db: Store, request: typeof fetch = fetch): Complete {
   return async (messages, tools, jsonMode = false, responseSchema) => {
     if (!settings.apiKey.trim()) throw new ModelError("Нет LLM_API_KEY. Укажите ключ в .env и перезапустите сервер.", "MODEL_AUTH_ERROR");
@@ -101,12 +109,20 @@ export function createComplete(settings: Settings, db: Store, request: typeof fe
       if (choice.finish_reason === "length" || choice.finish_reason === "max_tokens") {
         throw new ModelError(
           jsonMode
-            ? "Ответ модели обрезан по лимиту длины. Увеличьте LLM_MAX_OUTPUT_TOKENS и запустите анализ заново."
+            ? "Ответ модели обрезан по лимиту длины (" + settings.maxOutputTokens + " выходных токенов): JSON неполный и не сохранён как результат. " + truncationCause(message.content) + " Увеличение LLM_MAX_OUTPUT_TOKENS не является исправлением само по себе."
             : "Ответ модели при выборе инструментов обрезан по лимиту длины. Увеличьте LLM_MAX_PLANNING_TOKENS, сократите контекст или смените модель.",
         );
       }
       if (message.refusal || choice.finish_reason === "content_filter") throw new ModelError("Модель отказалась сформировать ответ.");
-      if (jsonMode && typeof message.content !== "string") throw new ModelError("API модели не вернул текст JSON.");
+      // An empty body is a provider failure, not a draft: it must never reach parse/repair.
+      if (jsonMode && (typeof message.content !== "string" || !message.content.trim())) {
+        const native = choice.provider_specific_fields?.native_finish_reason;
+        throw new ModelError("Провайдер вернул пустой ответ без JSON (finish_reason=" + String(choice.finish_reason)
+          + (typeof native === "string" && /^\w{1,30}$/.test(native) ? ", native_finish_reason=" + native : "")
+          + ", выходных токенов: " + tokens(result.usage?.completion_tokens)
+          + (typeof result.provider === "string" && /^[\w .-]{1,40}$/.test(result.provider) ? ", провайдер " + result.provider : "")
+          + "). Черновик не создан, repair не выполнялся: это сбой маршрута или провайдера, а не ответ модели.");
+      }
       return message;
     } catch (error) {
       if (error instanceof ModelError) throw error;

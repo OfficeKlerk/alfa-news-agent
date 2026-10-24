@@ -232,8 +232,11 @@ test("original rate-hold quotes expose the optional-array mistake and receive de
 
 test("original dentist prose rejects broad absence and accepts the instructed narrow comparison",()=>{
   const c=original(7),s=scenario();s.input.profile=c.profile;
+  const fixture=JSON.parse(readFileSync(resolve(ROOT,"tests/fixtures/event_interpretation_cases.json"),"utf8"));
+  s.input.event=fixture.cases.find((entry:Json)=>entry.id==="transport_budget").event;
+  assert.equal(eventInterpretation(s.input).industry.relation,"mismatch");
   const text=c.why_relevant;
-  // Profile subset suffices for this lexical check; this is not full context replay.
+  // Saved profile subset and transport event; this is not full context replay.
   assert.ok(cautiousLanguageRules(text,s.input).includes("Unconfirmed linkage must not be stated as proven absence"));
   assert.deepEqual(cautiousLanguageRules(text.replace("Прямая отраслевая связь отсутствует","Отрасль компании не совпадает с тематикой новости; возможные косвенные каналы не проверены"),s.input),[]);
 });

@@ -1,3 +1,4 @@
+import { generationContext } from "./generation-context.js";
 import { randomUUID } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import type { Settings } from "../config.js";
@@ -11,8 +12,22 @@ import { analysisDraft, validateGrounding, validateQuestionGrounding } from "./g
 import { adviceConstraints } from "./advice-policy.js";
 import { generatedResponseSchema } from "./response-schema.js";
 import { describeDiagnostics, safeDiagnostics, safeDraft, saveRejectedDraft } from "./diagnostics.js";
-import { repairInstruction, responseGuidance } from "./repair-guidance.js";
+import { repairInstruction, repairPlan, responseGuidance } from "./repair-guidance.js";
+import { generationBudgetIssues } from "./generation-budget.js";
 
+/** Merge the live claim budget with ordinary grounding issues so one repair sees both. */
+function withBudget(check: (value: Json) => void) {
+  return (value: Json) => {
+    const budget = generationBudgetIssues(value);
+    try { check(value); }
+    catch (error) {
+      if (!budget.length || !(error instanceof ApiFault) || !error.diagnostics) throw error;
+      const issues = [...budget, ...error.diagnostics.issues].slice(0, 10);
+      throw new ApiFault(502, "CONTRACT_VIOLATION", issues.map(i => i.path + ": " + i.rule).join("; "), { issues });
+    }
+    if (budget.length) throw new ApiFault(502, "CONTRACT_VIOLATION", budget.map(i => i.path + ": " + i.rule).join("; "), { issues: budget });
+  };
+}
 async function generate(settings: Settings, db: Store, prompt: string, data: Json,
   check: (value: Json) => void, request: typeof fetch, responseSchema: ResponseSchema) {
   const complete = createComplete(settings, db, request);
@@ -45,6 +60,7 @@ async function generate(settings: Settings, db: Store, prompt: string, data: Jso
       if (attempt === 0) messages.push({ role: "user", content: JSON.stringify({
         task: "Исправь ответ по проверенным ошибкам полей. Верни полный JSON по исходному контексту и системной схеме.",
         issues: diagnostics.issues, errors: describeDiagnostics(diagnostics),
+        repair_plan: repairPlan(diagnostics.issues, draft, responseSchema.name === "GeneratedAnswer", data),
         repair_rules: diagnostics.issues.map(issue => ({ ...issue, instruction: repairInstruction(issue, responseSchema.name === "GeneratedAnswer", draft) })),
         previous_violations: diagnostics.history,
         ai_source_requirements: data.response_guidance.ai_source_requirements,
@@ -61,8 +77,8 @@ export async function generatePrepared(settings: Settings, db: Store, input: Jso
   const context = prepareContext(input, settings.maxContextBytes);
   if (!input.event.sources.some((s: Json) => s.excerpt.trim().length >= 8)) throw new ApiFault(422, "VALIDATION_ERROR", "News evidence is too short");
   const { draft, attempts, diagnostics } = await generate(settings, db, ANALYSIS_PROMPT,
-    { ...context, advice_constraints: adviceConstraints(context.input), response_guidance: responseGuidance(context, settings.apiKey) },
-    value => validateGrounding(value, context, false, true), request,
+    { ...generationContext(context), advice_constraints: adviceConstraints(context.input), response_guidance: responseGuidance(context, settings.apiKey) },
+    withBudget(value => validateGrounding(value, context, false, true)), request,
     generatedResponseSchema("GeneratedAnalysis"));
   const notices = [
     ...input.research.limitations,
@@ -99,9 +115,9 @@ export function prepareQuestionContext(input: Json, maxBytes = 200000) {
 export async function answerPrepared(settings: Settings, db: Store, input: Json, id: string, request: typeof fetch = fetch) {
   const context = prepareQuestionContext(input, settings.maxContextBytes);
   const { draft } = await generate(settings, db, QUESTION_PROMPT,
-    { ...input, as_of: context.input.as_of, audience_role: context.input.audience_role,
+    { ...generationContext(context, input),
       advice_constraints: adviceConstraints(context.input), response_guidance: responseGuidance(context, settings.apiKey, "question") },
-    value => validateQuestionGrounding(value, context, true), request,
+    withBudget(value => validateQuestionGrounding(value, context, true)), request,
     generatedResponseSchema("GeneratedAnswer"));
   return envelope({ ...draft, analysis_id: input.analysis.id, company_id: input.company_id,
     source_ids: [...new Set(draft.claims.flatMap((c: Json) => c.source_ids))] }, id,

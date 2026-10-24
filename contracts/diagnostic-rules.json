@@ -61,6 +61,11 @@
     "Product mark contradicts the snapshot",
     "Question profile assertion needs matching claim and profile path",
     "Payment assertion contradicts the snapshot",
-    "Profile claim assertion needs matching profile path"
+    "Profile claim assertion needs matching profile path",
+    "Industry relation assertion contradicts prepared event",
+    "Too many claims for a compact answer",
+    "Too many bank claims",
+    "Repeated claim text",
+    "Project participation or budget funding is not established"
   ]
 }
