@@ -6,7 +6,7 @@ import { prepareContext } from "../context.js";
 import { validateGrounding, validateQuestionGrounding } from "../grounding.js";
 import { prepareQuestionContext } from "../prepared-agent.js";
 import { adviceConstraints } from "../advice-policy.js";
-import { groundRateTyping } from "../../news-events.js";
+import { groundRateTyping, extractEventDetails } from "../../news-events.js";
 
 // Synthetic adversarial fixtures test validation only; no generated/model-quality result is claimed.
 function rateCase() {
@@ -102,6 +102,44 @@ test("grounding a rate hold leaves non-rate events untouched (no over-classifica
   const held = rateCase().input.event;
   const before = JSON.stringify(held);
   assert.equal(JSON.stringify(groundRateTyping(held)), before);
+});
+test("a rate hold by an unspecified regulator is typed unchanged so no shock is invented, without attributing the CBR", () => {
+  // demo-rate from data/demo_news.json: "регулятор сохраняет ключевую ставку" — no
+  // quotable issuer. It must still engage monitoring_only (TEAM_TASKS2 #3), while the
+  // strict CBR path and directional abstention stay intact.
+  const quote = "Синтетический сценарий: регулятор сохраняет ключевую ставку, а неопределённость относительно сроков её изменения остаётся высокой.";
+  const scenario = rateCase();
+  const event = scenario.input.event;
+  event.text = event.sources[0].excerpt = quote;
+  event.event_type = "other";
+  event.event_details = { direction: "unknown", magnitude: null, magnitude_unit: "unknown", effective_at: null,
+    decision_status: "unknown", target_roles: [], target_okved_codes: [], evidence: [] };
+  const context = prepareContext(scenario.input);
+  assert.equal(context.input.event.event_type, "rate_change");
+  assert.equal(context.input.event.event_details.direction, "unchanged");
+  assert.equal(adviceConstraints(context.input).review_mode, "monitoring_only");
+  assert.ok(adviceConstraints(context.input).no_new_risk_or_opportunity);
+  // Evidence quotes the source and names no central bank — nothing is attributed to the CBR.
+  const rows = context.input.event.event_details.evidence;
+  assert.ok(rows.length && rows.every((r: Json) => quote.includes(r.quote) && !/банк россии|цб/i.test(r.quote)));
+  // A draft that invents a rate shock on this hold is rejected.
+  const draft = referenceDraft(scenario);
+  draft.risks = ["Сохранение ставки удорожает обслуживание лизинга."]; draft.grounding.risks = [[1]];
+  assert.throws(() => validateGrounding(draft, context), /review only/);
+});
+test("the unspecified-regulator hold stays conservative: directional moves and non-rate text are not reclassified", () => {
+  const src = (excerpt: string) => ({ event_type: "other", sources: [{ id: "s", excerpt }] });
+  // A raise by an unspecified actor is NOT turned into unchanged (no fabricated direction, no CBR).
+  const raise = extractEventDetails(src("Регулятор повысил ключевую ставку до 16%."));
+  assert.notEqual(raise.event_details?.direction, "unchanged");
+  // A strict CBR hold is still fully typed (regression).
+  const cbr = extractEventDetails(src("Совет директоров Банка России сохранил ключевую ставку 14%."));
+  assert.equal(cbr.event_type, "rate_change");
+  assert.equal(cbr.event_details.direction, "unchanged");
+  assert.equal(cbr.event_details.decision_status, "announced");
+  // A commercial bank's deposit-rate hold is not a key-rate decision.
+  const deposit = extractEventDetails(src("Банк сохранил ставку по вкладам на прежнем уровне."));
+  assert.notEqual(deposit.event_type, "rate_change");
 });
 test("unknown direction, forecast, disputed facts and absent product flags retain uncertainty", () => {
   const input = evaluationCases()[3].input;

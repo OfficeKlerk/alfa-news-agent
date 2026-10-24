@@ -91,6 +91,20 @@ function rateObservation(quote: string): RateObservation | null {
   return { quote, direction, magnitude, level: number !== null && Number.isFinite(number) ? number : null, date: eventDate, forecast: false };
 }
 
+/** A key-rate HOLD stated without a specific, quotable issuer (e.g. "регулятор
+ * сохраняет ключевую ставку"). Recognized ONLY as unchanged — never a directional
+ * change and never a numeric delta/level — so the monitoring_only guardrail engages
+ * without attributing the decision to the central bank. Strict CBR extraction
+ * (rateObservation) remains the sole authority for a typed, identified decision. */
+function unspecifiedRateHold(lower: string): boolean {
+  if (!/ключев[а-я]*\s+ставк/.test(lower)) return false;
+  if (/сниз|пониз|повыс|увелич/.test(lower)) return false; // any directional move is not a plain hold
+  return /сохран[а-я]*\s+ключев[а-я]*\s+ставк/.test(lower)
+    || /оставля[а-я]*\s+(?:без\s+изменени[а-я]*\s+)?ключев[а-я]*\s+ставк/.test(lower)
+    || /оставил[аио]?\s+ключев[а-я]*\s+ставк/.test(lower)
+    || /ключев[а-я]*\s+ставк[а-я]*\s+(?:сохран|оставл|остал|оставал|без\s+изменени|не\s+измен)/.test(lower);
+}
+
 /** Conservative, offline rules. Extract only from quoted source text; never invent entity IDs. */
 export function extractEventDetails(input: Json): Json {
   const event = structuredClone(input);
@@ -133,6 +147,12 @@ export function extractEventDetails(input: Json): Json {
             if (!event.event_at && rate.date) { event.event_at = rate.date; evidence("event_at", quote, source.id); }
           }
         }
+      } else if (!uncertain && !negated && unspecifiedRateHold(lower)) {
+        // A rate hold by an unspecified regulator: type it as unchanged so the review
+        // stays monitoring-only and no interest-rate shock is invented. Direction only —
+        // no issuer, magnitude or level is claimed, so nothing is attributed to the CBR.
+        if (!event.event_type || event.event_type === "other") { event.event_type = "rate_change"; evidence("event_type", quote, source.id); }
+        if (event.event_type === "rate_change" && !ambiguousRates) set("direction", "unchanged", quote, source.id);
       }
       if (!uncertain && !negated && /(?:ввел[аио]?|введен[аы]?|установил[аио]?|запретил[аио]?|продлил[аио]?|ограничил[аио]?|отменил[аио]?|снизил[аио]?|повысил[аио]?|утвердил[аио]?|принял[аио]?|решил[аио]?|действует)/.test(lower)
         && (/(?:пошлин)/.test(lower) || /(?:запрет|квот|ограничени)/.test(lower) && /(?:экспорт|импорт|ввоз|вывоз)/.test(lower))) {
