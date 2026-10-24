@@ -50,6 +50,14 @@
     "Recommendation condition and required data must match: required_data must match missing_data",
     "Unsupported limitation or missing-data number",
     "Financial figures are not allowed in limitations or missing_data",
-    "Unused claim"
+    "Unused claim",
+    "Payment statistic needs matching coverage paths",
+    "Unconfirmed linkage must not be stated as proven absence",
+    "Freshness-only ranking explanation is not supported by contributions",
+    "Product flags do not establish debt or contract terms",
+    "Unknown product flag must remain unknown",
+    "Trade flags do not establish direction or payment currency",
+    "Unknown payment metadata must remain unknown",
+    "Product mark contradicts the snapshot"
   ]
 }

@@ -41,7 +41,9 @@ def generate():
     d["ResponseDiagnostics"] = obj({"issues": array(REF("FieldIssue"), minItems=1, maxItems=10),
         "generation_id": {"type": "string", "format": "uuid"},
         "attempts": {"type": "integer", "minimum": 1, "maximum": 2},
-        "max_attempts": {"const": 2}, "draft_saved": {"type": "boolean"}}, ["issues"])
+        "max_attempts": {"const": 2}, "draft_saved": {"type": "boolean"},
+        "history": array(obj({"attempt": {"type": "integer", "minimum": 1, "maximum": 2},
+            "issues": array(REF("FieldIssue"), minItems=1, maxItems=10)}), maxItems=2)}, ["issues"])
     d["Error"]["properties"]["error"]["properties"]["diagnostics"] = REF("ResponseDiagnostics")
     d["Evidence"] = obj({"id": ID, "kind": {"enum": ["company", "news", "bank"]}, "title": STR,
                          "url": {"type": ["string", "null"], "format": "uri", "pattern": "^https?://"},

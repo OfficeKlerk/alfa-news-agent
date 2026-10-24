@@ -46,7 +46,10 @@ export function safeDiagnostics(value: ResponseDiagnostics): ResponseDiagnostics
     ...(value.generation_id && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(value.generation_id) ? { generation_id: value.generation_id } : {}),
     ...(value.attempts && Number.isInteger(value.attempts) && value.attempts >= 1 && value.attempts <= 2 ? { attempts: value.attempts } : {}),
     ...(value.max_attempts === 2 ? { max_attempts: 2 } : {}),
-    ...(typeof value.draft_saved === "boolean" ? { draft_saved: value.draft_saved } : {}) };
+    ...(typeof value.draft_saved === "boolean" ? { draft_saved: value.draft_saved } : {}),
+    ...(value.history ? { history: value.history.slice(0, 2).filter(h => h.attempt === 1 || h.attempt === 2)
+      .map(h => ({ attempt: h.attempt, issues: safeDiagnostics({ issues: h.issues }).issues }))
+      .filter(h => h.issues.length) } : {}) };
 }
 export function describeDiagnostics(value: ResponseDiagnostics): string {
   const safe = safeDiagnostics(value);
@@ -102,12 +105,12 @@ export function safeDraft(value: unknown, contract: string): unknown {
 
 /** Separate local diagnostic ledger, bounded to the last 100 rejected drafts per database. */
 export function saveRejectedDraft(db: Store, generationId: string, attempt: number, contract: string,
-  draft: unknown, issues: FieldIssue[]) {
+  draft: unknown, issues: FieldIssue[], history?: ResponseDiagnostics["history"]) {
   db.connection.exec(`CREATE TABLE IF NOT EXISTS llm_rejected_drafts(
     id TEXT PRIMARY KEY, generation_id TEXT NOT NULL, attempt INTEGER NOT NULL,
     contract TEXT NOT NULL, snapshot TEXT NOT NULL, diagnostics TEXT NOT NULL, created TEXT DEFAULT CURRENT_TIMESTAMP)`);
   db.run("INSERT INTO llm_rejected_drafts(id,generation_id,attempt,contract,snapshot,diagnostics) VALUES(?,?,?,?,?,?)",
     randomUUID(), generationId, attempt, contract, JSON.stringify(safeDraft(draft, contract)),
-    JSON.stringify(safeDiagnostics({ issues, generation_id: generationId, attempts: attempt, max_attempts: 2, draft_saved: true })));
+    JSON.stringify(safeDiagnostics({ issues, generation_id: generationId, attempts: attempt, max_attempts: 2, draft_saved: true, history })));
   db.connection.exec("DELETE FROM llm_rejected_drafts WHERE rowid NOT IN (SELECT rowid FROM llm_rejected_drafts ORDER BY rowid DESC LIMIT 100)");
 }

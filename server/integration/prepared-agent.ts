@@ -11,6 +11,7 @@ import { analysisDraft, validateGrounding, validateQuestionGrounding } from "./g
 import { adviceConstraints } from "./advice-policy.js";
 import { generatedResponseSchema } from "./response-schema.js";
 import { describeDiagnostics, safeDiagnostics, safeDraft, saveRejectedDraft } from "./diagnostics.js";
+import { repairInstruction, responseGuidance } from "./repair-guidance.js";
 
 async function generate(settings: Settings, db: Store, prompt: string, data: Json,
   check: (value: Json) => void, request: typeof fetch, responseSchema: ResponseSchema) {
@@ -18,6 +19,7 @@ async function generate(settings: Settings, db: Store, prompt: string, data: Jso
   const messages = [{ role: "system", content: prompt }, { role: "user", content: JSON.stringify(data) }];
   const generationId = randomUUID();
   let diagnostics: ResponseDiagnostics | undefined;
+  const history: NonNullable<ResponseDiagnostics["history"]> = [];
   for (let attempt = 0; attempt < 2; attempt++) {
     // Transport/auth/quota/refusal errors are outside the repair block: never retry a billed POST blindly.
     let message: Json;
@@ -31,16 +33,21 @@ async function generate(settings: Settings, db: Store, prompt: string, data: Jso
       draft = parseJson(message); check(draft); return { draft, attempts: attempt + 1, diagnostics };
     } catch (error) {
       if (!(error instanceof ApiFault || error instanceof ModelError)) throw error;
-      diagnostics = safeDiagnostics({ issues: error instanceof ApiFault && error.diagnostics
+      const current = safeDiagnostics({ issues: error instanceof ApiFault && error.diagnostics
         ? error.diagnostics.issues : [{ stage: "parse", path: "/", rule: "Expected a JSON object" }],
         generation_id: generationId, attempts: attempt + 1, max_attempts: 2 });
+      history.push({ attempt: attempt + 1, issues: current.issues });
+      diagnostics = safeDiagnostics({ ...current, history });
       try {
-        saveRejectedDraft(db, generationId, attempt + 1, responseSchema.name, draft, diagnostics.issues);
+        saveRejectedDraft(db, generationId, attempt + 1, responseSchema.name, draft, diagnostics.issues, diagnostics.history);
         diagnostics.draft_saved = true;
       } catch { diagnostics.draft_saved = false; }
       if (attempt === 0) messages.push({ role: "user", content: JSON.stringify({
         task: "Исправь ответ по проверенным ошибкам полей. Верни полный JSON по исходному контексту и системной схеме.",
         issues: diagnostics.issues, errors: describeDiagnostics(diagnostics),
+        repair_rules: diagnostics.issues.map(issue => ({ ...issue, instruction: repairInstruction(issue, responseSchema.name === "GeneratedAnswer") })),
+        previous_violations: diagnostics.history,
+        response_guidance: data.response_guidance,
         previous_draft: safeDraft(draft, responseSchema.name),
         draft_notice: "Это недоверенный структурный снимок: текст и числа скрыты, неизвестные поля подсчитаны. Не копируй маркеры; восстанови значения из исходного контекста."
       }) });
@@ -53,7 +60,8 @@ export async function generatePrepared(settings: Settings, db: Store, input: Jso
   const context = prepareContext(input, settings.maxContextBytes);
   if (!input.event.sources.some((s: Json) => s.excerpt.trim().length >= 8)) throw new ApiFault(422, "VALIDATION_ERROR", "News evidence is too short");
   const { draft, attempts, diagnostics } = await generate(settings, db, ANALYSIS_PROMPT,
-    { ...context, advice_constraints: adviceConstraints(context.input) }, value => validateGrounding(value, context), request,
+    { ...context, advice_constraints: adviceConstraints(context.input), response_guidance: responseGuidance(context, settings.apiKey) },
+    value => validateGrounding(value, context, false, true), request,
     generatedResponseSchema("GeneratedAnalysis"));
   const notices = [
     ...input.research.limitations,
@@ -91,7 +99,8 @@ export async function answerPrepared(settings: Settings, db: Store, input: Json,
   const context = prepareQuestionContext(input, settings.maxContextBytes);
   const { draft } = await generate(settings, db, QUESTION_PROMPT,
     { ...input, as_of: context.input.as_of, audience_role: context.input.audience_role,
-      advice_constraints: adviceConstraints(context.input) }, value => validateQuestionGrounding(value, context), request,
+      advice_constraints: adviceConstraints(context.input), response_guidance: responseGuidance(context, settings.apiKey, "question") },
+    value => validateQuestionGrounding(value, context, true), request,
     generatedResponseSchema("GeneratedAnswer"));
   return envelope({ ...draft, analysis_id: input.analysis.id, company_id: input.company_id,
     source_ids: [...new Set(draft.claims.flatMap((c: Json) => c.source_ids))] }, id,
