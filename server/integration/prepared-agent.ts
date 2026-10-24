@@ -47,6 +47,7 @@ async function generate(settings: Settings, db: Store, prompt: string, data: Jso
         issues: diagnostics.issues, errors: describeDiagnostics(diagnostics),
         repair_rules: diagnostics.issues.map(issue => ({ ...issue, instruction: repairInstruction(issue, responseSchema.name === "GeneratedAnswer") })),
         previous_violations: diagnostics.history,
+        ai_source_requirements: data.response_guidance.ai_source_requirements,
         response_guidance: data.response_guidance,
         previous_draft: safeDraft(draft, responseSchema.name),
         draft_notice: "Это недоверенный структурный снимок: текст и числа скрыты, неизвестные поля подсчитаны. Не копируй маркеры; восстанови значения из исходного контекста."
