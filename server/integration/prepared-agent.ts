@@ -45,7 +45,7 @@ async function generate(settings: Settings, db: Store, prompt: string, data: Jso
       if (attempt === 0) messages.push({ role: "user", content: JSON.stringify({
         task: "Исправь ответ по проверенным ошибкам полей. Верни полный JSON по исходному контексту и системной схеме.",
         issues: diagnostics.issues, errors: describeDiagnostics(diagnostics),
-        repair_rules: diagnostics.issues.map(issue => ({ ...issue, instruction: repairInstruction(issue, responseSchema.name === "GeneratedAnswer") })),
+        repair_rules: diagnostics.issues.map(issue => ({ ...issue, instruction: repairInstruction(issue, responseSchema.name === "GeneratedAnswer", draft) })),
         previous_violations: diagnostics.history,
         ai_source_requirements: data.response_guidance.ai_source_requirements,
         response_guidance: data.response_guidance,

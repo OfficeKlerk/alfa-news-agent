@@ -66,6 +66,7 @@ test("arbitrary paths, whole objects, service fields, array properties and missi
     assert.throws(() => profileValue(s.input.profile, path));
   const entry = profilePathIndex(s.input.profile).entries.find(v => /out\/industry_distribution\/0\/share_of_direction$/.test(v.path))!;
   const draft = referenceDraft(s); draft.claims[1].profile_paths = [entry.path, ...entry.coverage_paths];
+  draft.claims[1].text = draft.why_relevant = "Выбранная статистика описывает платёжный контекст; вывод о договорах требует проверки.";
   validateGrounding(draft, context);
   draft.claims[1].profile_paths = [entry.path];
   assert.throws(() => validateGrounding(draft, context), /matching coverage/);

@@ -60,6 +60,7 @@
     "Unknown payment metadata must remain unknown",
     "Product mark contradicts the snapshot",
     "Question profile assertion needs matching claim and profile path",
-    "Payment assertion contradicts the snapshot"
+    "Payment assertion contradicts the snapshot",
+    "Profile claim assertion needs matching profile path"
   ]
 }

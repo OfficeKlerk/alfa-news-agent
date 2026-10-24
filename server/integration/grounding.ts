@@ -5,6 +5,7 @@ import { adviceConstraints } from "./advice-policy.js";
 import { profileValue, paymentCoveragePaths } from "./profile-paths.js";
 import { cautiousLanguageRules } from "./cautious-language.js";
 import { questionProfileIssues } from "./question-profile-grounding.js";
+import { claimProfileRules } from "./claim-profile-grounding.js";
 export { profileValue } from "./profile-paths.js";
 
 export type PreparedContext = ReturnType<typeof prepareContext>;
@@ -97,6 +98,7 @@ export function validateGrounding(answer: Json, context: PreparedContext, server
         const allowed = new Set(scan(supports[index]));
         if (scan(c.text + " " + c.conditions.join(" ")).some(n => !allowed.has(n))) reject("Unsupported numeric assertion", path);
         if (hasFinancialFigure(withoutCompanyId(c.text + " " + c.conditions.join(" ")), okvedCodes)) reject("AI financial figures must be verbatim fact/bank quotes, not company impact", path);
+        for (const rule of claimProfileRules(c, context.input)) run(() => reject(rule, path + "/profile_paths"));
         for (const [suffix, text] of [["/text", c.text], ...c.conditions.map((text: string, i: number) => ["/conditions/" + i, text])]) {
           for (const rule of cautiousLanguageRules(text, context.input)) run(() => reject(rule, path + suffix));
         }
