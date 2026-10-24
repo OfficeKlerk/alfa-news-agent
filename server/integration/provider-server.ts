@@ -15,9 +15,11 @@ const settings = loadSettings(), kind = process.env.SERVICE_KIND;
 if (kind !== "agent" && kind !== "retrieval") throw new Error("SERVICE_KIND must be agent or retrieval");
 const runtime = await createApplication(settings);
 const app = express(); boundary(app);
-const retrieval = new LegacyRetrieval(runtime.db, runtime.retrieval), agent = new LegacyAgent(settings);
+const retrieval = new LegacyRetrieval(runtime.db, runtime.retrieval, settings), agent = new LegacyAgent(settings);
 app.get("/v1/health", (_req, res) => send(res, "HealthDataResponse", envelope({ status: "ok", service: kind }, res.locals.requestId, settings.mode === "demo" ? "demo" : "live")));
 if (kind === "retrieval") {
+  app.post("/v1/news", async (req, res) => { checkBody(req, "IngestRequest"); send(res, "IngestDataResponse", await retrieval.ingest(req.body, res.locals.requestId)); });
+  app.post("/v1/feeds/refresh", async (req, res) => { checkBody(req, "FeedRefreshRequest"); send(res, "FeedRefreshDataResponse", await retrieval.refresh(req.body, res.locals.requestId)); });
   app.post("/v1/tools/search_news", async (req, res) => { checkBody(req, "SearchRequest"); send(res, "SearchDataResponse", await retrieval.search(req.body, res.locals.requestId)); });
   app.post("/v1/tools/rag_bank_analytics", async (req, res) => { checkBody(req, "RagRequest"); send(res, "RagDataResponse", await retrieval.rag(req.body, res.locals.requestId)); });
   app.post("/v1/tools/resolve_sources", async (req, res) => { checkBody(req, "ResolveRequest"); send(res, "ResolveDataResponse", await retrieval.resolve(req.body, res.locals.requestId)); });

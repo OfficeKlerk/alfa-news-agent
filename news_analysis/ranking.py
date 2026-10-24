@@ -5,7 +5,7 @@ import json
 import math
 from collections import defaultdict
 from .contracts import finite, text, timestamp
-from .features import FEATURE_NAMES, FEATURE_VERSION, baseline_score
+from .features import FEATURE_VERSION, baseline_score, feature_names, infer_feature_version
 from .evidence import assert_training_eligible
 
 
@@ -16,43 +16,49 @@ def sigmoid(z):
     return ez / (1 + ez)
 
 
-def vector(values):
-    if set(values) != set(FEATURE_NAMES):
+def vector(values, feature_version=None):
+    names = feature_names(feature_version or infer_feature_version(values))
+    if not isinstance(values, dict) or set(values) != set(names):
         raise ValueError("Feature names do not match the model contract")
-    return [finite(values[name], name, 0, 1) for name in FEATURE_NAMES]
+    return [finite(values[name], name, 0, 1) for name in names]
 
 
 class LogisticRanker:
-    def __init__(self, coefficients, intercept, metadata=None):
-        if len(coefficients) != len(FEATURE_NAMES):
+    def __init__(self, coefficients, intercept, metadata=None, feature_version=FEATURE_VERSION):
+        self.feature_version = feature_version
+        self.feature_names = feature_names(feature_version)
+        if len(coefficients) != len(self.feature_names):
             raise ValueError("Wrong number of coefficients")
         self.coefficients = [finite(w, "coefficient") for w in coefficients]
         self.intercept = finite(intercept, "intercept")
         self.metadata = metadata or {}
 
     def predict(self, values):
-        return sigmoid(self.intercept + sum(w * x for w, x in zip(self.coefficients, vector(values))))
+        return sigmoid(self.intercept + sum(w * x for w, x in zip(self.coefficients, vector(values, self.feature_version))))
 
     def explain(self, features):
-        xs = vector(features["values"])
+        if features.get("version") != self.feature_version:
+            raise ValueError("Explanation feature version differs from the model")
+        xs = vector(features["values"], self.feature_version)
         return sorted([
             {"feature": name, "value": x, "coefficient": w, "logit_contribution": w * x,
+             "contribution": w * x, "scale": "logit",
              "evidence": features["evidence"][name]}
-            for name, x, w in zip(FEATURE_NAMES, xs, self.coefficients) if x != 0
+            for name, x, w in zip(self.feature_names, xs, self.coefficients) if x != 0
         ], key=lambda row: (-abs(row["logit_contribution"]), row["feature"]))
 
     def to_dict(self):
         return {"model_type": "l2_logistic_relevance", "schema_version": "1.0",
-                "feature_version": FEATURE_VERSION, "feature_names": list(FEATURE_NAMES),
+                "feature_version": self.feature_version, "feature_names": list(self.feature_names),
                 "coefficients": self.coefficients, "intercept": self.intercept,
                 "metadata": self.metadata, "score_meaning": "uncalibrated_relevance_score_not_business_loss_probability"}
 
     @classmethod
     def from_dict(cls, data):
         if (data.get("model_type") != "l2_logistic_relevance" or data.get("schema_version") != "1.0"
-                or data.get("feature_version") != FEATURE_VERSION or data.get("feature_names") != list(FEATURE_NAMES)):
+                or data.get("feature_names") != list(feature_names(data.get("feature_version")))):
             raise ValueError("Unsupported ranker artifact")
-        return cls(data["coefficients"], data["intercept"], data.get("metadata"))
+        return cls(data["coefficients"], data["intercept"], data.get("metadata"), data["feature_version"])
 
 
 def fit(rows, l2=0.01, iterations=600, tolerance=1e-7):
@@ -65,13 +71,13 @@ def fit(rows, l2=0.01, iterations=600, tolerance=1e-7):
     finite(tolerance, "tolerance", 1e-12, 1)
     if not isinstance(iterations, int) or isinstance(iterations, bool) or not 1 <= iterations <= 10000:
         raise ValueError("iterations must be 1..10000")
-    validate_rows(rows)
+    feature_version = validate_rows(rows)
     assert_training_eligible(rows)
-    x = [vector(row["features"]) for row in rows]
+    x = [vector(row["features"], feature_version) for row in rows]
     y = [int(row["label"] >= 2) for row in rows]
     if set(y) != {0, 1}:
         raise ValueError("Training requires both important and non-important examples")
-    n, d = len(x), len(FEATURE_NAMES)
+    n, d = len(x), len(feature_names(feature_version))
     p = sum(y) / n
     w, b = [0.0] * d, math.log(p / (1 - p))
 
@@ -108,21 +114,25 @@ def fit(rows, l2=0.01, iterations=600, tolerance=1e-7):
             break
         w, b, previous = candidate, bias, value
     return LogisticRanker(w, b, {"l2": l2, "iterations": epoch + 1, "converged": converged,
-                                  "objective": previous, "positive_label_minimum": 2})
+                                  "objective": previous, "positive_label_minimum": 2}, feature_version)
 
 
 def validate_rows(rows):
     if not isinstance(rows, (list, tuple)) or not rows:
         raise ValueError("Empty training dataset")
     pairs = set()
+    feature_version = None
     for row in rows:
         if not isinstance(row, dict):
             raise ValueError("Each training row must be an object")
         for key in ("company_id", "event_id", "query_id"):
             text(row.get(key), key)
         timestamp(row.get("published_at"))
-        if row.get("feature_version") != FEATURE_VERSION:
-            raise ValueError("Wrong training feature version")
+        version = row.get("feature_version")
+        feature_names(version)
+        if feature_version is not None and version != feature_version:
+            raise ValueError("Mixed feature versions require separate training datasets")
+        feature_version = version
         if row.get("label_origin") not in {"human", "ai", "synthetic"}:
             raise ValueError("label_origin must be human, ai or synthetic")
         if row["label_origin"] == "ai":
@@ -136,7 +146,8 @@ def validate_rows(rows):
         pairs.add(key)
         if not isinstance(row.get("features"), dict):
             raise ValueError("features must be an object")
-        vector(row["features"])
+        vector(row["features"], feature_version)
+    return feature_version
 
 
 def temporal_split(rows):
@@ -167,6 +178,11 @@ def evaluate(rows, score, k=5):
         raise ValueError("k must be positive")
     if not rows:
         return {"queries": 0, "rows": 0, "precision_at_k": None, "ndcg_at_k": None}
+    # Evaluation helpers also accept compact rows without annotation metadata,
+    # but they may never combine feature spaces within one reported metric.
+    versions = {infer_feature_version(row["features"]) for row in rows}
+    if len(versions) != 1 or any(row.get("feature_version", next(iter(versions))) not in versions for row in rows):
+        raise ValueError("Mixed or mismatched feature versions in evaluation")
     groups = defaultdict(list)
     for row in rows:
         groups[row["query_id"]].append((score(row["features"]), row["label"], row["event_id"]))

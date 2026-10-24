@@ -26,6 +26,9 @@ export class Store {
       'CREATE TABLE IF NOT EXISTS payments(payer TEXT,beneficiary TEXT,amount REAL,count INTEGER);' +
       'CREATE TABLE IF NOT EXISTS links(person TEXT,company TEXT);' +
       'CREATE TABLE IF NOT EXISTS news(id TEXT PRIMARY KEY,title TEXT,text TEXT,url TEXT,published TEXT,tags TEXT,is_demo INTEGER);' +
+      'CREATE TABLE IF NOT EXISTS news_metadata(news_id TEXT PRIMARY KEY,identity TEXT UNIQUE,payload TEXT);' +
+      'CREATE TABLE IF NOT EXISTS news_versions(news_id TEXT,version_id TEXT,available_at TEXT,payload TEXT,PRIMARY KEY(news_id,version_id));' +
+      'CREATE INDEX IF NOT EXISTS news_version_available ON news_versions(available_at);' +
       'CREATE TABLE IF NOT EXISTS research(id TEXT PRIMARY KEY,payload TEXT);' +
       'CREATE TABLE IF NOT EXISTS analyses(cache_key TEXT PRIMARY KEY,company_id TEXT,news_id TEXT,payload TEXT,created TEXT DEFAULT CURRENT_TIMESTAMP);' +
       'CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,company_id TEXT,status TEXT,payload TEXT,error TEXT,created TEXT DEFAULT CURRENT_TIMESTAMP);' +
@@ -82,6 +85,7 @@ export class Store {
   news(id: string): News {
     const row = this.get('SELECT * FROM news WHERE id=?', id);
     if (!row) throw new AppError('Новость не найдена', 404);
-    return { ...row, tags: JSON.parse(row.tags), is_demo: Boolean(row.is_demo) } as News;
+    const metadata = this.get('SELECT payload FROM news_metadata WHERE news_id=?', id);
+    return { ...row, ...(metadata ? JSON.parse(metadata.payload) : {}), tags: JSON.parse(row.tags), is_demo: Boolean(row.is_demo) } as News;
   }
 }

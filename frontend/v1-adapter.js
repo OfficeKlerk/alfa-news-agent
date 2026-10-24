@@ -50,8 +50,6 @@
     return v;
   }
 
-  const priority = (score) => (score >= 0.66 ? "Высокий" : score >= 0.4 ? "Средний" : "Низкий");
-
   function mapProfile(p) {
     const products = Object.entries(p.bank_products || {})
       .filter(([, on]) => on === true)
@@ -154,7 +152,11 @@
           return {
             id: it.news_id, title: e.title || it.news_id,
             published: e.published_at || asOf,
-            priority: priority(it.score), relevance: Math.round((it.score || 0) * 100),
+            // /v1 scores use distinct, uncalibrated scales. Preserve their raw
+            // value; the legacy 0..100 index and priority thresholds do not apply.
+            score: Number.isFinite(it.score) ? it.score : null,
+            score_kind: typeof it.score_kind === "string" ? it.score_kind : null,
+            feature_version: it.feature_version ?? null,
             reasons: (it.reasons || []).map((r) => r.text || r.detail || r.reason || "сигнал").slice(0, 3),
             is_demo: e.is_mock === true,
           };
@@ -197,10 +199,14 @@
       return mapAnalysis(r.data, "");
     }
 
-    if (p === "/api/news" && method === "POST")
-      throw new Error("В /v1-режиме добавление новости недоступно: нужен /v1-эндпоинт ingest (роль 3).");
-    if (p === "/api/feeds/refresh" && method === "POST")
-      throw new Error("В /v1-режиме RSS-обновление недоступно: нужен /v1-эндпоинт (роль 3).");
+    if (p === "/api/news" && method === "POST") {
+      const result = await v1("/v1/news", body, companyId);
+      return { ...body, ...result.data, id: result.data.news_id };
+    }
+    if (p === "/api/feeds/refresh" && method === "POST") {
+      const result = await v1("/v1/feeds/refresh", {}, companyId);
+      return result.data;
+    }
 
     throw new Error("Путь не поддержан /v1-адаптером: " + path);
   }

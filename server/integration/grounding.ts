@@ -1,6 +1,7 @@
 import type { Json } from "../types.js";
 import { ApiFault, validate } from "./contracts.js";
 import type { prepareContext } from "./context.js";
+import { adviceConstraints } from "./advice-policy.js";
 
 export type PreparedContext = ReturnType<typeof prepareContext>;
 const roots = new Set(["industry", "scale", "company_attributes", "bank_products", "foreign_trade", "geography",
@@ -10,6 +11,8 @@ const nonblank = (s: unknown) => typeof s === "string" && Boolean(s.trim());
 export function profileValue(profile: Json, path: string): unknown {
   const parts = path.slice(1).split("/").map(s => s.replace(/~1/g, "/").replace(/~0/g, "~"));
   if (!roots.has(parts[0]) || parts.some(s => ["__proto__", "prototype", "constructor", "source", "evidence", "limitation"].includes(s))) reject("Invalid business profile path");
+  if (parts[0] === "payment_summary" && parts[1] === "counterparty_context" && ["method", "scope"].includes(parts[2]))
+    reject("Payment aggregation metadata is not a business fact");
   let value: any = profile;
   for (const key of parts) {
     if (value === null || typeof value !== "object" || !Object.hasOwn(value, key)) reject("Unknown profile path");
@@ -21,15 +24,29 @@ export function profileValue(profile: Json, path: string): unknown {
 function numbers(text: string) {
   return text.replace(/(\d)[\s\u00a0\u202f](?=\d{3}(?:\D|$))/g, "$1").match(/[-+−]?\d+(?:[.,]\d+)?/g)?.map(s => s.replace(",", ".").replace("−", "-").replace(/^\+/, "")) ?? [];
 }
+/** Financial figures belong in verbatim fact/bank quotes, not generated company impact.
+ * Token membership alone would accept "company loses 14%" from a 14% policy rate.
+ * This deliberately conservative lexical guard is not a general semantic validator.
+ */
+export function hasFinancialFigure(text: string): boolean {
+  if (!/\d/.test(text)) return false;
+  return /\d\s*(?:%|₽|\$|€|₣|£|руб|доллар|евро|юан|процент|б\.?\s*п\.?|базисн|п\.?\s*п\.?)/iu.test(text)
+    || /(?:₽|\$|€|£)\s*\d/u.test(text)
+    || text.split(/[.!?;\n]+/).some(part => /\d/.test(part)
+      && /(?:выручк|прибыл|убыт|потер|экономи[яюи]|расход|затрат|доход|стоимост|себестоимост|ставк|долг|кредит|плат[её]ж|финансир|процент)/iu.test(part));
+}
 /** Structural/provenance checks, not a proof of factual truth or economic causality. */
 export function validateGrounding(answer: Json, context: PreparedContext, serverNotices = false) {
   validate("GeneratedAnalysis", serverNotices && Array.isArray(answer.limitations)
     ? { ...answer, limitations: answer.limitations.slice(0, 20) } : answer, true);
   if (!answer.limitations.every(nonblank)) reject("Blank limitation");
+  if (adviceConstraints(context.input).no_new_risk_or_opportunity && (answer.risks.length || answer.opportunities.length))
+    reject("Unchanged rate or unconfirmed applicability allows review only, not new risks/opportunities");
   const sources = new Map<string, Json>(context.sources.map(s => [s.id, s]));
   const companyId = context.input.company_id as string;
   // A numeric suffix in an identifier is not financial evidence. Permit the literal ID in prose without admitting its number on its own.
-  const scan = (text: string) => numbers(/[A-Za-z_:]/.test(companyId) ? text.split(companyId).join(" ") : text);
+  const withoutCompanyId = (text: string) => /[A-Za-z_:]/.test(companyId) ? text.split(companyId).join(" ") : text;
+  const scan = (text: string) => numbers(withoutCompanyId(text));
   const supports: string[] = [];
   for (const c of answer.claims as Json[]) {
     if (!nonblank(c.text) || !c.source_ids.every((id: string) => sources.has(id))) reject("Unknown claim source or blank text");
@@ -50,6 +67,7 @@ export function validateGrounding(answer: Json, context: PreparedContext, server
       supports.push(evidence + " " + JSON.stringify(values));
       const allowed = new Set(scan(supports.at(-1)!));
       if (scan(c.text + " " + c.conditions.join(" ")).some(n => !allowed.has(n))) reject("Unsupported numeric assertion");
+      if (hasFinancialFigure(withoutCompanyId(c.text + " " + c.conditions.join(" ")))) reject("AI financial figures must be verbatim fact/bank quotes, not company impact");
     }
   }
   const used = new Set<number>();
@@ -59,6 +77,10 @@ export function validateGrounding(answer: Json, context: PreparedContext, server
     indexes.forEach(i => used.add(i));
     const allowed = new Set(indexes.flatMap(i => scan(supports[i])));
     if (scan(text).some(n => !allowed.has(n))) reject("Unsupported section number");
+    // Only the exact quoted passage can carry a financial figure. Reusing its number elsewhere is not support.
+    const generated = indexes.filter(i => answer.claims[i].kind !== "ai")
+      .reduce((value, i) => value.split(answer.claims[i].quote).join(" "), text);
+    if (hasFinancialFigure(withoutCompanyId(generated))) reject("Section financial figures must be verbatim fact/bank quotes");
   }
   const g = answer.grounding;
   section(answer.summary, g.summary, "fact"); section(answer.why_relevant, g.why_relevant, "ai");
@@ -68,8 +90,15 @@ export function validateGrounding(answer: Json, context: PreparedContext, server
       const refs = key === "recommendations" ? g[key][i].claim_indexes : g[key][i];
       const rec = key === "recommendations" ? g[key][i] : null;
       if (rec && (!nonblank(rec.condition) || !rec.required_data.every(nonblank))) reject("Recommendation needs condition and required data");
+      if (rec && (!refs.some((index: number) => answer.claims[index]?.kind === "ai" && answer.claims[index].conditions.includes(rec.condition))
+        || !rec.required_data.every((item: string) => answer.missing_data.includes(item)))) reject("Recommendation condition and required data must match its AI claim and missing_data");
       section(text + (rec ? " " + rec.condition + " " + rec.required_data.join(" ") : ""), refs, "ai");
     });
+  }
+  const allowedNotes = new Set(supports.flatMap(value => scan(value)));
+  for (const note of [...answer.limitations, ...answer.missing_data]) {
+    if (scan(note).some(n => !allowedNotes.has(n))) reject("Unsupported limitation or missing-data number");
+    if (hasFinancialFigure(withoutCompanyId(note))) reject("Financial figures are not allowed in limitations or missing_data");
   }
   if (used.size !== answer.claims.length) reject("Unused claim");
 }

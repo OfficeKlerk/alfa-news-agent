@@ -78,7 +78,7 @@ describe('Node.js prototype: data, API and agent contracts', { concurrency: fals
     assert.equal((await request('/api/feed', undefined, '')).status, 400);
   });
   it('adds and deduplicates a new event without code changes', async () => {
-    const news = { title: 'Новая новость об импорте', text: 'Изменены правила импорта оборудования. Компаниям нужно проверить условия своих контрактов.', url: 'https://example.org/news' };
+    const news = { title: 'Новая новость об импорте', text: 'Изменены правила импорта оборудования. Компаниям нужно проверить условия своих контрактов.', url: 'https://example.org/news', published: '2026-10-22T09:00:00Z' };
     const a = await request('/api/news', news), b = await request('/api/news', news);
     assert.equal(a.status, 201); assert.equal(a.body.id, b.body.id); assert.equal(a.body.is_demo, false);
     assert.equal((await request('/api/feed?demo=0')).body.items[0].id, a.body.id);

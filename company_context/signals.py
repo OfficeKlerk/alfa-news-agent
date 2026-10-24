@@ -39,4 +39,17 @@ def relevance_signals(profile):
             add("события контрагента: " + cp["company_id"],
                 "Не менее 25% наблюдаемого потока данного направления. Договорная роль не установлена.",
                 0.85, [f"/counterparties/{index}"], [cp["company_id"]])
+    environment = profile["payment_summary"].get("counterparty_context", {})
+    for direction in ("in", "out"):
+        flow = environment.get(direction)
+        if flow is None:
+            continue
+        for index, item in enumerate(flow["industry_distribution"]):
+            if item["okved_division"] is None or item["share_of_direction"] is None or item["share_of_direction"] < 0.25:
+                continue
+            path = f"/payment_summary/counterparty_context/{direction}/industry_distribution/{index}"
+            add(f"отрасль контрагентов: ОКВЭД {item['okved_division']} ({direction})",
+                "Не менее 25% наблюдаемой суммы данного направления приходится на отрасль контрагентов. "
+                "Назначение платежей и финансовая чувствительность не установлены.",
+                0.75, [path], [item["okved_division"], item["sector"]])
     return sorted(result, key=lambda item: (-item["weight"], item["topic"]))

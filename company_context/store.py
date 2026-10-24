@@ -4,11 +4,12 @@ import json
 import re
 import sqlite3
 from collections import defaultdict
-from decimal import Decimal
+from decimal import Decimal, localcontext
 from pathlib import Path
 
 from .build import SCHEMA_VERSION
-from .io import PRODUCTS, REVENUE_MULTIPLIERS, flag, number, numeric, sector
+from .exposure import payment_environment
+from .io import PRODUCTS, REVENUE_MULTIPLIERS, decimal_share, exact_add, exact_sum, flag, number, numeric, sector
 from .signals import relevance_signals
 
 
@@ -66,7 +67,7 @@ class ContextStore:
         peers = self.connection.execute("SELECT revenue FROM companies WHERE division=?", (company["division"],))
         values = [Decimal(row[0]) for row in peers if row[0] is not None]
         value = Decimal(company["revenue"]) if company["revenue"] is not None else None
-        total = sum(values, Decimal(0))
+        total = exact_sum(values)
         ordered = sorted(values)
         n = len(ordered)
         median = (ordered[n // 2] if n % 2 else (ordered[n // 2 - 1] + ordered[n // 2]) / 2) if n else None
@@ -90,29 +91,29 @@ class ContextStore:
         totals = {"in": Decimal(0), "out": Decimal(0)}
         counts = {"in": 0, "out": 0}
         for direction, query in [
-            ("out", "SELECT beneficiary AS other, amount, count, source_record FROM payments WHERE payer=?"),
-            ("in", "SELECT payer AS other, amount, count, source_record FROM payments WHERE beneficiary=?"),
+            ("out", "SELECT beneficiary AS other, amount, count, source_record FROM payments WHERE payer=? AND beneficiary<>payer"),
+            ("in", "SELECT payer AS other, amount, count, source_record FROM payments WHERE beneficiary=? AND payer<>beneficiary"),
         ]:
             for row in self.connection.execute(query, (uid,)):
                 edge = edges.setdefault((row["other"], direction),
                                         {"amount": Decimal(0), "count": 0, "records": [], "records_total": 0})
                 amount = Decimal(row["amount"])
-                edge["amount"] += amount
+                edge["amount"] = exact_add(edge["amount"], amount)
                 edge["count"] += row["count"]
                 edge["records_total"] += 1
                 if len(edge["records"]) < 20:
                     edge["records"].append(row["source_record"])
-                totals[direction] += amount
+                totals[direction] = exact_add(totals[direction], amount)
                 counts[direction] += row["count"]
         result = []
-        ranked = sorted(edges.items(), key=lambda pair: (-pair[1]["amount"], *pair[0]))
+        ranked = sorted(edges.items(), key=lambda pair: (pair[1]["amount"].copy_negate(), *pair[0]))
         for (other, direction), edge in ranked[:top_n]:
             card = self.connection.execute("SELECT data FROM companies WHERE id=?", (other,)).fetchone()
             raw = json.loads(card[0]) if card else {}
             result.append({
                 "company_id": other, "direction": direction,
                 "pay_amount": numeric(edge["amount"]), "pay_count": edge["count"],
-                "share_of_direction": float(edge["amount"] / totals[direction]) if totals[direction] else None,
+                "share_of_direction": decimal_share(edge["amount"], totals[direction]),
                 "role": "получатель платежей" if direction == "out" else "отправитель платежей",
                 "company_card_available": card is not None,
                 "industry": {"okved_code": raw.get("MAINOKVED_CODE"), "name": raw.get("MAINOKVED_NAME")},
@@ -122,11 +123,14 @@ class ContextStore:
         for direction in ("in", "out"):
             amounts = sorted((e["amount"] for (_, d), e in edges.items() if d == direction), reverse=True)
             total = totals[direction]
+            with localcontext() as context:
+                context.prec = 28
+                hhi = float(sum(((amount / total)**2 for amount in amounts), Decimal(0))) if total else None
             concentration[direction] = {
                 "counterparties_count": len(amounts),
-                "largest_share": float(amounts[0] / total) if total else None,
-                "top_5_share": float(sum(amounts[:5], Decimal(0)) / total) if total else None,
-                "hhi": float(sum(((amount / total)**2 for amount in amounts), Decimal(0))) if total else None,
+                "largest_share": decimal_share(amounts[0], total) if amounts else None,
+                "top_5_share": decimal_share(exact_sum(amounts[:5]), total),
+                "hhi": hhi,
             }
         available = "payments" in self.metadata["sources"]
         return result, {
@@ -137,6 +141,7 @@ class ContextStore:
             "outgoing_count": counts["out"] if available else None,
             "counterparty_directions_total": len(edges), "counterparties_truncated": len(edges) > top_n,
             "concentration": concentration, "currency": None, "period": None,
+            "counterparty_context": payment_environment(self.connection, uid, edges, totals, available),
             "limitation": "Только наблюдаемые платежи; валюта, период и договорные роли не заданы.",
         }
 
@@ -216,7 +221,7 @@ class ContextStore:
             "dataset_position": self._position(company),
             "group": {"group_id": company["group_id"], "members": [c["id"] for c in group_rows[:top_n]],
                       "members_total": len(group_rows), "members_truncated": len(group_rows) > top_n,
-                      "observed_revenue_raw_sum": numeric(sum(group_values, Decimal(0))) if group_values else None,
+                      "observed_revenue_raw_sum": numeric(exact_sum(group_values)) if group_values else None,
                       "members_with_known_revenue": len(group_values),
                       "limitation": "Наблюдаемые участники; сумма выручки не консолидирована, внутригрупповой оборот не исключён.",
                       "source": self._source("companies", [c["source_record"] for c in group_rows[:top_n]], len(group_rows))},
@@ -232,7 +237,7 @@ class ContextStore:
                            "company_raw_fields": row, "sources": self.metadata["sources"],
                            "snapshot_built_at": self.metadata["built_at"],
                            "record_numbering": "logical CSV records, header=1",
-                           "signal_method": "deterministic_rules_v1",
+                           "signal_method": "deterministic_rules_v2",
                            "weight_meaning": "эвристический приоритет темы; не вероятность и не оценка ущерба"},
         }
         profile["relevance_signals"] = relevance_signals(profile)

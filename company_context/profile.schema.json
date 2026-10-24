@@ -514,6 +514,754 @@
         },
         "period": {
           "type": "null"
+        },
+        "counterparty_context": {
+          "type": "object",
+          "required": [
+            "available",
+            "method",
+            "scope",
+            "evidence",
+            "limitation",
+            "in",
+            "out"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "method": {
+              "const": "observed_payment_environment_v1"
+            },
+            "scope": {
+              "const": "all_observed_nonself_payments"
+            },
+            "evidence": {
+              "type": "object",
+              "required": [
+                "sources",
+                "fields",
+                "join"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "sources": {
+                  "const": [
+                    "payments",
+                    "companies"
+                  ]
+                },
+                "fields": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "join": {
+                  "type": "string"
+                }
+              }
+            },
+            "limitation": {
+              "type": "string"
+            },
+            "in": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "required": [
+                "amount_total",
+                "counterparties_count",
+                "coverage",
+                "industry_distribution",
+                "group_distribution"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "amount_total": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "counterparties_count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "coverage": {
+                  "type": "object",
+                  "required": [
+                    "company_card",
+                    "industry",
+                    "group_membership"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "company_card": {
+                      "type": "object",
+                      "required": [
+                        "known_amount",
+                        "unknown_amount",
+                        "known_share",
+                        "unknown_share"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "known_amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "unknown_amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "known_share": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "unknown_share": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        }
+                      }
+                    },
+                    "industry": {
+                      "type": "object",
+                      "required": [
+                        "known_amount",
+                        "unknown_amount",
+                        "known_share",
+                        "unknown_share"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "known_amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "unknown_amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "known_share": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "unknown_share": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        }
+                      }
+                    },
+                    "group_membership": {
+                      "type": "object",
+                      "required": [
+                        "known_amount",
+                        "unknown_amount",
+                        "known_share",
+                        "unknown_share"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "known_amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "unknown_amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "known_share": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "unknown_share": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        }
+                      }
+                    }
+                  }
+                },
+                "industry_distribution": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "okved_division",
+                      "sector",
+                      "amount",
+                      "share_of_direction",
+                      "counterparties_count",
+                      "counterparty_ids",
+                      "counterparty_ids_truncated"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "okved_division": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "pattern": "^\\d{2}$"
+                      },
+                      "sector": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "amount": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "share_of_direction": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "counterparties_count": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "counterparty_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 20,
+                        "uniqueItems": true
+                      },
+                      "counterparty_ids_truncated": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                },
+                "group_distribution": {
+                  "type": "object",
+                  "required": [
+                    "same_group",
+                    "other_group",
+                    "unknown"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "same_group": {
+                      "type": "object",
+                      "required": [
+                        "amount",
+                        "share_of_direction",
+                        "counterparties_count",
+                        "counterparty_ids",
+                        "counterparty_ids_truncated"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "share_of_direction": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "counterparties_count": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "counterparty_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 20,
+                          "uniqueItems": true
+                        },
+                        "counterparty_ids_truncated": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "other_group": {
+                      "type": "object",
+                      "required": [
+                        "amount",
+                        "share_of_direction",
+                        "counterparties_count",
+                        "counterparty_ids",
+                        "counterparty_ids_truncated"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "share_of_direction": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "counterparties_count": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "counterparty_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 20,
+                          "uniqueItems": true
+                        },
+                        "counterparty_ids_truncated": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "unknown": {
+                      "type": "object",
+                      "required": [
+                        "amount",
+                        "share_of_direction",
+                        "counterparties_count",
+                        "counterparty_ids",
+                        "counterparty_ids_truncated"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "share_of_direction": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "counterparties_count": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "counterparty_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 20,
+                          "uniqueItems": true
+                        },
+                        "counterparty_ids_truncated": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "out": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "required": [
+                "amount_total",
+                "counterparties_count",
+                "coverage",
+                "industry_distribution",
+                "group_distribution"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "amount_total": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "counterparties_count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "coverage": {
+                  "type": "object",
+                  "required": [
+                    "company_card",
+                    "industry",
+                    "group_membership"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "company_card": {
+                      "type": "object",
+                      "required": [
+                        "known_amount",
+                        "unknown_amount",
+                        "known_share",
+                        "unknown_share"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "known_amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "unknown_amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "known_share": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "unknown_share": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        }
+                      }
+                    },
+                    "industry": {
+                      "type": "object",
+                      "required": [
+                        "known_amount",
+                        "unknown_amount",
+                        "known_share",
+                        "unknown_share"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "known_amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "unknown_amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "known_share": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "unknown_share": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        }
+                      }
+                    },
+                    "group_membership": {
+                      "type": "object",
+                      "required": [
+                        "known_amount",
+                        "unknown_amount",
+                        "known_share",
+                        "unknown_share"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "known_amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "unknown_amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "known_share": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "unknown_share": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        }
+                      }
+                    }
+                  }
+                },
+                "industry_distribution": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "okved_division",
+                      "sector",
+                      "amount",
+                      "share_of_direction",
+                      "counterparties_count",
+                      "counterparty_ids",
+                      "counterparty_ids_truncated"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "okved_division": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "pattern": "^\\d{2}$"
+                      },
+                      "sector": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "amount": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "share_of_direction": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "counterparties_count": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "counterparty_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 20,
+                        "uniqueItems": true
+                      },
+                      "counterparty_ids_truncated": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                },
+                "group_distribution": {
+                  "type": "object",
+                  "required": [
+                    "same_group",
+                    "other_group",
+                    "unknown"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "same_group": {
+                      "type": "object",
+                      "required": [
+                        "amount",
+                        "share_of_direction",
+                        "counterparties_count",
+                        "counterparty_ids",
+                        "counterparty_ids_truncated"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "share_of_direction": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "counterparties_count": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "counterparty_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 20,
+                          "uniqueItems": true
+                        },
+                        "counterparty_ids_truncated": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "other_group": {
+                      "type": "object",
+                      "required": [
+                        "amount",
+                        "share_of_direction",
+                        "counterparties_count",
+                        "counterparty_ids",
+                        "counterparty_ids_truncated"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "share_of_direction": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "counterparties_count": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "counterparty_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 20,
+                          "uniqueItems": true
+                        },
+                        "counterparty_ids_truncated": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "unknown": {
+                      "type": "object",
+                      "required": [
+                        "amount",
+                        "share_of_direction",
+                        "counterparties_count",
+                        "counterparty_ids",
+                        "counterparty_ids_truncated"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "share_of_direction": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "counterparties_count": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "counterparty_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 20,
+                          "uniqueItems": true
+                        },
+                        "counterparty_ids_truncated": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "available": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "in": {
+                    "type": "object"
+                  },
+                  "out": {
+                    "type": "object"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "in": {
+                    "type": "null"
+                  },
+                  "out": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
         }
       }
     },
@@ -607,7 +1355,10 @@
           "type": "object"
         },
         "signal_method": {
-          "const": "deterministic_rules_v1"
+          "enum": [
+            "deterministic_rules_v1",
+            "deterministic_rules_v2"
+          ]
         }
       }
     },

@@ -3,6 +3,7 @@ WORKDIR /app
 COPY requirements-integration.txt requirements.lock ./
 RUN pip install --no-cache-dir -r requirements-integration.txt -c requirements.lock
 COPY company_context/ company_context/
+COPY news_analysis/ news_analysis/
 COPY tests/fixtures/company_context/ tests/fixtures/company_context/
 COPY contracts/ contracts/
 COPY integration/ integration/

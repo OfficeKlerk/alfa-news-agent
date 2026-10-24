@@ -146,11 +146,29 @@ function renderFeed() {
   $("#feed").innerHTML = state.news.length
     ? state.news
         .map(
-          (n) =>
-            `<button class="news-card ${n.id === state.selected ? "active" : ""}" data-nid="${esc(n.id)}"><div class="card-meta"><span class="priority ${n.relevance < 60 ? "low" : ""}">${esc(n.priority)} приоритет</span><span>${esc(n.published.slice(0, 10))}</span></div><h3>${esc(n.title)}</h3><p>${esc(n.reasons[0])}</p><div class="card-footer"><span>${n.is_demo ? '<span class="test-badge">ТЕСТОВОЕ СОБЫТИЕ</span>' : "Добавлено из источника"}</span><span class="relevance">Индекс ${n.relevance} / 100 ↗</span></div></button>`,
+          (n) => {
+            const ranking = feedRanking(n);
+            return `<button class="news-card ${n.id === state.selected ? "active" : ""}" data-nid="${esc(n.id)}"><div class="card-meta"><span class="priority ${ranking.neutral ? "low" : ""}" title="${esc(ranking.explanation)}">${esc(ranking.label)}</span><span>${esc(n.published.slice(0, 10))}</span></div><h3>${esc(n.title)}</h3><p>${esc(n.reasons[0])}</p><div class="card-footer"><span>${n.is_demo ? '<span class="test-badge">ТЕСТОВОЕ СОБЫТИЕ</span>' : "Добавлено из источника"}</span><span class="relevance" title="${esc(ranking.explanation)}">${esc(ranking.value)}</span></div></button>`;
+          },
         )
         .join("")
     : '<div class="source-card"><p class="muted">Событий пока нет. Добавьте текст новости или загрузите настроенные RSS.</p></div>';
+}
+function feedRanking(news) {
+  if (!Object.hasOwn(news, "score") && !Object.hasOwn(news, "score_kind")) {
+    return { label: `${news.priority} приоритет`, value: `Индекс ${news.relevance} / 100 ↗`,
+      neutral: news.relevance < 60, explanation: "Индекс по правилам отбора новостей." };
+  }
+  const scales = new Map([
+    ["manual_feature_baseline", ["Баллы по правилам", "Сумма вкладов признаков. Шкала не ограничена 0–1; это не вероятность и не размер ущерба."]],
+    ["logistic_relevance_uncalibrated", ["Модель · без калибровки", "Неоткалиброванный балл релевантности. Он не показывает вероятность события или ущерба."]],
+    ["mock", ["Тестовая оценка", "Условный тестовый балл; не оценка важности или вероятности события."]],
+  ]);
+  const [label, explanation] = scales.get(news.score_kind) || ["Шкала не указана", "Без описания шкалы балл нельзя интерпретировать как важность или вероятность."];
+  const value = Number.isFinite(news.score)
+    ? "Балл " + new Intl.NumberFormat("ru-RU", { maximumSignificantDigits: 6 }).format(news.score)
+    : "Балл недоступен";
+  return { label, value, explanation, neutral: true };
 }
 async function openNews(nid, force = false) {
   const cid = state.company.id;
@@ -308,7 +326,11 @@ $("#news-form").addEventListener("submit", async (e) => {
     $("#real-only").checked = false;
     showView("events");
     await loadFeed();
-    await openNews(n.id);
+    if (n.date_status && n.date_status !== "valid") {
+      notice(n.date_status === "future" ? "Новость сохранена. Она появится в ленте после даты публикации." : "Новость сохранена для проверки. Укажите корректную дату публикации из первоисточника, чтобы добавить её в ленту.");
+    } else {
+      await openNews(n.id);
+    }
   } catch (err) {
     notice(err.message, true);
   } finally {

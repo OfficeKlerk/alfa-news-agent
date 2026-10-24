@@ -1,55 +1,51 @@
-"""Test an exact local Git object, then stage only news_analysis in an ignored overlay.
-No checkout, merge, fetch, push or tracked module changes.
+"""Validate the bundled news module offline against current integration contracts.
+
+The historical sources.lock.json is provenance, not a runtime dependency.
+No Git checkout or legacy source overlay is required.
 """
-import io
 import json
 import os
 from pathlib import Path
-import shutil
-import subprocess
 import sys
-import tarfile
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
-
-def run(*args, **kwargs):
-    return subprocess.run(args, cwd=ROOT, check=True, **kwargs)
+from company_context import ContextStore, build_database
+from integration.contracts import envelope, validate
+from integration.ml import RankAdapter
 
 
 def main():
-    sha = json.loads((ROOT / "integration/sources.lock.json").read_text())["news_analysis_sha"]
-    try:
-        run("git", "cat-file", "-e", sha + "^{commit}")
-    except subprocess.CalledProcessError:
-        raise SystemExit("Pinned commit missing locally. Fetch repository branches explicitly, then retry.")
-    if run("git", "diff", sha, "--", "company_context", stdout=subprocess.PIPE).stdout:
-        raise SystemExit("company_context differs from audited source; review compatibility before staging")
-    target = ROOT / "var/sources/news-analysis"
-    target.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="source-audit-", dir=target.parent) as directory:
-        checkout = Path(directory)
-        archive = run("git", "archive", sha, "company_context", "news_analysis", "tests", "data/training_v1", "data/training_v2", stdout=subprocess.PIPE).stdout
-        with tarfile.open(fileobj=io.BytesIO(archive)) as tar:
-            tar.extractall(checkout, filter="data")
-        subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-q"], cwd=checkout,
-                       env={**os.environ, "PYTHONPATH": str(checkout)}, check=True)
-        stamp = {"sha": sha, "module": "news_analysis", "branch_tests": "passed"}
-        if target.exists():
-            if json.loads((target / "source.json").read_text()) != stamp:
-                raise SystemExit("Existing overlay has a different source; inspect before replacing")
-            expected = {p.relative_to(checkout / "news_analysis"): p.read_bytes() for p in (checkout / "news_analysis").rglob("*") if p.is_file() and "__pycache__" not in p.parts}
-            actual = {p.relative_to(target / "news_analysis"): p.read_bytes() for p in (target / "news_analysis").rglob("*") if p.is_file() and "__pycache__" not in p.parts}
-            if expected != actual:
-                raise SystemExit("Overlay changed locally; inspect before replacing")
-        else:
-            staged = checkout / "staged"
-            staged.mkdir()
-            shutil.copytree(checkout / "news_analysis", staged / "news_analysis", ignore=shutil.ignore_patterns("__pycache__"))
-            (staged / "source.json").write_text(json.dumps(stamp, indent=2) + "\n")
-            staged.rename(target)
-    print(f"Verified overlay: {target} @ {sha}")
+    os.environ["RANK_MODE"] = "news-analysis"
+    os.environ["NEWS_MODULE_PATH"] = str(ROOT)
+    os.environ.pop("RANK_MODEL_PATH", None)
+    adapter = RankAdapter()
+    request = validate("RankRequest", json.loads(
+        (ROOT / "contracts/v1/examples/rank-request.json").read_text(encoding="utf-8")))
+    fixtures = ROOT / "tests/fixtures/company_context"
+    scratch = ROOT / "var/source-audit"
+    scratch.mkdir(parents=True, exist_ok=True)
+    items_checked = 0
+    with tempfile.TemporaryDirectory(prefix="bundled-", dir=scratch) as directory:
+        database = Path(directory) / "context.sqlite3"
+        build_database(fixtures / "companies.csv", database,
+                       links=fixtures / "links.csv", payments=fixtures / "payments.csv")
+        with ContextStore(database) as store:
+            for company_id in ("U_A", "U_C"):
+                profile = store.get_company_profile(company_id)
+                validate("ProfileResponse", envelope(profile, "bundled-audit"))
+                result = adapter.rank(store, {**request, "company_id": company_id})
+                validate("RankDataResponse", envelope(result, "bundled-audit"))
+                if not result["items"] or any(
+                    item["feature_version"] != "company_event_v2"
+                    or not item["feature_contributions"] for item in result["items"]
+                ):
+                    raise ValueError("Bundled ranker must return v2 features and explanations")
+                items_checked += len(result["items"])
+    print(json.dumps({"module": "bundled news_analysis", "feature_version": "company_event_v2",
+                      "profiles_checked": 2, "items_checked": items_checked, "contracts": "passed"}))
 
 
 if __name__ == "__main__":

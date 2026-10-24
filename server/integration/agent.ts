@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { Json, Company, News } from "../types.js";
+import { AppError, type Json, type Company, type News } from "../types.js";
 import type { Settings } from "../config.js";
 import { ROLES } from "../config.js";
 import { Agent } from "../agent.js";
@@ -45,7 +45,7 @@ export class MockAgent implements AgentPort {
 class ProjectedStore extends Store {
   constructor(settings: Settings, private input: Json) { super(settings); }
   override company(id: string): Company {
-    if (id !== this.input.company_id) return super.company(id);
+    if (id !== this.input.company_id) throw new AppError("Профиль вне выбранного контекста", 404);
     const p = this.input.profile;
     return { id, name: "Компания " + id, industry: p.industry.name ?? "Неизвестна", region: p.geography.region,
       revenue: p.scale.revenue_raw, foreign_trade: p.foreign_trade.has_fts,
@@ -53,7 +53,7 @@ class ProjectedStore extends Store {
       top_partners: [], data_notes: ["Полный Python-профиль приложен в canonical_profile; неизвестные значения сохранены.", ...p.data_quality.warnings], canonical_profile: p };
   }
   override news(id: string): News {
-    if (id !== this.input.event.news_id) return super.news(id);
+    if (id !== this.input.event.news_id) throw new AppError("Новость вне выбранного контекста", 404);
     const e = this.input.event;
     return { id, title: e.title, text: e.text, url: e.sources[0].url, published: e.published_at, tags: [], is_demo: e.is_mock };
   }
@@ -65,7 +65,8 @@ class ProjectedStore extends Store {
 class PreloadedRetrieval extends Retrieval {
   constructor(db: Store, private input: Json) { super(db); }
   override rank(_company: Company, news: News) {
-    return { ...news, relevance: this.input.ranked_item.score * 100, reasons: this.input.ranked_item.reasons.map((r: Json) => r.text) as string[], priority: "Средний" };
+    return { ...news, relevance: this.input.ranked_item.score, score_kind: this.input.ranked_item.score_kind,
+      reasons: this.input.ranked_item.reasons.map((r: Json) => r.text) as string[], priority: "Не определён" };
   }
   override research(_query: string, limit = 5): Json[] {
     return this.input.research.items.slice(0, limit).map((s: Json) => ({ ...s, id: s.id.replace(/^research:/, ""), text: s.excerpt }));

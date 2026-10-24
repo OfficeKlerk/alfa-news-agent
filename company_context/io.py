@@ -3,7 +3,7 @@
 import csv
 import hashlib
 import re
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, localcontext
 from pathlib import Path
 
 PRODUCTS = {
@@ -50,8 +50,34 @@ def numeric(value):
     return int(value) if value == value.to_integral() else float(value)
 
 
+def exact_add(left, right):
+    """Add finite Decimal amounts without ambient-context or grouping rounding."""
+    precision = max(left.adjusted(), right.adjusted()) - min(left.as_tuple().exponent, right.as_tuple().exponent) + 2
+    with localcontext() as context:
+        context.prec = max(28, precision)
+        return left + right
+
+
+def exact_sum(values):
+    result = Decimal(0)
+    for value in values:
+        result = exact_add(result, value)
+    return result
+
+
+def decimal_share(amount, total):
+    """A JSON float ratio, independent of a caller's lower Decimal precision."""
+    if not total:
+        return None
+    with localcontext() as context:
+        context.prec = 28
+        return float(amount / total)
+
+
 def division(code):
-    match = re.match(r"^(\d{2})(?:\.\d{1,2}){0,2}$", code or "")
+    # OKVED codes cross both Python and JavaScript contracts. Python's \d also
+    # accepts Unicode digit scripts that JavaScript's \d does not.
+    match = re.fullmatch(r"([0-9]{2})(?:\.[0-9]{1,2}){0,2}", code) if isinstance(code, str) else None
     return match.group(1) if match else None
 
 
@@ -102,7 +128,9 @@ def csv_rows(path, required):
         sample = stream.read(65536)
         stream.seek(0)
         try:
-            dialect = csv.Sniffer().sniff(sample, delimiters=";,\t")
+            # Sniffer can fail on short Windows CSVs with quoted delimiters.
+            # Normalize only its sample; preserve the original stream for parsing.
+            dialect = csv.Sniffer().sniff(sample.replace("\r\n", "\n").replace("\r", "\n"), delimiters=";,\t")
         except csv.Error:
             dialect = csv.excel
         reader = csv.DictReader(stream, dialect=dialect)

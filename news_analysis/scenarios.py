@@ -158,11 +158,14 @@ def _evaluate_plan(case, fractions):
         baseline = sign * case["exposure_rub"]["value"] * shock["delta"]["value"] * scale
         residual = baseline * (1 - protected)
         benefit = baseline - residual
-        outcomes.append({"scenario_id": shock["id"], "baseline_impact_rub": baseline,
+        outcome = {"scenario_id": shock["id"], "baseline_impact_rub": baseline,
                          "residual_impact_rub": residual, "action_cost_rub": cost,
                          "total_impact_and_cost_rub": residual + cost,
                          "net_saving_rub": benefit - cost,
-                         "roi": (benefit - cost) / cost if cost else None})
+                         "roi": (benefit - cost) / cost if cost else None}
+        if any(not math.isfinite(value) for key, value in outcome.items() if key != "scenario_id" and value is not None):
+            raise ValueError("Numerical overflow in shock scenario: " + shock["id"])
+        outcomes.append(outcome)
     base = next(outcome for outcome in outcomes if outcome["scenario_id"] == case["base_scenario"])
     constraints = case["constraints"]
     violations = []
@@ -190,6 +193,8 @@ def _evaluate_plan(case, fractions):
 def evaluate_plan(case, fractions):
     """Evaluate a user's explicit combination; does not execute business actions."""
     validate_case(case)
+    if not isinstance(fractions, dict):
+        raise ValueError("Action fractions must be an object")
     actions = {action["id"]: action for action in case.get("actions", [])}
     if set(fractions) - set(actions):
         raise ValueError("Unknown action id")
@@ -229,6 +234,7 @@ def optimize_actions(case):
             "model": "disjoint_protection_of_linear_exposure_v1", "inputs": case,
             "objective": case.get("objective", "base"), "baseline": baseline,
             "recommendation": best, "alternatives": {"lower_cost_90pct": economical, "fewer_actions_90pct": simple},
+            "decision_reason": "positive_net_saving_under_supplied_assumptions" if best["actions"] else "no_action_justified_under_supplied_assumptions",
             "search": {"method": "exhaustive_declared_grid", "combinations": size,
                        "feasible_combinations": len(feasible), "optimality_scope": "supplied_model_and_grid_only"},
             "limitations": ["Условный расчёт по заданным параметрам; причинный эффект действий не обучен на реальной истории.",

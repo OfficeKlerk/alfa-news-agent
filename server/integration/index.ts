@@ -15,7 +15,7 @@ const retrievalMode = process.env.RETRIEVAL_MODE ?? "http", agentMode = process.
 if (!["mock", "legacy", "http"].includes(retrievalMode) || !["mock", "legacy", "http"].includes(agentMode)) throw new Error("Invalid integration provider mode");
 const retrievalClient = new ContractClient(process.env.RETRIEVAL_URL ?? "http://127.0.0.1:8102");
 const agentClient = new ContractClient(process.env.AGENT_URL ?? "http://127.0.0.1:8102", 2 * settings.timeout + 15000);
-const retrieval = retrievalMode === "legacy" ? new LegacyRetrieval(runtime.db, runtime.retrieval) : retrievalMode === "mock" ? new MockRetrieval()
+const retrieval = retrievalMode === "legacy" ? new LegacyRetrieval(runtime.db, runtime.retrieval, settings) : retrievalMode === "mock" ? new MockRetrieval()
   : new HttpRetrieval(retrievalClient);
 const agent = agentMode === "legacy" ? new LegacyAgent(settings) : agentMode === "mock" ? new MockAgent()
   : new HttpAgent(agentClient);

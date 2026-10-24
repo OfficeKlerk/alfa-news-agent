@@ -11,6 +11,7 @@ from company_context import ContextStore
 from .pipeline import analyze_news, prepare_training_rows
 from .ranking import LogisticRanker, train_ranker
 from .scenarios import optimize_actions
+from .features import FEATURE_VERSION, DEFAULT_FEATURE_VERSION
 
 
 def read(path):
@@ -53,6 +54,7 @@ def main():
     prepare.add_argument("--events", required=True, help="JSON array of extracted events")
     prepare.add_argument("--as-of", required=True, help="ISO timestamp with timezone")
     prepare.add_argument("--output", required=True)
+    prepare.add_argument("--feature-version", choices=[FEATURE_VERSION, DEFAULT_FEATURE_VERSION], default=FEATURE_VERSION)
     train = commands.add_parser("train", help="Train L2 logistic ranker on labelled JSONL")
     train.add_argument("--dataset", required=True)
     train.add_argument("--model-out", required=True)
@@ -70,6 +72,7 @@ def main():
     analyze.add_argument("--bank-analytics", help="JSON array of sourced bank excerpts")
     analyze.add_argument("--limit", type=int, default=10)
     analyze.add_argument("--output")
+    analyze.add_argument("--feature-version", choices=[FEATURE_VERSION, DEFAULT_FEATURE_VERSION])
     optimize = commands.add_parser("optimize", help="Compare action fractions for one scenario")
     optimize.add_argument("--case", required=True)
     optimize.add_argument("--output")
@@ -78,7 +81,7 @@ def main():
         if args.command == "prepare-labels":
             protect([args.database, args.events], [args.output])
             with ContextStore(args.database) as store:
-                rows = prepare_training_rows(store, args.company_ids, read(args.events), args.as_of)
+                rows = prepare_training_rows(store, args.company_ids, read(args.events), args.as_of, args.feature_version)
             write(rows, args.output, lines=True)
         elif args.command == "train":
             protect([args.dataset], [args.model_out, args.report_out])
@@ -92,7 +95,8 @@ def main():
             with ContextStore(args.database) as store:
                 result = analyze_news(store, args.company_id, read(args.events), args.as_of, model,
                                       read(args.cases) if args.cases else [],
-                                      read(args.bank_analytics) if args.bank_analytics else [], args.limit)
+                                      read(args.bank_analytics) if args.bank_analytics else [], args.limit,
+                                      feature_version=args.feature_version)
             write(result, args.output)
         else:
             protect([args.case], [args.output])

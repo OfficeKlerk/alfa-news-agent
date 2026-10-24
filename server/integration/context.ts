@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { ApiFault, validate } from "./contracts.js";
 import type { Json } from "../types.js";
+import { validateEventDetails } from "../news-events.js";
 
 /** Sort object keys only: arrays, null, false and numeric values keep their meaning. */
 export function canonicalJson(value: unknown): string {
@@ -21,6 +22,8 @@ export function prepareContext(input: Json, maxBytes = 200_000) {
   };
   fail(input.profile.company_id === input.company_id, "Profile belongs to another company");
   fail(input.ranked_item.news_id === input.event.news_id && input.ranked_item.event_id === input.event.event_id, "Rank belongs to another event");
+  try { validateEventDetails(input.event); }
+  catch { throw new ApiFault(502, "CONTRACT_VIOLATION", "Event details are not grounded in supplied news evidence"); }
   const cutoff = Date.parse(input.as_of);
   fail(Date.parse(input.event.published_at) <= cutoff, "Future news");
   fail(input.event.sources.every((s: Json) => s.published_at && Date.parse(s.published_at) <= cutoff), "Undated or future news evidence");

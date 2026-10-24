@@ -4,6 +4,9 @@ import { ROOT } from "../config.js";
 import type { Json } from "../types.js";
 import type { Store } from "../db.js";
 import type { Retrieval } from "../retrieval.js";
+import type { Settings } from "../config.js";
+import { saveNews, ingestFeeds } from "../news.js";
+import { articleToEvent, clusterEvents, newsArticlesAsOf, normalizePublicationDate } from "../news-events.js";
 import { ApiFault, envelope, validate, type Envelope } from "./contracts.js";
 import { ContractClient } from "./client.js";
 
@@ -11,12 +14,16 @@ export interface RetrievalPort {
   search(body: Json, requestId: string): Promise<Envelope>;
   rag(body: Json, requestId: string): Promise<Envelope>;
   resolve(body: Json, requestId: string): Promise<Envelope>;
+  ingest?(body: Json, requestId: string): Promise<Envelope>;
+  refresh?(body: Json, requestId: string): Promise<Envelope>;
 }
 export class HttpRetrieval implements RetrievalPort {
   constructor(private client: ContractClient) {}
   search(body: Json, id: string) { return this.client.call("/v1/tools/search_news", "SearchDataResponse", id, body); }
   rag(body: Json, id: string) { return this.client.call("/v1/tools/rag_bank_analytics", "RagDataResponse", id, body); }
   resolve(body: Json, id: string) { return this.client.call("/v1/tools/resolve_sources", "ResolveDataResponse", id, body); }
+  ingest(body: Json, id: string) { return this.client.call("/v1/news", "IngestDataResponse", id, body); }
+  refresh(body: Json, id: string) { return this.client.call("/v1/feeds/refresh", "FeedRefreshDataResponse", id, body); }
 }
 export class MockRetrieval implements RetrievalPort {
   private events: Json[] = JSON.parse(readFileSync(resolve(ROOT, "integration/fixtures/events.json"), "utf8"));
@@ -35,28 +42,34 @@ export class MockRetrieval implements RetrievalPort {
     return envelope({ items, unknown_ids: body.source_ids.filter((key: string) => !found.has(key)) }, id, "mock", ["synthetic_source_registry"]);
   }
 }
-const date = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) ? value + "T00:00:00Z" : value;
+const date = (value: unknown) => normalizePublicationDate(value).value;
 
-/** Read-only projection of the existing prototype; extraction is deliberately 'other/reported'. */
+/** SQLite projection with publication-time filtering and source-preserving event clustering. */
 export class LegacyRetrieval implements RetrievalPort {
-  constructor(private db: Store, private retrieval: Retrieval) {}
+  constructor(private db: Store, private retrieval: Retrieval, private settings: Settings = db.settings) {}
+  private articles(asOf: string, newsId?: string): Json[] {
+    return newsArticlesAsOf(this.db, asOf, newsId);
+  }
   async search(body: Json, id: string) {
-    const rows = body.news_id ? [{ id: body.news_id }] : this.db.all("SELECT id FROM news ORDER BY published DESC LIMIT 1000");
-    const items = rows.map(row => this.db.news(row.id)).filter(n => Date.parse(date(n.published)) <= Date.parse(body.as_of) && (!body.query || (n.title + " " + n.text).toLowerCase().includes(body.query.toLowerCase()))).slice(0, body.limit).map(n => {
-      if (!n.url && !n.is_demo) throw new ApiFault(502, "CONTRACT_VIOLATION", "Real news has no source URL");
-      const event = { news_id: n.id, event_id: n.id, title: n.title, text: n.text, event_type: "other", published_at: date(n.published), event_at: null,
-        fact_status: "reported", okved_divisions: [], countries: [], regions: [], company_ids: [], entity_mapping_source: null,
-        sources: [{ id: "news:" + n.id, kind: "news", title: n.title, url: n.url || "https://example.invalid/demo/" + n.id, excerpt: n.text,
-          document_id: null, page: null, published_at: date(n.published), is_mock: n.is_demo }], is_mock: n.is_demo };
-      validate("Event", event, true); return event;
-    });
-    return envelope({ items }, id, items.some(e => e.is_mock) ? "mock" : "live", ["legacy_extraction_other_reported", "date_only_timestamps_assume_utc_midnight"]);
+    const events = this.articles(body.as_of, body.news_id).map(articleToEvent).filter((event): event is Json => event !== null);
+    const items = clusterEvents(events).filter(event => !body.query || [event.title, event.text, ...event.sources.map((s: Json) => s.excerpt)].join(" ").toLowerCase().includes(body.query.toLowerCase())).slice(0, body.limit);
+    for (const event of items) validate("Event", event, true);
+    return envelope({ items }, id, items.some(e => e.is_mock) ? "mock" : "live", ["conservative_rule_extraction", "undated_invalid_future_news_excluded", "date_only_news_assume_utc_end_of_day"]);
+  }
+  async ingest(body: Json, id: string) {
+    const saved = saveNews(this.db, body);
+    const item = saved.date_status === "valid" && (!saved.available_at || Date.parse(saved.available_at) <= Date.now()) ? articleToEvent(saved) : null;
+    if (item) validate("Event", item, true);
+    return envelope({ item, news_id: saved.id, date_status: saved.date_status, ingestion_status: saved.ingestion_status, warnings: saved.warnings }, id, "live", saved.warnings);
+  }
+  async refresh(_body: Json, id: string) {
+    return envelope(await ingestFeeds(this.settings, this.db), id, "live");
   }
   async rag(body: Json, id: string) {
-    const items = this.retrieval.research(body.query, body.limit).map(doc => ({ id: "research:" + doc.id, kind: "bank", title: doc.title,
-      url: doc.url, excerpt: doc.text, document_id: doc.document_id, page: doc.page, published_at: doc.date ? date(doc.date) : null, is_mock: false }))
+    const items = this.retrieval.research(body.query, body.limit, body.as_of).map(doc => ({ id: "research:" + doc.id, kind: "bank", title: doc.title,
+      url: doc.url, excerpt: doc.text, document_id: doc.document_id, page: doc.page, published_at: date(doc.published_at ?? doc.published ?? doc.date), is_mock: false }))
       .filter(doc => doc.published_at !== null && Date.parse(doc.published_at) <= Date.parse(body.as_of));
-    return envelope({ items, limitations: ["Лексический поиск исходного прототипа; недатированные страницы исключены."] }, id, "live", ["legacy_lexical_search", "undated_bank_pages_excluded"]);
+    return envelope({ items, limitations: ["Лексический поиск исходного прототипа; недатированные и будущие страницы исключены до выбора первых результатов."] }, id, "live", ["legacy_lexical_search", "undated_bank_pages_excluded", "date_only_bank_sources_assume_utc_end_of_day"]);
   }
   async resolve(body: Json, id: string) {
     const items: Json[] = [], unknown_ids: string[] = [];
@@ -64,18 +77,25 @@ export class LegacyRetrieval implements RetrievalPort {
       let source: Json | undefined;
       if (key.startsWith("news:")) {
         try {
-          const result = await this.search({ news_id: key.slice(5), query: "", limit: 1, as_of: body.as_of }, id);
-          source = result.data.items[0]?.sources[0];
+          const match = /^news:([^:]+)(?::([^:]+))?$/.exec(key);
+          if (match?.[2]) {
+            const row = this.db.get("SELECT payload FROM news_versions WHERE news_id=? AND version_id=? AND available_at<=?", match[1], match[2], new Date(body.as_of).toISOString());
+            const article = row ? JSON.parse(row.payload) : null;
+            if (article && Date.parse(article.published) <= Date.parse(body.as_of)) source = articleToEvent(article)?.sources[0];
+          } else if (match) {
+            source = articleToEvent(this.articles(body.as_of, match[1])[0] ?? {})?.sources[0];
+            if (source) source = { ...source, id: key };
+          }
         } catch (error) { if (!(error instanceof Error && "status" in error && error.status === 404)) throw error; }
       } else if (key.startsWith("research:")) {
         const match = /^(.*):c(\d+)$/.exec(key.slice(9));
         if (match) {
           const row = this.db.get("SELECT payload FROM research WHERE id=?", match[1]);
           if (row) {
-            const doc = JSON.parse(row.payload), start = Number(match[2]);
-            if (doc.date && start % 1400 === 0 && start < doc.text.length && Date.parse(date(doc.date)) <= Date.parse(body.as_of)) source = {
+            const doc = JSON.parse(row.payload), start = Number(match[2]), publishedAt = date(doc.published_at ?? doc.published ?? doc.date);
+            if (publishedAt && start % 1400 === 0 && start < doc.text.length && Date.parse(publishedAt) <= Date.parse(body.as_of)) source = {
               id: key, kind: "bank", title: doc.title, url: doc.url, excerpt: doc.text.slice(Math.max(0, start - 150), start + 1600),
-              document_id: doc.document_id, page: doc.page, published_at: date(doc.date), is_mock: false,
+              document_id: doc.document_id, page: doc.page, published_at: publishedAt, is_mock: false,
             };
           }
         }
