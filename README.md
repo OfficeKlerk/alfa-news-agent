@@ -136,3 +136,5 @@ docker compose up --build --wait
 GitHub-публикацию и merge выполняет пользователь. Подготовка этой объединённой ветки выполнена только локально.
 
 Повторная проверка и исправления: [LLM_VERIFICATION.md](docs/integration/LLM_VERIFICATION.md). Копирование финального комплекта, обновление master и ручной push: [PUBLISH_MASTER.md](docs/integration/PUBLISH_MASTER.md).
+
+Оценка текущего банковского поиска: `npm run rag:evaluate` (офлайн; нужен Python для BM25 reference). [Методика](docs/guides/SERVER_RETRIEVAL_EVAL.md) и [результаты/промахи](docs/reports/SERVER_RETRIEVAL_EVAL.md).
