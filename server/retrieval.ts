@@ -47,15 +47,32 @@ export class Retrieval {
       }
     }
     chunks.sort((a, b) => b.score - a.score);
+    // Show the strongest matching chunk from each document before extra context.
+    // This ordering is independent of limit, so a larger request preserves its prefix.
+    if (limit <= 0) return [];
     const pages = new Map<string, number>(),
+      documents = new Set<string>(),
+      selected = new Set<string>(),
       out: Json[] = [];
-    for (const doc of chunks) {
-      const page = JSON.stringify([doc.document_id, doc.page]),
+    const documentKey = (doc: Json) => doc.document_id ?? doc.filename ?? doc.id.split(":c")[0];
+    const append = (doc: Json) => {
+      const page = JSON.stringify([documentKey(doc), doc.page]),
         count = pages.get(page) ?? 0;
-      if (count < 2) {
-        out.push(doc);
-        pages.set(page, count + 1);
-      }
+      if (selected.has(doc.id) || count >= 2) return;
+      out.push(doc);
+      selected.add(doc.id);
+      pages.set(page, count + 1);
+    };
+    for (const doc of chunks) {
+      const key = documentKey(doc);
+      if (documents.has(key)) continue;
+      documents.add(key);
+      append(doc);
+      if (out.length >= limit) return out;
+    }
+    // Small corpora still provide additional chunks, with at most two per page.
+    for (const doc of chunks) {
+      append(doc);
       if (out.length >= limit) break;
     }
     return out;
