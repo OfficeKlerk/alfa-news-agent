@@ -13,6 +13,7 @@ export interface ResponseDiagnostics {
   attempts?: number;
   max_attempts?: number;
   draft_saved?: boolean;
+  history?: { attempt: number; issues: FieldIssue[] }[];
 }
 export interface Company extends Json {
   id: string;

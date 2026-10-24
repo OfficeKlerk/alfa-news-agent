@@ -32,7 +32,7 @@ export function evaluationCases(): EvaluationCase[] {
   unrelated.input.event.sources = [{ ...event.sources[0], id: "news:unrelated", title: unrelated.input.event.title, excerpt: unrelated.input.event.text }];
   Object.assign(unrelated.input.ranked_item, { news_id: "unrelated", event_id: "unrelated", score: 0,
     reasons: [{ code: "fixture", text: "Подтверждённая экспозиция отсутствует", profile_paths: ["/geography/region"] }] });
-  unrelated.expectations = ["Сказать, что подтверждённая связь с бизнесом отсутствует.", "Не выдумывать риск, договор или необходимость банковского продукта ради заполнения раздела."];
+  unrelated.expectations = ["Сказать, что связь с бизнесом не подтверждена предоставленными данными.", "Не выдумывать риск, договор или необходимость банковского продукта ради заполнения раздела."];
   const incomplete = structuredClone(borrower); incomplete.id = "incomplete_profile"; delete incomplete.comparison_group;
   incomplete.input.profile.bank_products.loan = null; incomplete.input.profile.provenance.company_raw_fields.CL_PRODUCT_LOA_MARK = null;
   incomplete.input.profile.relevance_signals = [];
@@ -46,7 +46,7 @@ export function evaluationCases(): EvaluationCase[] {
 export function referenceDraft(test: EvaluationCase): Json {
   const input = test.input, source = input.event.sources[0], loan = input.profile.bank_products.loan;
   const unrelated = test.id === "unrelated_region";
-  const text = unrelated ? "Подтверждённая связь открытия парка с регионом регистрации компании отсутствует."
+  const text = unrelated ? "Связь открытия парка с бизнесом компании не подтверждена предоставленными данными."
     : loan === true ? "Кредитный продукт отмечен в профиле. Влияние на стоимость обслуживания зависит от условий ставки договора."
     : loan === false ? "Кредитный продукт не отмечен. Подтверждённого действующего кредита из этого профиля не следует."
     : "Наличие кредита неизвестно. Влияние ставки на обязательства компании пока не подтверждено.";
