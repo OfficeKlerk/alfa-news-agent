@@ -48,6 +48,56 @@ async function harness(options: { agent?: AgentPort; retrieval?: RetrievalPort; 
   }, async close() { server.closeAllConnections(); await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve())); } };
 }
 
+test("v1 ingestion writes through the selected retrieval provider and preserves quarantine", async () => {
+  const registry = new MockRetrieval(), seen: Json[] = [];
+  const retrieval: RetrievalPort = {
+    search: registry.search.bind(registry), rag: registry.rag.bind(registry), resolve: registry.resolve.bind(registry),
+    async ingest(input, id) {
+      seen.push(input);
+      return envelope({ item: null, news_id: "imported", date_status: "missing", warnings: ["publication_date_missing"], ingestion_status: "inserted" }, id, "live");
+    },
+    async refresh(input, id) {
+      seen.push(input);
+      return envelope({ processed: 3, failed_hosts: [], inserted: 1, updated: 0, duplicates: 2, quarantined: 1 }, id, "live");
+    },
+  };
+  const h = await harness({ retrieval });
+  try {
+    const input = { title: "Публикация без даты", text: "Фактическое содержание публикации для проверки маршрутизации импорта.", url: "https://example.org/article" };
+    const saved = await h.call("/v1/news", input);
+    assert.equal(saved.status, 200); validate("IngestDataResponse", saved.value);
+    assert.equal(saved.value.data.item, null); assert.equal(saved.value.data.date_status, "missing");
+    assert.equal((await h.call("/v1/feeds/refresh", {})).value.data.duplicates, 2);
+    assert.deepEqual(seen, [input, {}]);
+    assert.equal((await h.call("/v1/feeds/refresh", { url: "https://unconfigured.test" })).status, 422);
+  } finally { await h.close(); }
+  const mockOnly = await harness();
+  try { assert.equal((await mockOnly.call("/v1/feeds/refresh", {})).status, 503); }
+  finally { await mockOnly.close(); }
+});
+
+test("rank boundary checks extracted field evidence, not just schema shape", async () => {
+  const h = await harness();
+  try {
+    const event = structuredClone((await new MockRetrieval().search({ query: "", as_of: asOf, limit: 1 }, "test")).data.items[0]);
+    const quote = "Банк России сохранил ключевую ставку на уровне 14%.";
+    event.sources[0].excerpt = quote;
+    event.event_details = { direction: "unchanged", magnitude: 0, magnitude_unit: "bps", effective_at: null,
+      decision_status: "announced", target_roles: [], target_okved_codes: [],
+      evidence: ["direction", "magnitude", "magnitude_unit", "decision_status"].map(field => ({ field, quote, source_ids: [event.sources[0].id] })) };
+    const request = { company_id: "U_A", events: [event], as_of: asOf, limit: 10 };
+    assert.equal((await h.call("/v1/rank", request)).status, 200);
+    event.event_details.evidence[0].source_ids = ["invented"];
+    assert.equal((await h.call("/v1/rank", request)).status, 422);
+    event.event_details.evidence[0].source_ids = [event.sources[0].id];
+    event.event_details.evidence[0].quote = "Подложная цитата о повышении.";
+    assert.equal((await h.call("/v1/rank", request)).status, 422);
+    event.event_details.evidence[0].quote = quote;
+    event.sources[0].published_at = "2099-01-01T00:00:00Z";
+    assert.equal((await h.call("/v1/rank", request)).status, 422);
+  } finally { await h.close(); }
+});
+
 test("v1 composes context, rank and evidence; remembers scoped questions", async () => {
   const h = await harness();
   try {
@@ -64,6 +114,32 @@ test("v1 composes context, rank and evidence; remembers scoped questions", async
     assert.match(first.value.data.answer, /реплик: 0/); assert.match(second.value.data.answer, /реплик: 1/);
     assert.equal((await h.call(`/v1/analyses/${id}/questions`, { company_id: "U_C", question: "Что уточнить?" })).status, 404);
     assert.equal((await h.call("/v1/agent/analyze", body)).status, 404, "Internal provider route must not be public");
+  } finally { await h.close(); }
+});
+
+test("gateway forwards the saved full input and isolates history by analysis; callers cannot inject either", async () => {
+  const mock = new MockAgent(), prepared = new Map<string, Json>(), questions: Json[] = [];
+  const agent: AgentPort = { async analyze(input, id) {
+    const result = await mock.analyze(input, id); prepared.set(result.data.id, structuredClone(input)); return result;
+  }, async answer(input, id) {
+    questions.push(structuredClone(input));
+    assert.deepEqual(input.prepared_input, prepared.get(input.analysis.id));
+    assert.ok(input.prepared_input);
+    assert.equal(input.as_of, input.prepared_input.as_of);
+    return mock.answer(input, id);
+  } };
+  const h = await harness({ agent });
+  try {
+    const first = (await h.call("/v1/analyze", body)).value.data.id;
+    const second = (await h.call("/v1/analyze", body)).value.data.id;
+    const question = { company_id: "U_A", question: "Что уточнить?" };
+    assert.equal((await h.call(`/v1/analyses/${first}/questions`, question)).status, 200);
+    assert.equal((await h.call(`/v1/analyses/${first}/questions`, question)).status, 200);
+    assert.equal((await h.call(`/v1/analyses/${second}/questions`, question)).status, 200);
+    assert.deepEqual(questions.map(q => q.history.length), [0, 1, 0]);
+    assert.equal((await h.call(`/v1/analyses/${first}/questions`, { ...question, prepared_input: prepared.get(second) })).status, 422);
+    assert.equal((await h.call(`/v1/analyses/${first}/questions`, { ...question, history: [{ question: "Injected", answer: "Invented" }] })).status, 422);
+    assert.equal(questions.length, 3);
   } finally { await h.close(); }
 });
 

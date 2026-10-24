@@ -8,12 +8,14 @@ import json
 import math
 import sqlite3
 import time
-from collections import defaultdict
+from collections import defaultdict, deque
 from contextlib import contextmanager
 from pathlib import Path
 from uuid import uuid4
 
-from news_analysis.features import FEATURE_NAMES, baseline_score
+from news_analysis.features import baseline_score, feature_names
+from news_analysis.contracts import finite
+from news_analysis.evidence import assert_training_eligible
 from news_analysis.ranking import LogisticRanker, evaluate, fit, sigmoid, validate_rows, vector
 
 
@@ -38,28 +40,39 @@ def informative(rows):
 
 def pairwise_fit(rows, l2, iterations=200):
     """RankNet-style pairwise logistic loss on within-query label preferences."""
-    validate_rows(rows)
+    version = validate_rows(rows)
+    assert_training_eligible(rows)
+    finite(l2, 'l2', 0)
+    if isinstance(iterations, bool) or not isinstance(iterations, int) or not 1 <= iterations <= 10000:
+        raise ValueError('iterations must be 1..10000')
     groups = defaultdict(list)
     for row in rows:
         groups[row['query_id']].append(row)
-    pairs = []
-    for query in sorted(groups):
-        group = sorted(groups[query], key=lambda r: r['event_id'])
+    def differences(group):
         for i, a in enumerate(group):
             for b in group[i + 1:]:
                 if a['label'] == b['label']:
                     continue
                 high, low = (a, b) if a['label'] > b['label'] else (b, a)
-                pairs.append([x - y for x, y in zip(vector(high['features']), vector(low['features']))])
-                if len(pairs) >= 5000:
-                    break
-            if len(pairs) >= 5000:
-                break
-        if len(pairs) >= 5000:
-            break
+                yield [x - y for x, y in zip(vector(high['features'], version), vector(low['features'], version))]
+    queue = deque((query, differences(sorted(groups[query], key=lambda r: r['event_id']))) for query in sorted(groups)
+                  if len({row['label'] for row in groups[query]}) > 1)
+    if len(queue) > 5000:
+        raise ValueError('Pair budget cannot cover every informative query; split the training batch explicitly')
+    pairs, pair_queries = [], set()
+    # A large first query must not spend the entire budget before other
+    # companies contribute any preference. Keep deterministic bounded memory.
+    while queue and len(pairs) < 5000:
+        query, iterator = queue.popleft()
+        try:
+            pairs.append(next(iterator))
+        except StopIteration:
+            continue
+        pair_queries.add(query)
+        queue.append((query, iterator))
     if not pairs:
         raise ValueError('Pairwise training requires different labels within queries')
-    weights = [0.0] * len(FEATURE_NAMES)
+    weights = [0.0] * len(feature_names(version))
     # ||x_high-x_low||² <= d, loss gradient Lipschitz <= d/4 + l2.
     step = 1 / (len(weights) / 4 + l2)
     for _ in range(iterations):
@@ -70,7 +83,8 @@ def pairwise_fit(rows, l2, iterations=200):
                 gradient[i] += error * value / len(pairs)
         weights = [w - step * g for w, g in zip(weights, gradient)]
     return LogisticRanker(weights, 0.0, {'algorithm': 'pairwise_logistic', 'l2': l2,
-                                       'iterations': iterations, 'pairs': len(pairs)})
+                                       'iterations': iterations, 'pairs': len(pairs), 'queries': len(pair_queries),
+                                       'pair_sampling': 'round_robin_queries_limit_5000'}, feature_version=version)
 
 
 class Learning:
@@ -132,7 +146,12 @@ class Learning:
     def capture(self, exposure_id, company, rows, ranked, model_version):
         shown = {item['event_id'] for item in ranked['items']}
         rows = [r for r in rows if r['event_id'] in shown]
+        versions = {row.get('feature_version') for row in rows}
+        if len(versions) > 1:
+            raise ValueError('One ranking snapshot cannot mix feature versions')
         for row in rows:
+            vector(row['features'], row.get('feature_version'))
+            feature_names(row.get('feature_version'))
             row['label_origin'] = 'human'
             row['query_id'] = company + '@' + row['as_of']
         payload = encoded({'rows': rows, 'model_version': model_version})
@@ -187,11 +206,14 @@ class Learning:
             counts = {key: 0 for key in ('train', 'validation', 'gate')}
             for row in db.execute('SELECT split,count(*) AS n FROM labels GROUP BY split'):
                 counts[row['split']] = row['n']
+            versions = defaultdict(int)
+            for row in db.execute('SELECT row_json FROM labels'):
+                versions[json.loads(row[0]).get('feature_version', 'unknown')] += 1
             active = db.execute("SELECT value FROM state WHERE key='active'").fetchone()[0]
             last = db.execute('SELECT report FROM runs ORDER BY created DESC LIMIT 1').fetchone()
             return {'active_version': active, 'paused': db.execute("SELECT value FROM state WHERE key='paused'").fetchone()[0] == '1', 'labels': counts,
                     'consumed_gate_groups': db.execute('SELECT count(*) FROM consumed_groups').fetchone()[0],
-                    'last_run': json.loads(last[0]) if last else None,
+                    'last_run': json.loads(last[0]) if last else None, 'feature_versions': dict(versions),
                     'thresholds': {'train_rows': self.min_train, 'validation_rows': self.min_validation,
                                    'fresh_gate_rows': self.min_gate, 'gate_queries': self.min_queries, 'gate_groups': self.min_gate_groups,
                                    'ndcg_gain': self.min_gain}}
@@ -256,10 +278,23 @@ class Learning:
         return report
 
     def _train(self, run_id, rows, consumed, active):
+        versions = defaultdict(int)
+        for row in rows:
+            versions[row.get('feature_version', 'unknown')] += 1
+        if len(versions) > 1:
+            return self._finish(run_id, {'status': 'waiting', 'feature_versions': dict(versions),
+                                        'reason': 'Mixed feature versions; use a separate learning registry or explicitly rebuild reviewed snapshots. No labels were converted or discarded.'})
         if rows:
-            validate_rows(rows)
+            version = validate_rows(rows)
             if any(r['label_origin'] != 'human' or r['dataset_split'] != partition(r['split_group_id']) for r in rows):
                 raise ValueError('Only human rows in stable policy partitions may enter learning')
+            if active != 'baseline':
+                with self.db() as db:
+                    old = LogisticRanker.from_dict(json.loads(db.execute(
+                        'SELECT artifact FROM models WHERE id=?', (active,)).fetchone()[0]))
+                if old.feature_version != version:
+                    return self._finish(run_id, {'status': 'waiting', 'feature_versions': dict(versions),
+                                                'reason': 'Active model uses another feature version; explicitly migrate the registry before comparing models. Gate remains unused.'})
         train = [r for r in rows if r['dataset_split'] == 'train'][-self.max_rows:]
         validation = informative([r for r in rows if r['dataset_split'] == 'validation'][-self.max_rows:])
         fresh = [r for r in rows if r['dataset_split'] == 'gate' and r['split_group_id'] not in consumed]

@@ -1,4 +1,4 @@
-"""Adapters for ContextStore and the checked, optional news_analysis checkout."""
+"""Adapters for ContextStore and the bundled, versioned news_analysis module."""
 import importlib
 import json
 import os
@@ -43,11 +43,25 @@ class RankAdapter:
         if model_path and self.mode != "news-analysis":
             raise ValueError("RANK_MODEL_PATH requires RANK_MODE=news-analysis")
         if self.mode == "news-analysis":
-            path = Path(os.environ.get("NEWS_MODULE_PATH", ROOT / "var/sources/news-analysis"))
+            path = Path(os.environ.get("NEWS_MODULE_PATH", ROOT)).resolve()
             if not (path / "news_analysis/__init__.py").is_file():
-                raise ValueError("Run python scripts/prepare_news_source.py before RANK_MODE=news-analysis")
-            sys.path.insert(0, str(path.resolve()))
-            module = importlib.import_module("news_analysis")
+                raise ValueError("NEWS_MODULE_PATH must contain a compatible news_analysis package; omit it to use this repository")
+            for name, cached in tuple(sys.modules.items()):
+                if name == "news_analysis" or name.startswith("news_analysis."):
+                    filename = getattr(cached, "__file__", None)
+                    if filename and not Path(filename).resolve().is_relative_to(path / "news_analysis"):
+                        raise ValueError("NEWS_MODULE_PATH differs from the already loaded news_analysis; select one checkout before process startup")
+            sys.path.insert(0, str(path))
+            try:
+                module = importlib.import_module("news_analysis")
+                feature_module = importlib.import_module("news_analysis.features")
+                contract_module = importlib.import_module("news_analysis.contracts")
+                if (getattr(feature_module, "DEFAULT_FEATURE_VERSION", None) != "company_event_v2"
+                        or not callable(getattr(feature_module, "baseline_explain", None))
+                        or not callable(getattr(contract_module, "validate_source_availability", None))):
+                    raise ValueError("NEWS_MODULE_PATH uses an incompatible legacy module; use the bundled module and load v1 weights via RANK_MODEL_PATH")
+            finally:
+                sys.path.remove(str(path))
             self.analyze = module.analyze_news
             if model_path:
                 try:
@@ -72,10 +86,21 @@ class RankAdapter:
             items = []
             for card in result["cards"]:
                 features = card["company_evidence"]["features"]
-                reasons = [{"code": key, "text": f"{key}: {features['values'][key]}",
+                basis = {"rule_subject_taxonomy": "тематическое сопоставление по правилам; применимость условий не подтверждена",
+                         "explicit_target_okved": "совпадение явно указанного целевого ОКВЭД"}
+                reasons = [{"code": key, "text": f"{key}: {features['values'][key]}" +
+                            (" (" + basis[value["match_basis"]] + ")" if value.get("match_basis") in basis else ""),
                             "profile_paths": value["profile_pointers"]}
                            for key, value in features["evidence"].items() if features["values"][key]]
+                contributions = [{"feature": entry["feature"], "value": entry["value"],
+                                  "coefficient": entry["coefficient"], "contribution": entry["contribution"],
+                                  "scale": entry["scale"],
+                                  "profile_paths": entry["evidence"].get("profile_pointers", []),
+                                  "source_ids": sorted({source["id"] for source in entry["evidence"].get("news_sources", [])
+                                                        if isinstance(source.get("id"), str)})}
+                                 for entry in card["model_assessment"]["feature_contributions"]]
                 items.append({"news_id": card["news_id"], "event_id": card["event_id"], "score": card["score"],
+                              "feature_version": features["version"], "feature_contributions": contributions,
                               "score_kind": card["score_kind"], "reasons": reasons or [
                                   {"code": "baseline", "text": "Базовая оценка; прямое влияние не подтверждено", "profile_paths": []}],
                               "warnings": card["self_check"]["warnings"]})
@@ -83,14 +108,13 @@ class RankAdapter:
                     "excluded_future_news_ids": result["excluded_future_news_ids"], "truncated": result["truncated"]}
             if self.learning and exposure_id:
                 events = {event["news_id"]: event for event in request["events"]}
-                from news_analysis.features import FEATURE_VERSION
                 rows = []
                 for card in result["cards"]:
                     event = events[card["news_id"]]
                     rows.append({"company_id": request["company_id"], "event_id": card["event_id"],
                                  "as_of": request["as_of"], "published_at": event["published_at"],
                                  "features": card["company_evidence"]["features"]["values"],
-                                 "feature_version": FEATURE_VERSION, "is_mock": event["is_mock"],
+                                 "feature_version": card["company_evidence"]["features"]["version"], "is_mock": event["is_mock"],
                                  "split_group_id": event.get("split_group_id", event["event_id"]),
                                  "annotation_context": {"event": event,
                                      "profile_provenance": card["company_evidence"]["profile_provenance"],
@@ -103,10 +127,12 @@ class RankAdapter:
             return data
         profile = store.get_company_profile(request["company_id"])
         future, clusters = [], {}
+        from news_analysis.contracts import validate_source_availability
         for event in request["events"]:
             if timestamp(event["published_at"]) > timestamp(request["as_of"]):
                 future.append(event["news_id"])
                 continue
+            validate_source_availability(event, request["as_of"])
             old = clusters.get(event["event_id"])
             if not old or (timestamp(event["published_at"]), event["news_id"]) > (timestamp(old["published_at"]), old["news_id"]):
                 clusters[event["event_id"]] = event

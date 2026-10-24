@@ -1,5 +1,6 @@
 import type { Store } from "./db.js";
 import type { Company, News, Json } from "./types.js";
+import { newsArticlesAsOf, normalizePublicationDate } from "./news-events.js";
 const THEMES: Record<string, string[]> = {
   rates: ["ставк", "кредит", "долг", "финансирован", "облигац", "лизинг", "денежно"],
   trade: ["импорт", "экспорт", "валют", "тамож", "логист", "постав", "внешнеторгов"],
@@ -21,12 +22,16 @@ const intersection = (a: Iterable<string>, b: Iterable<string>) => {
 };
 export class Retrieval {
   constructor(private db: Store) {}
-  research(query: string, limit = 5): Json[] {
+  research(query: string, limit = 5, asOf?: string): Json[] {
     const words = tokens(query),
       themes = tags(query),
       chunks: Json[] = [];
     for (const row of this.db.all("SELECT payload FROM research")) {
       const doc = JSON.parse(row.payload);
+      if (asOf) {
+        const publishedAt = normalizePublicationDate(doc.published_at ?? doc.published ?? doc.date).value;
+        if (!publishedAt || Date.parse(publishedAt) > Date.parse(asOf)) continue;
+      }
       for (let start = 0; start < doc.text.length; start += 1400) {
         const text = doc.text.slice(Math.max(0, start - 150), start + 1600),
           terms = new Set(tokens(text));
@@ -86,10 +91,11 @@ export class Retrieval {
   }
   feed(id: string, includeDemo = true) {
     const company = this.db.company(id);
-    return this.db
-      .all("SELECT id FROM news ORDER BY published DESC LIMIT 200")
-      .map((row) => this.db.news(row.id))
+    return newsArticlesAsOf(this.db, new Date().toISOString())
       .filter((n) => includeDemo || !n.is_demo)
+      .filter(n => { const published = normalizePublicationDate(n.published).value; return published !== null && Date.parse(published) <= Date.now() && (!n.available_at || Date.parse(n.available_at) <= Date.now()) && (n.is_demo || Boolean(n.url)); })
+      .sort((a, b) => Date.parse(normalizePublicationDate(b.published).value!) - Date.parse(normalizePublicationDate(a.published).value!))
+      .slice(0, 200)
       .map((n) => this.rank(company, n))
       .sort((a, b) => b.relevance - a.relevance || a.id.localeCompare(b.id));
   }

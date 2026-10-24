@@ -728,7 +728,8 @@
                             "type": [
                               "string",
                               "null"
-                            ]
+                            ],
+                            "pattern": "^\\d{2}$"
                           },
                           "sector": {
                             "type": [
@@ -1059,7 +1060,8 @@
                             "type": [
                               "string",
                               "null"
-                            ]
+                            ],
+                            "pattern": "^\\d{2}$"
                           },
                           "sector": {
                             "type": [
@@ -1236,27 +1238,27 @@
                   "if": {
                     "properties": {
                       "available": {
-                        "const": false
+                        "const": true
                       }
                     }
                   },
                   "then": {
                     "properties": {
                       "in": {
-                        "type": "null"
+                        "type": "object"
                       },
                       "out": {
-                        "type": "null"
+                        "type": "object"
                       }
                     }
                   },
                   "else": {
                     "properties": {
                       "in": {
-                        "type": "object"
+                        "type": "null"
                       },
                       "out": {
-                        "type": "object"
+                        "type": "null"
                       }
                     }
                   }
@@ -1635,6 +1637,7 @@
             "trade_restriction",
             "regional_event",
             "company_event",
+            "tax_change",
             "other"
           ]
         },
@@ -1716,6 +1719,9 @@
         "split_group_id": {
           "type": "string",
           "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "event_details": {
+          "$ref": "#/$defs/EventDetails"
         }
       },
       "required": [
@@ -1751,6 +1757,161 @@
                 "minLength": 1
               }
             }
+          }
+        }
+      ]
+    },
+    "EventDetails": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "direction": {
+          "enum": [
+            "increase",
+            "decrease",
+            "unchanged",
+            "unknown"
+          ]
+        },
+        "magnitude": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "magnitude_unit": {
+          "enum": [
+            "bps",
+            "percentage_points",
+            "percent",
+            "unknown"
+          ]
+        },
+        "effective_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "decision_status": {
+          "enum": [
+            "announced",
+            "effective",
+            "forecast",
+            "unknown"
+          ]
+        },
+        "target_roles": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "importer",
+              "exporter",
+              "buyer",
+              "seller",
+              "borrower",
+              "depositor"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "target_okved_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^\\d{2}(?:\\.\\d{1,2}){0,2}$"
+          },
+          "uniqueItems": true
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "field": {
+                "enum": [
+                  "direction",
+                  "magnitude",
+                  "magnitude_unit",
+                  "effective_at",
+                  "decision_status",
+                  "target_roles",
+                  "target_okved_codes",
+                  "event_type",
+                  "event_at",
+                  "okved_divisions",
+                  "subject_okved_codes"
+                ]
+              },
+              "quote": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              "source_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "field",
+              "quote",
+              "source_ids"
+            ]
+          },
+          "maxItems": 100
+        },
+        "subject_okved_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^\\d{2}(?:\\.\\d{1,2}){0,2}$"
+          },
+          "uniqueItems": true
+        },
+        "taxonomy_origin": {
+          "const": "rule_inference"
+        },
+        "taxonomy_version": {
+          "const": "business-subjects-v1"
+        }
+      },
+      "required": [
+        "direction",
+        "magnitude",
+        "magnitude_unit",
+        "effective_at",
+        "decision_status",
+        "target_roles",
+        "target_okved_codes",
+        "evidence"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "subject_okved_codes"
+            ],
+            "properties": {
+              "subject_okved_codes": {
+                "minItems": 1
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "taxonomy_origin",
+              "taxonomy_version"
+            ]
           }
         }
       ]
@@ -1815,6 +1976,63 @@
           "items": {
             "type": "string",
             "minLength": 1
+          }
+        },
+        "feature_version": {
+          "enum": [
+            "company_event_v1",
+            "company_event_v2"
+          ]
+        },
+        "feature_contributions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "feature": {
+                "type": "string",
+                "minLength": 1
+              },
+              "value": {
+                "type": "number"
+              },
+              "coefficient": {
+                "type": "number"
+              },
+              "contribution": {
+                "type": "number"
+              },
+              "scale": {
+                "enum": [
+                  "raw_score",
+                  "logit"
+                ]
+              },
+              "profile_paths": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^/"
+                }
+              },
+              "source_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+                }
+              }
+            },
+            "required": [
+              "feature",
+              "value",
+              "coefficient",
+              "contribution",
+              "scale",
+              "profile_paths",
+              "source_ids"
+            ]
           }
         }
       },
@@ -2050,6 +2268,13 @@
         },
         "thresholds": {
           "type": "object"
+        },
+        "feature_versions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
         }
       },
       "required": [
@@ -2107,6 +2332,138 @@
       },
       "required": [
         "items"
+      ]
+    },
+    "IngestRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 300
+        },
+        "text": {
+          "type": "string",
+          "minLength": 30,
+          "maxLength": 18000
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?://",
+          "maxLength": 2000
+        },
+        "published": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 100
+        },
+        "modified": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 100
+        }
+      },
+      "required": [
+        "title",
+        "text",
+        "url"
+      ]
+    },
+    "IngestData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "item": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Event"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "news_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "date_status": {
+          "enum": [
+            "valid",
+            "missing",
+            "invalid",
+            "future"
+          ]
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "ingestion_status": {
+          "enum": [
+            "inserted",
+            "updated",
+            "duplicate"
+          ]
+        }
+      },
+      "required": [
+        "item",
+        "news_id",
+        "date_status",
+        "warnings"
+      ]
+    },
+    "FeedRefreshRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {},
+      "required": []
+    },
+    "FeedRefreshData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "processed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed_hosts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "inserted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "updated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "duplicates": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "quarantined": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "processed",
+        "failed_hosts"
       ]
     },
     "RagRequest": {
@@ -2830,6 +3187,9 @@
             "ceo",
             "treasury"
           ]
+        },
+        "prepared_input": {
+          "$ref": "#/$defs/AgentRequest"
         }
       },
       "required": [
@@ -3197,6 +3557,38 @@
         },
         "data": {
           "$ref": "#/$defs/PreparedContextData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "IngestDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/IngestData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "FeedRefreshDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/FeedRefreshData"
         }
       },
       "required": [

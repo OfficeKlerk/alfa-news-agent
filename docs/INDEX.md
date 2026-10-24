@@ -48,6 +48,12 @@ python -m pytest tests/test_demo_news_contract.py -q               # контр�
 ```
 Полный список (typecheck/test/build Python+Node) — корневой `README.md`, раздел «Проверки».
 
+Аудит персонализации: [таблица компания × новость × оценка × причина](../data/personalization/annotation_table.md), [сравнение v1/v2](reports/PERSONALIZATION_COMPARISON.md). Он использует 3 проверенных обезличенных профиля и 13 событий; оценки AI, независимой человеческой проверки пока нет. [Сбор и извлечение событий](integration/NEWS_INGESTION.md) описывает даты, версии и дубли; [передача кода](integration/NEWS_PERSONALIZATION_HANDOFF.md) содержит команды воспроизведения.
+
+Последующая [проверка всей цепочки и исправления от 24 октября](reports/NEWS_FULL_AUDIT_20261024.md): [30 результатов на оригинальных новостях недели](reports/WEEKLY_NEWS_RESULTS_20261024.md), без внешней LLM. Это отдельная отладочная подборка, без независимых человеческих оценок.
+
+Свежая [проверка интеграции ветки коллег `codex/payment-context`](reports/PAYMENT_INTEGRATION_REVIEW_20261024.md): новые платёжные агрегаты, исправления расчётов/контрактов и правильный режим `/v1` + `RANK_MODE=news-analysis`.
+
 ## Запуск приложения
 ```bash
 npm ci && npm run build && python scripts/dev.py   # стенд на :8000 (Python API + Node gateway + моки)

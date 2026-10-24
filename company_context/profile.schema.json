@@ -726,7 +726,8 @@
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "pattern": "^\\d{2}$"
                       },
                       "sector": {
                         "type": [
@@ -1057,7 +1058,8 @@
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "pattern": "^\\d{2}$"
                       },
                       "sector": {
                         "type": [
@@ -1234,27 +1236,27 @@
               "if": {
                 "properties": {
                   "available": {
-                    "const": false
+                    "const": true
                   }
                 }
               },
               "then": {
                 "properties": {
                   "in": {
-                    "type": "null"
+                    "type": "object"
                   },
                   "out": {
-                    "type": "null"
+                    "type": "object"
                   }
                 }
               },
               "else": {
                 "properties": {
                   "in": {
-                    "type": "object"
+                    "type": "null"
                   },
                   "out": {
-                    "type": "object"
+                    "type": "null"
                   }
                 }
               }

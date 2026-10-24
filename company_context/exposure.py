@@ -4,7 +4,7 @@ from collections import defaultdict
 from decimal import Decimal
 import json
 
-from .io import division, numeric, sector
+from .io import decimal_share, division, exact_add, numeric, sector
 
 
 def payment_environment(connection, company_id, edges, totals, available):
@@ -50,22 +50,23 @@ def payment_environment(connection, company_id, edges, totals, available):
             card = cards.get(uid)
             raw = card[1] if card else {}
             code = raw.get("MAINOKVED_CODE")
-            industry_key = (division(code), sector(code)) if sector(code) else (None, None)
-            industry[industry_key]["amount"] += amount
+            industry_sector = sector(code)
+            industry_key = (division(code), industry_sector) if industry_sector else (None, None)
+            industry[industry_key]["amount"] = exact_add(industry[industry_key]["amount"], amount)
             industry[industry_key]["ids"].append(uid)
             if card is not None:
-                known["company_card"] += amount
+                known["company_card"] = exact_add(known["company_card"], amount)
             if industry_key[0] is not None:
-                known["industry"] += amount
+                known["industry"] = exact_add(known["industry"], amount)
             group_key = "unknown"
             if own_group and card and card[0]:
                 group_key = "same_group" if own_group == card[0] else "other_group"
-                known["group_membership"] += amount
-            groups[group_key]["amount"] += amount
+                known["group_membership"] = exact_add(known["group_membership"], amount)
+            groups[group_key]["amount"] = exact_add(groups[group_key]["amount"], amount)
             groups[group_key]["ids"].append(uid)
 
         def share(amount):
-            return float(amount / total) if total else None
+            return decimal_share(amount, total)
 
         def bucket(value):
             return {"amount": numeric(value["amount"]), "share_of_direction": share(value["amount"]),
@@ -76,11 +77,11 @@ def payment_environment(connection, company_id, edges, totals, available):
         # Explicit unknown bucket, even if its amount is zero.
         industry.setdefault((None, None), {"amount": Decimal(0), "ids": []})
         distribution = [{"okved_division": key[0], "sector": key[1], **bucket(value)}
-                        for key, value in sorted(industry.items(), key=lambda pair: (-pair[1]["amount"], pair[0][0] or ""))]
+                        for key, value in sorted(industry.items(), key=lambda pair: (pair[1]["amount"].copy_negate(), pair[0][0] or ""))]
         result[direction] = {
             "amount_total": numeric(total), "counterparties_count": counterparties_count,
-            "coverage": {key: {"known_amount": numeric(amount), "unknown_amount": numeric(total - amount),
-                               "known_share": share(amount), "unknown_share": share(total - amount)}
+            "coverage": {key: {"known_amount": numeric(amount), "unknown_amount": numeric(exact_add(total, amount.copy_negate())),
+                               "known_share": share(amount), "unknown_share": share(exact_add(total, amount.copy_negate()))}
                          for key, amount in known.items()},
             "industry_distribution": distribution,
             "group_distribution": {key: bucket(value) for key, value in groups.items()},

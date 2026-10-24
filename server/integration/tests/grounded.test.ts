@@ -95,6 +95,8 @@ test("live generation sends full original context, repairs once and exposes dete
     assert.ok(result.data.limitations.some((s: string) => s.includes("синтетические")));
     const prepared = JSON.parse(seen[0].messages[1].content);
     assert.deepEqual(prepared.input.profile, scenario.input.profile); assert.equal(prepared.sha256, prepareContext(scenario.input).sha256);
+    assert.deepEqual(prepared.input.ranked_item, scenario.input.ranked_item);
+    assert.equal(prepared.advice_constraints.review_mode, "needs_event_details");
     assert.ok(result.data.trace[1].detail.includes(PROMPT_VERSION)); assert.doesNotMatch(JSON.stringify(seen), /local-test-secret/);
   } finally { l.close(); }
 });
@@ -103,8 +105,15 @@ test("live questions ground their claims in the saved company and source context
   try {
     const analysis = (await generatePrepared(l.settings,l.db,scenario.input,"analysis", (async () => reply(draft)) as typeof fetch)).data;
     const answer = {answer:draft.summary + " " + draft.why_relevant,claims:draft.claims,claim_indexes:[0,1],limitations:draft.limitations,missing_data:draft.missing_data};
-    const result = await answerPrepared(l.settings,l.db,{company_id:analysis.company_id,analysis,question:"Что уточнить?",history:[]},"question",(async () => reply(answer)) as typeof fetch);
+    const result = await answerPrepared(l.settings,l.db,{company_id:analysis.company_id,analysis,question:"Что уточнить?",history:[],prepared_input:scenario.input},"question",(async (_url, init) => {
+      const supplied = JSON.parse(JSON.parse(String(init?.body)).messages[1].content);
+      assert.deepEqual(supplied.prepared_input.ranked_item, scenario.input.ranked_item);
+      assert.equal(supplied.as_of, scenario.input.as_of);
+      assert.equal(supplied.advice_constraints.review_mode, "needs_event_details");
+      return reply(answer);
+    }) as typeof fetch);
     validateQuestionGrounding(answer,prepareContext(scenario.input)); assert.equal(result.data.analysis_id,analysis.id);
+    assert.equal(result.meta.mode, "mock", "synthetic source provenance is retained in a follow-up");
     assert.ok(result.data.source_ids.includes("company:" + scenario.input.company_id));
     const bad = {...answer, claims:structuredClone(answer.claims)}; bad.claims[1].profile_paths = ["/foreign_trade/nonexistent"];
     assert.throws(() => validateQuestionGrounding(bad,prepareContext(scenario.input)));

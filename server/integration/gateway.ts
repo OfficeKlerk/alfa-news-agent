@@ -82,6 +82,13 @@ export function createGateway(options: { ml: ContractClient; retrieval: Retrieva
   });
   app.post("/v1/rank", async (req, res) => {
     checkBody(req, "RankRequest");
+    const cutoff = Date.parse(req.body.as_of);
+    for (const event of req.body.events as Json[]) {
+      if (Date.parse(event.published_at) <= cutoff && event.sources.some((source: Json) =>
+        source.published_at && Date.parse(source.published_at) > cutoff)) {
+        throw new ApiFault(422, "VALIDATION_ERROR", "News evidence is later than the ranking date");
+      }
+    }
     const result = await options.ml.call("/v1/rank", "RankDataResponse", res.locals.requestId, req.body);
     binding(result.data.company_id === req.body.company_id && result.data.as_of === req.body.as_of, "Wrong rank context");
     binding(result.data.items.every((item: Json) => req.body.events.some((event: Json) => event.news_id === item.news_id && event.event_id === item.event_id)), "Rank returned an unknown event");
@@ -99,6 +106,16 @@ export function createGateway(options: { ml: ContractClient; retrieval: Retrieva
   app.post("/v1/tools/search_news", async (req, res) => {
     checkBody(req, "SearchRequest");
     send(res, "SearchDataResponse", await options.retrieval.search(req.body, res.locals.requestId));
+  });
+  app.post("/v1/news", async (req, res) => {
+    checkBody(req, "IngestRequest");
+    if (!options.retrieval.ingest) throw new ApiFault(503, "DEPENDENCY_UNAVAILABLE", "News import requires a writable retrieval provider");
+    send(res, "IngestDataResponse", await options.retrieval.ingest(req.body, res.locals.requestId));
+  });
+  app.post("/v1/feeds/refresh", async (req, res) => {
+    checkBody(req, "FeedRefreshRequest");
+    if (!options.retrieval.refresh) throw new ApiFault(503, "DEPENDENCY_UNAVAILABLE", "RSS refresh requires a writable retrieval provider");
+    send(res, "FeedRefreshDataResponse", await options.retrieval.refresh(req.body, res.locals.requestId));
   });
   app.post("/v1/tools/rag_bank_analytics", async (req, res) => {
     checkBody(req, "RagRequest");
@@ -200,7 +217,7 @@ export function createGateway(options: { ml: ContractClient; retrieval: Retrieva
     s.busy = true;
     try {
       const result = await bounded(() => options.agent.answer(structuredClone({ ...req.body, analysis: s.response.data, history: s.history.slice(-10),
-        as_of: s.context.input.as_of, audience_role: s.context.input.audience_role }), res.locals.requestId));
+        as_of: s.context.input.as_of, audience_role: s.context.input.audience_role, prepared_input: s.context.input }), res.locals.requestId));
       validate("AnswerResponse", result, true);
       const ids = new Set(s.response.data.sources.map((source: Json) => source.id));
       binding(result.data.analysis_id === req.params.analysis_id && result.data.company_id === req.body.company_id && result.data.source_ids.every((id: string) => ids.has(id)), "Answer changed context or sources");

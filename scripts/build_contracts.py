@@ -42,7 +42,7 @@ def generate():
             "document_id": STR, "page": {"type": "integer", "minimum": 1}, "url": {"type": "string", "format": "uri", "pattern": "^https?://"}}}},
         {"if": {"properties": {"kind": {"const": "news"}}}, "then": {"properties": {"url": {"type": "string", "format": "uri", "pattern": "^https?://"}}}}]
     d["Event"] = obj({"news_id": ID, "event_id": ID, "title": STR, "text": STR,
-                      "event_type": {"enum": ["rate_change", "fx_change", "commodity_price_change", "trade_restriction", "regional_event", "company_event", "other"]},
+                      "event_type": {"enum": ["rate_change", "fx_change", "commodity_price_change", "trade_restriction", "regional_event", "company_event", "tax_change", "other"]},
                       "published_at": DATE, "event_at": {**DATE, "type": ["string", "null"]},
                       "fact_status": {"enum": ["reported", "confirmed", "disputed"]},
                       "okved_divisions": array({"type": "string", "pattern": r"^\d{2}$"}),
@@ -50,6 +50,25 @@ def generate():
                       "entity_mapping_source": {"type": ["string", "null"]},
                       "sources": array({"allOf": [REF("Evidence"), {"properties": {"kind": {"const": "news"}}}]}, minItems=1), "is_mock": {"type": "boolean"}})
     d["Event"]["properties"]["split_group_id"] = ID
+    d["EventDetails"] = obj({
+        "direction": {"enum": ["increase", "decrease", "unchanged", "unknown"]},
+        "magnitude": {"type": ["number", "null"], "minimum": 0},
+        "magnitude_unit": {"enum": ["bps", "percentage_points", "percent", "unknown"]},
+        "effective_at": {**DATE, "type": ["string", "null"]},
+        "decision_status": {"enum": ["announced", "effective", "forecast", "unknown"]},
+        "target_roles": array({"enum": ["importer", "exporter", "buyer", "seller", "borrower", "depositor"]}, uniqueItems=True),
+        "target_okved_codes": array({"type": "string", "pattern": r"^\d{2}(?:\.\d{1,2}){0,2}$"}, uniqueItems=True),
+        "evidence": array(obj({"field": {"enum": ["direction", "magnitude", "magnitude_unit", "effective_at", "decision_status", "target_roles", "target_okved_codes", "event_type", "event_at", "okved_divisions"]},
+                               "quote": {**STR, "maxLength": 4000}, "source_ids": array(ID, minItems=1, uniqueItems=True)}), maxItems=100)
+    })
+    d["Event"]["properties"]["event_details"] = REF("EventDetails")
+    d["EventDetails"]["properties"].update({
+        "subject_okved_codes": array({"type": "string", "pattern": r"^\d{2}(?:\.\d{1,2}){0,2}$"}, uniqueItems=True),
+        "taxonomy_origin": {"const": "rule_inference"},
+        "taxonomy_version": {"const": "business-subjects-v1"}})
+    d["EventDetails"]["properties"]["evidence"]["items"]["properties"]["field"]["enum"].append("subject_okved_codes")
+    d["EventDetails"]["allOf"] = [{"if": {"required": ["subject_okved_codes"], "properties": {"subject_okved_codes": {"minItems": 1}}},
+        "then": {"required": ["taxonomy_origin", "taxonomy_version"]}}]
     d["Event"]["allOf"] = [{"if": {"properties": {"company_ids": {"minItems": 1}}},
                               "then": {"properties": {"entity_mapping_source": STR}}}]
     d["Reason"] = obj({"code": ID, "text": STR, "profile_paths": array({"type": "string", "pattern": "^/"})})
@@ -58,6 +77,12 @@ def generate():
                            "reasons": array(REF("Reason"), minItems=1), "warnings": STRINGS})
     d["RankedItem"]["allOf"] = [{"if": {"properties": {"score_kind": {"enum": ["mock", "logistic_relevance_uncalibrated"]}}},
                                    "then": {"properties": {"score": {"minimum": 0, "maximum": 1}}}}]
+    d["RankedItem"]["properties"].update({
+        "feature_version": {"enum": ["company_event_v1", "company_event_v2"]},
+        "feature_contributions": array(obj({"feature": STR, "value": {"type": "number"},
+            "coefficient": {"type": "number"}, "contribution": {"type": "number"},
+            "scale": {"enum": ["raw_score", "logit"]},
+            "profile_paths": array({"type": "string", "pattern": "^/"}), "source_ids": array(ID)}))})
     d["RankRequest"] = obj({"company_id": ID, "events": array(REF("Event"), maxItems=100),
                             "as_of": DATE, "limit": {"type": "integer", "minimum": 1, "maximum": 100}})
     d["RankData"] = obj({"company_id": ID, "as_of": DATE, "items": array(REF("RankedItem")),
@@ -72,10 +97,24 @@ def generate():
         "labels": obj({key: {"type": "integer", "minimum": 0} for key in ("train", "validation", "gate")}),
         "consumed_gate_groups": {"type": "integer", "minimum": 0},
         "last_run": {"type": ["object", "null"]}, "thresholds": {"type": "object"}})
+    d["LearningStatusData"]["properties"]["feature_versions"] = {
+        "type": "object", "additionalProperties": {"type": "integer", "minimum": 0}}
     d["SearchRequest"] = obj({"query": {"type": "string", "maxLength": 500}, "as_of": DATE,
                               "limit": {"type": "integer", "minimum": 1, "maximum": 100},
                               "news_id": {"type": ["string", "null"], "pattern": ID["pattern"]}})
     d["SearchData"] = obj({"items": array(REF("Event"))})
+    d["IngestRequest"] = obj({"title": {**STR, "minLength": 5, "maxLength": 300},
+        "text": {**STR, "minLength": 30, "maxLength": 18000},
+        "url": {"type": "string", "format": "uri", "pattern": "^https?://", "maxLength": 2000},
+        "published": {"type": ["string", "null"], "maxLength": 100},
+        "modified": {"type": ["string", "null"], "maxLength": 100}}, ["title", "text", "url"])
+    d["IngestData"] = obj({"item": {"anyOf": [REF("Event"), {"type": "null"}]},
+        "news_id": ID, "date_status": {"enum": ["valid", "missing", "invalid", "future"]}, "warnings": STRINGS})
+    d["IngestData"]["properties"]["ingestion_status"] = {"enum": ["inserted", "updated", "duplicate"]}
+    d["FeedRefreshRequest"] = obj({})
+    d["FeedRefreshData"] = obj({"processed": {"type": "integer", "minimum": 0}, "failed_hosts": STRINGS})
+    d["FeedRefreshData"]["properties"].update({name: {"type": "integer", "minimum": 0}
+        for name in ("inserted", "updated", "duplicates", "quarantined")})
     d["RagRequest"] = obj({"query": {"type": "string", "minLength": 1, "maxLength": 500}, "as_of": DATE,
                            "limit": {"type": "integer", "minimum": 1, "maximum": 20}})
     d["RagData"] = obj({"items": array({"allOf": [REF("Evidence"), {"properties": {"kind": {"const": "bank"}}}]}), "limitations": STRINGS})
@@ -120,7 +159,9 @@ def generate():
     d["QuestionRequest"] = obj({"company_id": ID, "question": {"type": "string", "minLength": 3, "maxLength": 2000}})
     d["AgentQuestionRequest"] = obj({"company_id": ID, "question": {"type": "string", "minLength": 3, "maxLength": 2000},
                                      "analysis": REF("Analysis"), "history": array(obj({"question": STR, "answer": STR}), maxItems=10)})
-    d["AgentQuestionRequest"]["properties"].update({"as_of": DATE, "audience_role": {"enum": ["cfo", "ceo", "treasury"]}})
+    d["AgentQuestionRequest"]["properties"].update({"as_of": DATE, "audience_role": {"enum": ["cfo", "ceo", "treasury"]},
+        # Optional for mock/demo compatibility; live providers require the original immutable input.
+        "prepared_input": REF("AgentRequest")})
     d["Answer"] = obj({"analysis_id": ID, "company_id": ID, "answer": STR, "source_ids": array(ID, minItems=1)})
     d["GeneratedAnswer"] = obj({"answer": {**STR, "maxLength": 8000, "pattern": r"\S"}, "claims": array(REF("Claim"), minItems=2, maxItems=30),
         "claim_indexes": indexes, "limitations": lines(20), "missing_data": lines(20)})
@@ -128,7 +169,7 @@ def generate():
     d["CompaniesData"] = obj({"items": array(ID), "offset": {"type": "integer", "minimum": 0},
                               "limit": {"type": "integer", "minimum": 1, "maximum": 100}})
     d["HealthData"] = obj({"status": {"const": "ok"}, "service": STR})
-    for name in ["Profile", "CompaniesData", "RankData", "SearchData", "RagData", "ResolveData", "Analysis", "Answer", "HealthData", "FeedbackData", "LearningStatusData", "PreparedContextData"]:
+    for name in ["Profile", "CompaniesData", "RankData", "SearchData", "RagData", "ResolveData", "Analysis", "Answer", "HealthData", "FeedbackData", "LearningStatusData", "PreparedContextData", "IngestData", "FeedRefreshData"]:
         d[name + "Response"] = obj({"meta": REF("Meta"), "data": REF(name)})
     routes = [
         ("post", "/v1/learning/feedback", "FeedbackRequest", "FeedbackDataResponse", 5),
@@ -138,6 +179,8 @@ def generate():
         ("get", "/v1/companies/{company_id}", None, "ProfileResponse", 1),
         ("post", "/v1/rank", "RankRequest", "RankDataResponse", 1),
         ("post", "/v1/tools/search_news", "SearchRequest", "SearchDataResponse", 3),
+        ("post", "/v1/news", "IngestRequest", "IngestDataResponse", 3),
+        ("post", "/v1/feeds/refresh", "FeedRefreshRequest", "FeedRefreshDataResponse", 3),
         ("post", "/v1/tools/rag_bank_analytics", "RagRequest", "RagDataResponse", 3),
         ("post", "/v1/tools/resolve_sources", "ResolveRequest", "ResolveDataResponse", 3),
         ("post", "/v1/analyze", "AnalyzeRequest", "AnalysisResponse", 2),

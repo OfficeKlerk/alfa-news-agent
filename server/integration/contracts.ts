@@ -5,6 +5,8 @@ import { createRequire } from "node:module";
 import type { FormatsPlugin } from "ajv-formats";
 import { ROOT } from "../config.js";
 import type { Json } from "../types.js";
+import { validateEventDetails } from "../news-events.js";
+import { validatePaymentContext } from "./payment-context.js";
 
 export class ApiFault extends Error {
   constructor(public status: number, public code: string, message: string) { super(message); }
@@ -17,6 +19,19 @@ export function validate(name: string, value: unknown, output = false): asserts 
   const check = ajv.getSchema(`urn:alfa:integration:v1#/$defs/${name}`);
   if (!check) throw new Error("Unknown contract: " + name);
   if (!check(value)) throw new ApiFault(output ? 502 : 422, output ? "CONTRACT_VIOLATION" : "VALIDATION_ERROR", "JSON violates " + name);
+  const visit = (node: unknown): void => {
+    if (!node || typeof node !== "object") return;
+    if (Array.isArray(node)) { node.forEach(visit); return; }
+    const item = node as Json;
+    if (item.company_id && item.schema_version && item.payment_summary && item.industry) validatePaymentContext(item);
+    if (item.news_id && item.event_id && item.event_type && Array.isArray(item.sources)) {
+      if (new Set(item.sources.map((source: Json) => source.id)).size !== item.sources.length) throw new Error("Repeated event source ID");
+      validateEventDetails(item);
+    }
+    Object.values(item).forEach(visit);
+  };
+  try { visit(value); }
+  catch { throw new ApiFault(output ? 502 : 422, output ? "CONTRACT_VIOLATION" : "VALIDATION_ERROR", "Event evidence or payment aggregates are invalid"); }
 }
 export type Envelope = { meta: { schema_version: string; request_id: string; mode: "mock" | "demo" | "live"; warnings: string[] }; data: Json };
 export function envelope(data: Json, requestId: string, mode: "mock" | "demo" | "live", warnings: string[] = []): Envelope {

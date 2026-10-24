@@ -121,11 +121,12 @@
         <h2>Добавить событие</h2>
         <button class="close" data-close="news-dialog" aria-label="Закрыть">×</button>
       </div>
-      <p class="muted">Вставьте текст новости: она попадёт в общую базу и будет ранжироваться для каждой компании.</p>
+      <p class="muted">Вставьте текст, ссылку и дату из первоисточника. Новость без подтверждённой даты сохранится для проверки и не попадёт в ленту.</p>
       <form id="news-form">
         <label>Заголовок<input name="title" required minlength="5" maxlength="300" /></label
         ><label>Текст новости<textarea name="text" required minlength="30" maxlength="18000" rows="8"></textarea></label
-        ><label>Ссылка на первоисточник<input name="url" type="url" placeholder="https://…" /></label
+        ><label>Ссылка на первоисточник<input name="url" type="url" required placeholder="https://…" /></label
+        ><label>Дата публикации в первоисточнике<input name="published" type="date" /></label
         ><button class="button dark wide">Добавить в ленту</button>
       </form>
     </dialog>

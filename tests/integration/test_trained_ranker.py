@@ -51,6 +51,28 @@ def test_no_artifact_keeps_existing_baseline(tmp_path, monkeypatch):
         assert items and all(item["score_kind"] == "manual_feature_baseline" for item in items)
 
 
+def test_bundled_module_is_default_and_exports_v2_without_an_overlay(tmp_path, monkeypatch):
+    configure(monkeypatch, tmp_path)
+    monkeypatch.delenv("NEWS_MODULE_PATH", raising=False)
+    body = json.loads((ROOT / "contracts/v1/examples/rank-request.json").read_text())
+    with TestClient(create_app()) as client:
+        response = client.post("/v1/rank", json=body)
+        assert response.status_code == 200, response.text
+        items = response.json()["data"]["items"]
+        assert items and all(item["feature_version"] == "company_event_v2" for item in items)
+        assert all(item["feature_contributions"] for item in items)
+
+
+def test_explicit_checkout_cannot_silently_reuse_another_cached_module(tmp_path, monkeypatch):
+    configure(monkeypatch, tmp_path)
+    package = tmp_path / "foreign/news_analysis"
+    package.mkdir(parents=True)
+    (package / "__init__.py").write_text("# Different checkout, intentionally not loaded\n")
+    monkeypatch.setenv("NEWS_MODULE_PATH", str(package.parent))
+    with pytest.raises(ValueError, match="already loaded"):
+        RankAdapter()
+
+
 @pytest.mark.parametrize("problem", ["missing", "invalid_json", "wrong_features", "wrong_metadata"])
 def test_bad_artifact_stops_startup_instead_of_silent_fallback(tmp_path, monkeypatch, model_file, problem):
     if problem == "missing":
