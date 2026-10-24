@@ -52,6 +52,8 @@ python -m pytest tests/test_demo_news_contract.py -q               # контр�
 
 Последующая [проверка всей цепочки и исправления от 24 октября](reports/NEWS_FULL_AUDIT_20261024.md): [30 результатов на оригинальных новостях недели](reports/WEEKLY_NEWS_RESULTS_20261024.md), без внешней LLM. Это отдельная отладочная подборка, без независимых человеческих оценок.
 
+Живые LLM-прогоны и списки работ: [REPORT8](reports/REPORT8.md) → [TEAM_TASKS8](reports/TEAM_TASKS8.md) → [ход исправлений](reports/TASKS8_PROGRESS.md) → [REPORT9](reports/REPORT9.md) → [TEAM_TASKS9](reports/TEAM_TASKS9.md).
+
 Свежая [проверка интеграции ветки коллег `codex/payment-context`](reports/PAYMENT_INTEGRATION_REVIEW_20261024.md): новые платёжные агрегаты, исправления расчётов/контрактов и правильный режим `/v1` + `RANK_MODE=news-analysis`.
 
 ## Запуск приложения

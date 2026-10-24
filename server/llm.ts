@@ -1,8 +1,9 @@
 import type { Store } from "./db.js";
-import type { Settings } from "./config.js";
+import { RESERVED_BODY_KEYS, type Settings } from "./config.js";
 import { ModelError, type Json } from "./types.js";
+import { SPECULATIVE_ABSENCE } from "./integration/generation-budget.js";
 export type ResponseSchema = { name: string; schema: Json };
-export type Complete = (messages: Json[], tools?: Json[], jsonMode?: boolean, responseSchema?: ResponseSchema) => Promise<Json>;
+export type Complete = (messages: Json[], tools?: Json[], jsonMode?: boolean, responseSchema?: ResponseSchema, maxTokens?: number) => Promise<Json>;
 export function parseJson(message: Json): Json {
   try {
     const text = (message.content ?? "")
@@ -16,16 +17,23 @@ export function parseJson(message: Json): Json {
     throw new ModelError("Модель не вернула JSON по схеме.");
   }
 }
+const STRUCTURE_FIELDS = ["summary", "why_relevant", "grounding", "risks", "opportunities", "recommendations", "limitations", "missing_data", "answer", "claim_indexes"];
 /** Name the usual cause of a truncated JSON without keeping its untrusted text. */
 export function truncationCause(content: unknown): string {
   const texts = typeof content === "string" ? [...content.matchAll(/"text":"((?:[^"\\]|\\.){8,})"/g)].map(m => m[1]) : [];
   const repeats = texts.length - new Set(texts).size;
-  return repeats > 0
-    ? "Причина — зацикливание: в обрезанном тексте " + texts.length + " claim-текстов, из них " + repeats + " повторов."
-    : "Обычная причина — разрастание claims или пересказ контекста, а не малый лимит; проверьте размер контекста и число claims.";
+  if (repeats > 0) return "Причина — зацикливание: в обрезанном тексте " + texts.length + " claim-текстов, из них " + repeats + " повторов.";
+  // REPORT9: a contract field repeated in place (e.g. "grounding":[0,1,2,3] dozens of times), named only from our own field list.
+  // The loop may sit inside a string, so the key can appear as grounding\": as well as "grounding":.
+  const field = typeof content === "string" ? STRUCTURE_FIELDS.map(key => ({ key, n: content.match(new RegExp(key + '\\\\?"\\s*:', "g"))?.length ?? 0 }))
+    .sort((a, b) => b.n - a.n)[0] : undefined;
+  if (field && field.n >= 5) return "Причина — структурное зацикливание: поле " + field.key + " повторено " + field.n + " раз.";
+  const absent = texts.filter(text => SPECULATIVE_ABSENCE.test(text)).length;
+  if (absent >= 3) return "Причина — перечень того, о чём новость не сообщает: " + absent + " таких claims из " + texts.length + ".";
+  return "Обычная причина — разрастание claims или пересказ контекста, а не малый лимит; проверьте размер контекста и число claims.";
 }
 export function createComplete(settings: Settings, db: Store, request: typeof fetch = fetch): Complete {
-  return async (messages, tools, jsonMode = false, responseSchema) => {
+  return async (messages, tools, jsonMode = false, responseSchema, maxTokens) => {
     if (!settings.apiKey.trim()) throw new ModelError("Нет LLM_API_KEY. Укажите ключ в .env и перезапустите сервер.", "MODEL_AUTH_ERROR");
     let base: URL;
     try { base = new URL(settings.baseUrl); } catch { throw new ModelError("Некорректный адрес LLM API."); }
@@ -44,20 +52,26 @@ export function createComplete(settings: Settings, db: Store, request: typeof fe
       db.connection.exec("ROLLBACK");
       throw error;
     }
+    // A technical cap, not a prompt plea: REPORT8 loops ran to 6000 tokens while accepted answers stayed under 1800.
+    const outputLimit = jsonMode ? Math.min(settings.maxOutputTokens, maxTokens ?? settings.maxOutputTokens) : settings.maxPlanningTokens;
+    const strict = jsonMode && settings.responseFormat === "json_schema" && !!responseSchema;
     const payload: Json = {
       model: settings.model,
       messages,
-      max_tokens: jsonMode ? settings.maxOutputTokens : settings.maxPlanningTokens,
+      max_tokens: outputLimit,
       temperature: 0.2,
     };
     if (tools?.length) Object.assign(payload, { tools, tool_choice: "auto" });
-    if (jsonMode) payload.response_format = settings.responseFormat === "json_schema" && responseSchema
-      ? { type: "json_schema", json_schema: { ...responseSchema, strict: true } }
+    if (jsonMode) payload.response_format = strict
+      ? { type: "json_schema", json_schema: { ...responseSchema!, strict: true } }
       : { type: "json_object" };
     // Preserve the master branch's reasoning controls alongside the response contract.
     if (settings.reasoningEffort) payload.reasoning_effort = settings.reasoningEffort;
-    if (settings.extraBody) for (const [key, value] of Object.entries(settings.extraBody))
-      if (!["model", "messages", "stream", "response_format"].includes(key)) payload[key] = value;
+    // Provider routing is configuration, never hardcoded: LLM_EXTRA_BODY_JSON for every call,
+    // LLM_STRICT_EXTRA_BODY_JSON only for json_schema calls (REPORT8: strict requests routed to AkashML came back empty).
+    for (const extra of [settings.extraBody, strict ? settings.strictExtraBody : undefined])
+      if (extra) for (const [key, value] of Object.entries(extra))
+        if (!RESERVED_BODY_KEYS.includes(key)) payload[key] = value;
     try {
       const response = await request(settings.baseUrl + "/chat/completions", {
         method: "POST",
@@ -109,7 +123,7 @@ export function createComplete(settings: Settings, db: Store, request: typeof fe
       if (choice.finish_reason === "length" || choice.finish_reason === "max_tokens") {
         throw new ModelError(
           jsonMode
-            ? "Ответ модели обрезан по лимиту длины (" + settings.maxOutputTokens + " выходных токенов): JSON неполный и не сохранён как результат. " + truncationCause(message.content) + " Увеличение LLM_MAX_OUTPUT_TOKENS не является исправлением само по себе."
+            ? "Ответ модели обрезан по лимиту длины (" + outputLimit + " выходных токенов): JSON неполный и не сохранён как результат. " + truncationCause(message.content) + " Увеличение LLM_GENERATION_MAX_TOKENS или LLM_MAX_OUTPUT_TOKENS не является исправлением само по себе."
             : "Ответ модели при выборе инструментов обрезан по лимиту длины. Увеличьте LLM_MAX_PLANNING_TOKENS, сократите контекст или смените модель.",
         );
       }

@@ -25,10 +25,31 @@ export function profileFacts(input: Json) {
   };
 }
 
+/** REPORT7/8 null control: null is an unknown value, never "no mark". Checked in every text, including
+ * conditions and warnings: "…не доказывает отсутствие обязательств" qualifies the inference, not the misread premise. */
+export function nullMarkRules(text: string, input: Json): string[] {
+  const values = input.profile?.bank_products ?? {};
+  for (const clause of assertionClauses(text)) {
+    if (/если\s+бы/iu.test(clause)) continue;
+    if (/(?<!не\s)(?:null|unknown)\s*(?:[—=-]\s*)?(?:означает|значит|это|равно|равен)\s+(?:отсутстви[а-яё]*|нет)\s+отметк/iu.test(clause))
+      return ["Unknown product flag must remain unknown"];
+    const absence = /(?:отсутстви[а-яё]*|отсутству[а-яё]*|нет)\s+((?:[а-яё]+\s+){0,2}?)отметк[а-яё]*|отметк[а-яё]*[^.!?;]{0,30}отсутству[а-яё]*|не\s+отмечен[а-яё]*/iu.exec(clause);
+    // A plain hypothetical ("Если в снимке отсутствуют отметки…") stays allowed; the definition above does not.
+    if (!absence || /данн|сведени|информаци/iu.test(absence[1] ?? "") || /(?:^|[\s,])если\s/iu.test(clause.slice(0, absence.index))) continue;
+    // "null не означает отсутствие отметки" and "неизвестность, а не отсутствие отметки" are correct.
+    if (/(?:не\s+(?:означа|явля|равн|знач|следует)[а-яё]*|нельзя\s+[а-яё]+|а\s+не|вместо)\s+(?:[а-яё]+\s+)?$/iu.test(clause.slice(0, absence.index))) continue;
+    const named = mentionedProducts(clause);
+    const all = Object.values(values);
+    if (named.some(product => unknown(values[product])) || !named.length && /продукт/iu.test(clause) && all.length && all.every(unknown))
+      return ["Unknown product flag must remain unknown"];
+  }
+  return [];
+}
+
 /** Targeted regressions for observed misreadings; not a general semantic verifier.
  * Called only for generated prose; literal fact/bank quotes are excluded upstream. */
 export function profileFactRules(text: string, input: Json): string[] {
-  const issues = new Set<string>(), profile = input.profile;
+  const issues = new Set<string>(nullMarkRules(text, input)), profile = input.profile;
   const payment = profile.payment_summary ?? {}, trade = profile.foreign_trade ?? {};
   for (const clause of assertionClauses(text)) {
     // Conditional scenarios, questions and explicit warnings do not assert a fact.
@@ -44,6 +65,18 @@ export function profileFactRules(text: string, input: Json): string[] {
     const actualTerms = /(?:договор[а-яё]*|кредит[а-яё]*|лизинг[а-яё]*)[^.!?;]{0,35}(?:имеют|имеет|предусматрива[а-яё]*|привязан[а-яё]*)[^.!?;]{0,30}(?:плавающ|фиксирован|ключев)/iu.test(clause);
     if (absence || (actualContract && !marked) || actualTerms)
       issues.add("Product flags do not establish debt or contract terms");
+    // REPORT8 metal-borrower: "использует продукты финансирования (loan, leasing)" turns a mark into usage.
+    const usage = /(?<!не\s)(?:использует|пользуется|применяет|обслуживает|привлекает|имеет)\s+((?:[\p{L}\d.,()-]+\s+){0,3}?)(?:продукт[а-яё]*\s+(?:финансирован|кредитован|лизинг)|кредитн[а-яё]*\s+(?:продукт|договор|лини)|кредит(?:ы|ов|ом|ам|а|у)?(?![а-яё])|лизинг|займ|за[её]м|финансировани|loan|leasing|factoring|факторинг)/iu.exec(clause);
+    if (usage && !/отметк|отмечен|флаг/iu.test(usage[1])) issues.add("Product flags do not establish debt or contract terms");
+    // REPORT8 rate-up-borrower-no-rag: "параметры действующих договоров" presumes contracts that a mark does not show;
+    // "действующий договор неизвестен" does not.
+    const presumed = /(?:параметр|услови|обслуживани|ставк|срок|остат|тип|чувствительност)[а-яё]*\s+(?:[а-яё]+\s+)?(?:по\s+)?действующ[а-яё]*\s+(?:(?:кредитн|лизингов|долгов)[а-яё]*\s+)?(?:кредит|лизинг|договор|обязательств|займ|за[её]м)/iu.exec(clause);
+    if (presumed && !/наличи|существ|есть\s+ли|при\s+условии/iu.test(clause.slice(0, presumed.index))
+      && !/если\s+они\s+(?:есть|существуют|имеются)|при\s+их\s+наличии/iu.test(clause.slice(presumed.index)))
+      issues.add("Product flags do not establish debt or contract terms");
+    // REPORT8 trade-foreign: an FTS mark is not proven foreign-trade activity.
+    if (/(?<!не\s)(?:осуществля[а-яё]*|вед[её]т|занима[а-яё]*с[яь]|участву[а-яё]*\s+в)\s+(?:[а-яё]+\s+)?(?:внешнеторгов|внешнеэкономическ|внешн[а-яё]*\s+торговл|вэд(?![а-яё]))/iu.test(clause))
+      issues.add("Trade flags do not establish direction or payment currency");
     const checkMark = (product: string, asserted: boolean) => {
       const value = profile.bank_products?.[product];
       if (unknown(value)) issues.add("Unknown product flag must remain unknown");

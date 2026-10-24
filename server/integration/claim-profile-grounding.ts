@@ -34,7 +34,10 @@ function claimProfileCheck(claim: Json, input: Json) {
     if (/(?:продуктов[а-яё]*\s+отметк|банковск[а-яё]*\s+продукт)[^.!?;]{0,35}(?:отсутств|не\s+отмеч)|(?:отсутств|нет)[^.!?;]{0,25}продуктов[а-яё]*\s+отметк/iu.test(clause))
       require(Object.keys(input.profile.bank_products ?? {}).every(key => paths.includes("/bank_products/" + key)),
         Object.keys(input.profile.bank_products ?? {}).map(key => "/bank_products/" + key));
-    if (/has_fts|(?:отметк|флаг)[^.!?;]{0,25}(?:фтс|внешнеторгов)|(?:фтс)[^.!?;]{0,25}(?:отметк|флаг)|внешнеторгов[а-яё]*\s+деятельност/iu.test(clause))
+    // REPORT8 trade-foreign: "отметку о внешней торговле" is the has_fts mark itself; direction does not stand in for it.
+    if (/(?:отметк|флаг|отмечен)[^.!?;]{0,25}(?:фтс|внешнеторгов|внешн[а-яё]*\s+торговл|внешнеэкономическ|вэд(?![а-яё]))|(?:фтс)[^.!?;]{0,25}(?:отметк|флаг)/iu.test(clause))
+      require(paths.includes("/foreign_trade/has_fts"), ["/foreign_trade/has_fts"]);
+    else if (/has_fts|внешнеторгов[а-яё]*\s+деятельност|внешн[а-яё]*\s+торговл|внешнеэкономическ/iu.test(clause))
       require(paths.includes("/foreign_trade/has_fts") || paths.includes("/foreign_trade/trade_direction"), ["/foreign_trade/has_fts"]);
     if (/has_fts|фтс/iu.test(clause)) require(paths.includes("/foreign_trade/has_fts"), ["/foreign_trade/has_fts"]);
     if (/\bhas_fts\s*=\s*(?:true|false)\b/iu.test(clause)) {

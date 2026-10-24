@@ -9,6 +9,7 @@ import { validateGrounding, validateQuestionGrounding } from "../server/integrat
 import { ApiFault } from "../server/integration/contracts.js";
 import { repairInstruction, repairPlan } from "../server/integration/repair-guidance.js";
 import { generationBudgetIssues } from "../server/integration/generation-budget.js";
+import { joinStrictClaims } from "../server/integration/response-schema.js";
 import type { Json } from "../server/types.js";
 
 const args = process.argv.slice(2);
@@ -57,8 +58,9 @@ const rows = index.map(call => {
     completion_tokens: provider.usage?.completion_tokens, status: "truncated", issues: [] };
   if (call.finish_reason === "length") { assert.equal(call.draft_file, null); return row; }
   assert.equal(call.finish_reason, "stop", "Unsupported provider finish reason");
-  const draft = JSON.parse(content);
-  assert.deepEqual(draft, read(call.draft_file));
+  // Typed strict arrays (REPORT9 follow-up) are joined exactly as the live path does before validation.
+  const draft = joinStrictClaims(JSON.parse(content));
+  assert.deepEqual(JSON.parse(content), read(call.draft_file));
   row.claim_count = draft.claims?.length;
   // The live claim budget applies to new generation; it is reported with the ordinary guards.
   const budget = generationBudgetIssues(draft);

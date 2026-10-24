@@ -13,7 +13,17 @@ export function generationBudgetIssues(draft: Json): FieldIssue[] {
   if (draft.claims.filter((c: Json) => c?.kind === "bank").length > GENERATION_BANK_CLAIM_LIMIT)
     issues.push({ stage: "grounding", path: "/claims", rule: "Too many bank claims", limit: GENERATION_BANK_CLAIM_LIMIT });
   // REPORT8 truncations were loops of one claim; a complete draft with a copy gets the same compact rebuild.
-  const texts = draft.claims.map((c: Json) => typeof c?.text === "string" ? c.kind + ":" + c.text.trim().toLowerCase() : undefined).filter(Boolean);
-  if (new Set(texts).size < texts.length) issues.push({ stage: "grounding", path: "/claims", rule: "Repeated claim text" });
+  // REPORT9: loops also produced near-copies that differ only in punctuation or one word.
+  const texts: { kind: string; words: Set<string>; norm: string }[] = draft.claims.filter((c: Json) => typeof c?.text === "string").map((c: Json) => {
+    const norm = c.text.toLowerCase().replaceAll("ё", "е").replace(/[^\p{L}\d]+/gu, " ").trim();
+    return { kind: c.kind, norm, words: new Set(norm.split(" ").filter(Boolean)) };
+  });
+  const near = (a: typeof texts[number], b: typeof texts[number]) => a.kind === b.kind && (a.norm === b.norm
+    || Math.min(a.words.size, b.words.size) >= 6 && [...a.words].filter(w => b.words.has(w)).length / new Set([...a.words, ...b.words]).size >= 0.9);
+  if (texts.some((a, i) => texts.slice(i + 1).some(b => near(a, b)))) issues.push({ stage: "grounding", path: "/claims", rule: "Repeated claim text" });
+  // REPORT8 transport-dentist and REPORT9 bank-forecast grew into lists of what the news does not say.
+  if (draft.claims.filter((c: Json) => c?.kind === "ai" && typeof c.text === "string" && SPECULATIVE_ABSENCE.test(c.text)).length >= 2)
+    issues.push({ stage: "grounding", path: "/claims", rule: "Speculative absence enumeration" });
   return issues;
 }
+export const SPECULATIVE_ABSENCE = /(?:новост[а-яё]*|событи[а-яё]*|сообщени[а-яё]*)\s+не\s+(?:содерж[а-яё]*|сообща[а-яё]*|упомина[а-яё]*|указыва[а-яё]*)\s+(?:информаци[а-яё]*|сведени[а-яё]*|данн[а-яё]*)?/iu;

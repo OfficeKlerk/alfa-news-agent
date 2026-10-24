@@ -32,7 +32,7 @@ const rules: Record<string, string> = {
   "Product flags do not establish debt or contract terms": "Пиши только об отметке продукта в снимке. loan=false не доказывает отсутствие долгов; true не подтверждает действующий договор, его валюту и тип ставки. Условия формулируй как проверяемое предположение.",
   "Product mark contradicts the snapshot": "Сверь точное значение флага в profile_facts: true означает отметку, false — отсутствие отметки в снимке. Не меняй значение поля и не выводи условия договоров из флага.",
   "Unknown product flag must remain unknown": "Не заменяй null/unknown на true, false или ноль. Явно укажи неизвестность наличия продукта и добавь нужные данные.",
-  "Trade flags do not establish direction or payment currency": "Не выводи импорт/экспорт и наличие валютных платежей из has_fts. Сохрани неизвестность direction/currencies и запроси сведения о контрактах и маршрутах.",
+  "Trade flags do not establish direction or payment currency": "has_fts=true — только отметка ФТС в снимке, а не доказанная внешнеторговая деятельность: пиши «В снимке есть отметка ФТС» с путём /foreign_trade/has_fts. Не выводи импорт/экспорт и наличие валютных платежей из has_fts. Сохрани неизвестность direction/currencies и запроси сведения о контрактах и маршрутах.",
   "Unknown payment metadata must remain unknown": "Не подставляй валюту, период или нулевую сумму вместо неизвестного значения. Отличай известный числовой ноль от null.",
   "Unsupported section number": "Число раздела должно буквально присутствовать в quote связанного fact/bank, а не просто в полном excerpt или metadata. Не добавляй дату из published_at/as_of. Выбери дословную цитату с нужной датой/кодом и свяжи её индексом; иначе убери неподтверждённое число.",
   "Section financial figures must be verbatim fact/bank quotes": "Скопируй финансовую фразу целиком из связанного fact/bank.quote, включая слова, дату, знак и формат числа. Не вставляй AI-пояснение внутрь цитаты. В summary оставь цитату; качественное пояснение без цифр перенеси в why_relevant с AI-основанием.",
@@ -55,16 +55,22 @@ const rules: Record<string, string> = {
   "Unconfirmed linkage must not be stated as proven absence": "Замени категорическое отрицание на «Связь не подтверждена предоставленными данными». Не заполняй risks/opportunities вымышленным воздействием. Неполный граф и отличие отрасли не доказывают отсутствия связи.",
   "Project participation or budget funding is not established": "Отраслевое совпадение не доказывает участие компании в программе, госконтракты или получение бюджетных средств. Пиши, что участие и контракты нужно проверить; не приписывай компании финансирование.",
   "Too many claims for a compact answer": "Не исправляй прежний список по одному элементу. Собери ответ заново: одна короткая fact-цитата, 1–3 ai-вывода с собственными profile_paths и conditions, bank только если фрагмент помогает ответить. Не пересказывай профиль и банковский корпус. Пересчитай все индексы.",
+  "Speculative absence enumeration": "Не перечисляй, о чём новость не сообщает: один раз перечисли недостающие данные в missing_data и limitations, а claims оставь для проверяемых выводов о компании. Собери ответ заново компактно и пересчитай индексы.",
   "Repeated claim text": "Не повторяй claim с тем же текстом. Собери ответ заново: каждый claim уникален, отраслевое сопоставление — не больше одного раза. Пересчитай все индексы.",
   "Too many bank claims": "Оставь не более трёх применимых bank-цитат либо ни одной. Не превращай каждое предложение банковского фрагмента в отдельный claim; удали лишние вместе с их индексами.",
+  "Prompt rule copied into the answer": "Не переноси в ответ правила и имена полей системного промпта (response_guidance, advice_constraints и т. п.) и фразы вроде «Связь с контрагентом допускает только условный косвенный канал». Опиши конкретный проверяемый канал для этой компании или удали фразу.",
   "Freshness-only ranking explanation is not supported by contributions": "Проверь ranking_evidence и все ненулевые feature_contributions, включая отрицательные. Только freshness_only_confirmed=true разрешает вывод об исключительно свежестном вкладе; иначе опиши ограничения без такого утверждения.",
 };
 export function repairInstruction(issue: FieldIssue, question = false, draft?: Json): string {
   if (issue.rule === "Too few items") {
+    // REPORT8 rate-hold-leasing call-05: one ai claim and an empty summary after "do not repeat".
+    if (issue.path === "/claims") return "Нужно минимум два claims: одна дословная fact-цитата новости и минимум один ai-вывод. Требование уникальности запрещает только повтор того же text, а не второй claim. Не удаляй fact-цитату ради краткости.";
+    if (issue.path === "/grounding/summary" || issue.path === "/claim_indexes") return "Сошлись на индекс fact-цитаты, текст которой скопирован в " + (question ? "answer" : "summary") + "; пустой список оснований недопустим. Если fact-claim отсутствует, добавь его из quote_candidates и пересчитай индексы.";
     const match = /^\/claims\/(\d+)\/(profile_paths|conditions)$/.exec(issue.path);
     const kind = match ? draft?.claims?.[Number(match[1])]?.kind : undefined;
     if (match && (kind === "fact" || kind === "bank")) return "У fact/bank поле " + match[2] + " необязательно: удали его целиком, не возвращай пустой массив. Сохрани kind, text=quote и выбранные источники нужного типа.";
-    if (match && kind === "ai") return "У ai profile_paths и conditions обязательны и непусты. Заполни проверенными бизнес-путями и явными условиями из исходного контекста; не удаляй их и не придумывай значения.";
+    // REPORT9 rate-up-borrower: a general remark about the event got /industry/okved_code and then a wrong mismatch phrase.
+    if (match && kind === "ai") return "У ai profile_paths и conditions обязательны и непусты. Если вывод опирается на конкретное поле профиля, добавь этот путь и явное условие из исходного контекста. Если это общий комментарий о событии без поля профиля, удали claim целиком и перенумеруй индексы: не добавляй путь отрасли и отраслевую формулировку ради заполнения. Значения не придумывай.";
     return "Проверь тип claim и обязательность массива: у fact/bank пустые необязательные profile_paths/conditions удали, у ai заполни оба проверенными основаниями. Обязательные source_ids и индексы не удаляй; выбери существующие источники и пересчитай индексы без повторов.";
   }
   const instruction = rules[issue.rule] ?? "Исправь указанное поле по исходной схеме и проверенному контексту. Не добавляй источники, факты или числа; проверь весь ответ, а не только одно поле.";
@@ -101,13 +107,14 @@ function claimsOf(path: string, draft: Json, question: boolean): number[] {
 export function repairPlan(issues: FieldIssue[], draft: Json | undefined, question = false, data: Json = {}): Json {
   const claims = Array.isArray(draft?.claims) ? draft!.claims.length : 0;
   const quoteIssues = issues.filter(i => quoteRules.has(i.rule)).length;
-  const rebuild = issues.some(i => ["Too many claims for a compact answer", "Too many bank claims", "Repeated claim text"].includes(i.rule))
+  const rebuild = issues.some(i => ["Too many claims for a compact answer", "Too many bank claims", "Repeated claim text", "Speculative absence enumeration"].includes(i.rule))
     || quoteIssues >= 3 || claims > GENERATION_CLAIM_LIMIT;
   const numeric = issues.filter(i => numberRules.has(i.rule));
   const together = [...new Set(numeric.flatMap(i => claimsOf(i.path, draft ?? {}, question)
     .flatMap(c => dependents(draft ?? {}, question, c))))];
   const input = data.input ?? data.prepared_input;
-  const relation = issues.some(i => relationRules.has(i.rule)) && input ? industryWording(input) : undefined;
+  // REPORT9 rate-up-borrower: the repair introduced the mismatch wording under relation=unknown; always pass the exact wording.
+  const relation = input?.event ? industryWording(input) : undefined;
   // REPORT8 trade-foreign failed twice on the same claim: name the exact existing fields instead of the rule alone.
   const addPaths: Record<string, string[]> = {};
   for (const issue of issues) {
@@ -116,8 +123,22 @@ export function repairPlan(issues: FieldIssue[], draft: Json | undefined, questi
     const wanted = claimProfileSuggestions(claim, input);
     if (wanted.length) addPaths[issue.path] = wanted;
   }
+  // REPORT8 rate-up-borrower failed twice on Unused claim with a bare targeted_fix: name the indexes and the renumbering.
+  const unused = [...new Set(issues.filter(i => i.rule === "Unused claim").map(i => /^\/claims\/(\d+)$/.exec(i.path)).filter(m => m).map(m => Number(m![1])))]
+    .filter(i => i < claims).sort((a, b) => a - b);
+  const kept = [...Array(claims).keys()].filter(i => !unused.includes(i));
+  const wording = unused.length && input?.event ? industryWording(input).use.toLowerCase() : "";
+  const onlyIndustry = unused.filter(i => typeof draft?.claims?.[i]?.text === "string" && wording
+    && draft!.claims[i].text.toLowerCase().includes(wording.split(":")[0]) && draft!.claims[i].text.length <= wording.length + 60);
   return {
     mode: rebuild ? "rebuild_compact" : "targeted_fix",
+    ...(unused.length ? { unused_claims: {
+      indexes: unused,
+      actions: [question ? "Добавь индекс в claim_indexes, если claim действительно подтверждает answer." : "Добавь индекс в grounding.why_relevant (или в основание риска/рекомендации), если claim действительно объясняет этот раздел.",
+        "Либо удали claim и перенумеруй все индексы по delete_renumber."],
+      delete_renumber: Object.fromEntries(kept.map((old, i) => [String(old), i])),
+      ...(onlyIndustry.length ? { prefer_delete: onlyIndustry, reason: "Claim только с отраслевой формулировкой не нужен: её можно один раз написать в why_relevant или limitations." } : {}),
+      rule: "Не создавай новые claims вместо неиспользуемых и не дублируй содержимое; после удаления claims проверь summary, why_relevant, risks, opportunities и recommendations." } } : {}),
     claim_budget: { max_claims: GENERATION_CLAIM_LIMIT, max_bank_claims: GENERATION_BANK_CLAIM_LIMIT, typical: [2, 5] },
     ...(rebuild ? { rebuild: "Прежний черновик разросся или содержит много неверных цитат. Не воспроизводи его список claims. Собери новый короткий набор из исходного контекста: одна fact-цитата, ai-выводы со своими путями, bank только при применимости. Каждая fact/bank-цитата — непрерывная подстрока excerpt, text=quote. Сведения о компании — только ai." } : {}),
     ...(together.length ? { fix_together: together, numbers: "Неподтверждённое число или код убери одновременно из всех перечисленных мест, включая основной раздел и condition рекомендации. Код ОКВЭД компании не подтверждает производные коды из тематики новости. Предпочитай качественное объяснение без цифр." } : {}),
@@ -148,7 +169,8 @@ export function responseGuidance(context: PreparedContext, apiKey: string, opera
       candidates.push({ source_id: source.id, kind: claim.kind, quote, claim,
         ...(kind === "bank" ? { published_at: source.published_at,
           note: "Дословный исторический фрагмент. Доступность на as_of не доказывает, что это текущая позиция банка; учитывай дату и применимость." } : {}) });
-      break;
+      // REPORT8 strict answers paraphrased bank text: offer one verbatim passage per bank source, up to the bank budget.
+      if (kind === "news" || candidates.filter(c => c.kind === "bank").length >= GENERATION_BANK_CLAIM_LIMIT) break;
     }
   }
   const news = candidates.find(c => c.kind === "fact");

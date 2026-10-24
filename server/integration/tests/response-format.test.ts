@@ -11,7 +11,7 @@ import { prepareContext } from "../context.js";
 import { analysisDraft, validateGrounding } from "../grounding.js";
 import { generatePrepared, answerPrepared } from "../prepared-agent.js";
 import { ANALYSIS_PROMPT } from "../analysis-prompts.js";
-import { generatedResponseSchema } from "../response-schema.js";
+import { generatedResponseSchema, strictResponseSchema } from "../response-schema.js";
 
 const reply = (draft: Json) => Response.json({ choices: [{ finish_reason: "stop",
   message: { role: "assistant", content: JSON.stringify(draft) } }] });
@@ -86,7 +86,7 @@ for (const format of ["json_object", "json_schema"] as const) {
       const db = new Store(settings), scenario = evaluationCases()[0], seen: Json[] = [];
       db.connection.exec("CREATE TABLE llm_calls(id INTEGER PRIMARY KEY,day TEXT,model TEXT,prompt_tokens INTEGER DEFAULT 0,completion_tokens INTEGER DEFAULT 0)");
       const expectedFormat = (name: "GeneratedAnalysis" | "GeneratedAnswer") => format === "json_schema"
-        ? { type: format, json_schema: { ...generatedResponseSchema(name), strict: true } } : { type: format };
+        ? { type: format, json_schema: { ...strictResponseSchema(name), strict: true } } : { type: format };
       try {
         const result = await generatePrepared(settings, db, scenario.input, "shape-repair", (async (_url, init) => {
           seen.push(JSON.parse(String(init?.body)));
