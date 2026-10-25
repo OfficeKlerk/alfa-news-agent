@@ -1,3 +1,4 @@
+import { developmentAccess } from "../access.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from "node:fs";
@@ -154,7 +155,7 @@ test("reviewed real news passes gateway context/rank/analysis with exact bank qu
     return Response.json({choices:[{finish_reason:"stop",message:{content:JSON.stringify(draft)}}],usage:{prompt_tokens:1,completion_tokens:1}});
   };
   const agent = new LegacyAgent({...h.settings,mode:"live",apiKey:"test-only-no-external-key"},fakeModel);
-  const app = createGateway({ml,retrieval:h.provider,agent:{
+  const app = createGateway({ access: developmentAccess,ml,retrieval:h.provider,agent:{
     analyze(input,id){lastInput=input;return agent.analyze(input,id);},answer:agent.answer.bind(agent),
   }});
   const server=app.listen(0,"127.0.0.1");await new Promise<void>(r=>server.once("listening",r));
@@ -178,4 +179,21 @@ test("reviewed real news passes gateway context/rank/analysis with exact bank qu
     }
     assert.equal(generated,readReviewedNews(bundlePath).length);assert.ok(bankClaims>0);
   } finally {server.closeAllConnections();await new Promise<void>(r=>server.close(()=>r()));h.close();}
+});
+
+test("production retrieval excludes synthetic seeds before limit and cannot resolve their source IDs", async () => {
+  const h = await harness();
+  try {
+    const provider = new LegacyRetrieval(h.db, new Retrieval(h.db), h.settings, undefined, false);
+    const mixed = await h.provider.search({query:"",as_of:asOf,limit:100},"mixed");
+    const synthetic = mixed.data.items.filter((e:Json)=>e.is_mock).flatMap((e:Json)=>e.sources.map((s:Json)=>s.id));
+    assert.ok(synthetic.length);
+    const all = await provider.search({query:"",as_of:asOf,limit:100},"production");
+    assert.ok(all.data.items.length);assert.equal(all.meta.mode,"live");
+    assert.ok(all.data.items.every((e:Json)=>!e.is_mock && e.sources.every((s:Json)=>!s.is_mock)));
+    const short = await provider.search({query:"",as_of:asOf,limit:1},"limited");
+    assert.deepEqual(short.data.items,all.data.items.slice(0,1));
+    const denied = await provider.resolve({source_ids:synthetic,as_of:asOf},"denied");
+    assert.deepEqual(denied.data.items,[]);assert.deepEqual(denied.data.unknown_ids,synthetic);
+  } finally {h.close();}
 });

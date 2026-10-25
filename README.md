@@ -1,8 +1,12 @@
 # Alfa News Agent
 
+**Объединённая версия 25.10.2026:** [оценка и проверки](docs/reports/MERGED_PIPELINE_REVIEW_20261025.md), [запуск live с OIDC](deploy/MERGED_RELEASE.md), [задачи трём исполнителям](deploy/NEXT_TASKS_3_PEOPLE.md). Live-контур коллеги уже включён; старые замечания об отсутствии конвейера относятся к предыдущей сборке.
+
 Персональная новостная аналитика для компаний: профиль бизнеса → релевантные новости → анализ с источниками → уточняющие вопросы.
 
 > 🧭 Новым читателям и жюри: начните с [карты проекта](docs/INDEX.md) — что где лежит, как запустить проверки и где какой критерий ТЗ закрыт.
+
+Обновление безопасности и поиска: [защищённый запуск и OIDC](docs/integration/PRODUCTION_ACCESS.md), [состав изменений и проверки](docs/reports/DELIVERY_REVIEW_20261025.md), [независимая приёмка live-конвейера](docs/integration/LIVE_PIPELINE_ACCEPTANCE.md). Production-конфигурация — `compose.production.yaml`; она использует реальные сервисы и требует настройки доступа. Обычный `compose.yaml` — локальный demo.
 
 В этой ветке объединены `master`, `feature/news-analysis`, `feature/node-prototype` и `role5/integration-foundation`. История и предметные модули сохранены. Состав, проверки и порядок передачи в master: [MERGE_TO_MASTER.md](docs/integration/MERGE_TO_MASTER.md).
 
@@ -52,11 +56,11 @@ python scripts/dev.py --native-providers
 
 ```powershell
 if (!(Test-Path .env)) { Copy-Item .env.example .env }
-# Заполните LLM_API_KEY локально, затем:
+# Заполните LLM_API_KEY и OIDC/TLS по PRODUCTION_ACCESS.md, затем:
 python scripts/dev.py --live --context-db var/learning/context.sqlite3
 ```
 
-На `/analysis/` выберите компанию, введите проверенную новость или импортируйте JSON. «Подготовить контекст» не вызывает модель; «Сформировать ответ» запускает генерацию. Ответ содержит факты, связь с компанией, условные действия, ограничения и источники. Вопросы используют контекст сохранённого анализа. Текст новости не загружается автоматически по URL.
+Откройте настроенный HTTPS-адрес `/analysis/`, войдите через IdP и выберите разрешённую компанию, введите проверенную новость или импортируйте JSON. «Подготовить контекст» не вызывает модель; «Сформировать ответ» запускает генерацию. Ответ содержит факты, связь с компанией, условные действия, ограничения и источники. Вопросы используют контекст сохранённого анализа. Текст новости не загружается автоматически по URL.
 
 Создание базы и настройки: [LIVE_LLM.md](docs/integration/LIVE_LLM.md). JSON и проверки: [LLM_GROUNDING.md](docs/integration/LLM_GROUNDING.md). Интерфейс и оценка качества: [LLM_EVALUATION_UI.md](docs/integration/LLM_EVALUATION_UI.md).
 
@@ -93,12 +97,15 @@ python scripts/dev.py --live --context-db var/learning/context.sqlite3
 ```powershell
 npm ci
 if (!(Test-Path .env)) { Copy-Item .env.example .env }
+$env:AUTH_MODE = 'development'
 npm start
 ```
 
-Этот запуск обслуживает старый `/api` без Python. Первый старт импортирует полные gzip CSV в `var/app-node.sqlite3`; интерфейс — <http://localhost:8000/>. `start_windows.bat` также относится к этому режиму. Не смешивать его DTO `published/actions/relevance` с `/v1` `published_at/recommendations/score_kind`.
+На Linux/macOS: `AUTH_MODE=development npm start`. Этот офлайн-запуск обслуживает старый `/api` без Python. Первый старт импортирует полные gzip CSV в `var/app-node.sqlite3`; интерфейс — <http://localhost:8000/>. `start_windows.bat` также относится к этому режиму. Не смешивать его DTO `published/actions/relevance` с `/v1` `published_at/recommendations/score_kind`.
 
 ## Проверки
+
+Протокольный OIDC-тест дополнительно требует установленный `openssl` в PATH (только для тестового HTTPS IdP, не для запуска приложения).
 
 ```powershell
 python scripts/build_contracts.py --check

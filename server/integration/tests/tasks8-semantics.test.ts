@@ -140,7 +140,7 @@ function ledger(env: Record<string, string> = {}) {
   const folder = mkdtempSync(resolve(ROOT, "var/llm-test-"));
   const settings = { ...loadSettings({ LLM_MODE: "live", LLM_API_KEY: "local-test-secret", LLM_BASE_URL: "https://provider.invalid/v1",
     LLM_MODEL: "qwen/qwen3.6-35b-a3b", LLM_ALLOWED_MODELS_JSON: '["qwen/qwen3.6-35b-a3b"]', LLM_MAX_OUTPUT_TOKENS: "6000", ...env }),
-    dbPath: resolve(folder, "calls.sqlite3"), maxCalls: 10, timeout: 1000 };
+    dbPath: resolve(folder, "calls.sqlite3"), maxCalls: 10, questionReserveCalls: 0, timeout: 1000 };
   const db = new Store(settings);
   db.connection.exec("CREATE TABLE llm_calls(id INTEGER PRIMARY KEY,day TEXT,model TEXT,prompt_tokens INTEGER DEFAULT 0,completion_tokens INTEGER DEFAULT 0)");
   return { settings, db, close() { db.close(); rmSync(folder, { recursive: true, force: true }); } };

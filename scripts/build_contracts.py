@@ -29,7 +29,7 @@ def generate():
     d["Meta"] = obj({"schema_version": {"const": "1.0.0"}, "request_id": ID,
                      "mode": {"enum": ["mock", "demo", "live"]}, "warnings": STRINGS})
     d["Error"] = obj({"schema_version": {"const": "1.0.0"}, "request_id": ID,
-                      "error": obj({"code": {"enum": ["VALIDATION_ERROR", "NOT_FOUND", "CONFLICT", "BUSY", "DEPENDENCY_UNAVAILABLE", "DEPENDENCY_TIMEOUT", "CONTRACT_VIOLATION", "INTERNAL_ERROR", "PAYLOAD_TOO_LARGE", "UNSUPPORTED_MEDIA_TYPE", "FORBIDDEN"]},
+                      "error": obj({"code": {"enum": ["VALIDATION_ERROR", "NOT_FOUND", "CONFLICT", "BUSY", "DEPENDENCY_UNAVAILABLE", "DEPENDENCY_TIMEOUT", "CONTRACT_VIOLATION", "INTERNAL_ERROR", "PAYLOAD_TOO_LARGE", "UNSUPPORTED_MEDIA_TYPE", "FORBIDDEN", "UNAUTHORIZED"]},
                                     "message": STR, "retryable": {"type": "boolean"}})})
     rules = json.loads((ROOT / "contracts/diagnostic-rules.json").read_text(encoding="utf-8"))
     d["FieldIssue"] = obj({"stage": {"enum": list(rules)},
@@ -64,6 +64,8 @@ def generate():
                       "entity_mapping_source": {"type": ["string", "null"]},
                       "sources": array({"allOf": [REF("Evidence"), {"properties": {"kind": {"const": "news"}}}]}, minItems=1), "is_mock": {"type": "boolean"}})
     d["Event"]["properties"]["split_group_id"] = ID
+    d["Event"]["properties"]["content"] = obj({"scope": {"enum": ["article_full", "feed_content", "feed_excerpt", "provided"]},
+        "material_revision": STR, "version_id": STR, "warnings": STRINGS})
     d["EventDetails"] = obj({
         "direction": {"enum": ["increase", "decrease", "unchanged", "unknown"]},
         "magnitude": {"type": ["number", "null"], "minimum": 0},
@@ -116,7 +118,12 @@ def generate():
     d["SearchRequest"] = obj({"query": {"type": "string", "maxLength": 500}, "as_of": DATE,
                               "limit": {"type": "integer", "minimum": 1, "maximum": 100},
                               "news_id": {"type": ["string", "null"], "pattern": ID["pattern"]}})
+    d["SearchRequest"]["properties"].update({"since": DATE,
+        "offset": {"type": "integer", "minimum": 0, "maximum": 1000},
+        "candidate_limit": {"type": "integer", "minimum": 1, "maximum": 1000}})
     d["SearchData"] = obj({"items": array(REF("Event"))})
+    d["SearchData"]["properties"].update({"total_candidates": {"type": "integer", "minimum": 0},
+        "next_offset": {"type": ["integer", "null"], "minimum": 0}})
     d["IngestRequest"] = obj({"title": {**STR, "minLength": 5, "maxLength": 300},
         "text": {**STR, "minLength": 30, "maxLength": 18000},
         "url": {"type": "string", "format": "uri", "pattern": "^https?://", "maxLength": 2000},
@@ -129,6 +136,18 @@ def generate():
     d["FeedRefreshData"] = obj({"processed": {"type": "integer", "minimum": 0}, "failed_hosts": STRINGS})
     d["FeedRefreshData"]["properties"].update({name: {"type": "integer", "minimum": 0}
         for name in ("inserted", "updated", "duplicates", "quarantined")})
+    nullable_date = {**DATE, "type": ["string", "null"]}
+    d["FeedStatusData"] = obj({"enabled": {"type": "boolean"}, "running": {"type": "boolean"},
+        "poll_seconds": {"type": "integer", "minimum": 1}, "last_success": nullable_date,
+        "feeds": array(obj({"url": {"type": "string", "format": "uri", "pattern": "^https://"},
+            "last_attempt": nullable_date, "last_success": nullable_date,
+            "last_error": {"type": ["string", "null"]}, "next_attempt": nullable_date,
+            "consecutive_failures": {"type": "integer", "minimum": 0}}), maxItems=64)})
+    feed_status_properties = d["FeedStatusData"]["properties"]["feeds"]["items"]["properties"]
+    feed_status_properties.update({"name": STR, "kind": {"enum": ["rss", "json", "html"]}})
+    feed_status_properties.update({name: {"type": "integer", "minimum": 0} for name in (
+        "article_count", "full_text_count", "inline_full_text_count", "excerpt_count",
+        "discovered_count", "pending_full_text_count", "full_text_errors")})
     d["RagRequest"] = obj({"query": {"type": "string", "minLength": 1, "maxLength": 500}, "as_of": DATE,
                            "limit": {"type": "integer", "minimum": 1, "maximum": 20}})
     d["RagData"] = obj({"items": array({"allOf": [REF("Evidence"), {"properties": {"kind": {"const": "bank"}}}]}), "limitations": STRINGS})
@@ -183,18 +202,57 @@ def generate():
     d["CompaniesData"] = obj({"items": array(ID), "offset": {"type": "integer", "minimum": 0},
                               "limit": {"type": "integer", "minimum": 1, "maximum": 100}})
     d["HealthData"] = obj({"status": {"const": "ok"}, "service": STR})
-    for name in ["Profile", "CompaniesData", "RankData", "SearchData", "RagData", "ResolveData", "Analysis", "Answer", "HealthData", "FeedbackData", "LearningStatusData", "PreparedContextData", "IngestData", "FeedRefreshData"]:
+    d["RuntimeData"] = obj({"generation_enabled": {"type": "boolean"}})
+    role = {"enum": ["cfo", "ceo", "treasury"]}
+    milliseconds = {"type": "number", "minimum": 0}
+    d["LiveSubscribeRequest"] = obj({"company_id": ID, "audience_role": role,
+        "limit": {"type": "integer", "minimum": 1, "maximum": 50}, "min_score": {"type": "number", "minimum": 0, "maximum": 1},
+        "enabled": {"type": "boolean"}}, ["company_id", "audience_role"])
+    d["LiveScanRequest"] = obj({"company_id": ID, "audience_role": role})
+    d["LiveQuestionRequest"] = obj({"company_id": ID, "question": {"type": "string", "minLength": 3, "maxLength": 2000}, "idempotency_key": ID})
+    d["LiveFavoriteRequest"] = obj({"company_id": ID, "favorite": {"type": "boolean"}})
+    d["LiveCard"] = obj({"id": ID, "seq": {"type": "integer", "minimum": 1}, "company_id": ID, "news_id": ID,
+        "revision": STR, "audience_role": role, "title": STR, "created_at": milliseconds,
+        "stale": {"type": "boolean"}, "favorite": {"type": "boolean"}, "analysis": REF("Analysis")})
+    d["LiveFeedData"] = obj({"items": array(REF("LiveCard"), maxItems=100), "next_cursor": {"type": ["string", "null"]}})
+    d["LiveSubscriptionData"] = obj({"company_id": ID, "audience_role": role, "limit": {"type": "integer"}, "min_score": {"type": "number"},
+        "enabled": {"type": "boolean"}, "next_scan": milliseconds, "last_scan": {"type": ["number", "null"]}, "error": {"type": ["string", "null"]}})
+    d["LiveJobData"] = obj({"id": ID, "kind": {"enum": ["analysis", "question"]}, "company_id": ID,
+        "news_id": ID, "analysis_id": {"type": ["string", "null"]}, "status": {"enum": ["queued", "running", "deferred", "succeeded", "failed", "superseded"]},
+        "title": {"type": "string"}, "attempts": {"type": "integer"}, "error": {"type": ["string", "null"]},
+        "next_attempt": milliseconds, "created_at": milliseconds, "updated_at": milliseconds,
+        "result": {"anyOf": [REF("AnalysisResponse"), REF("AnswerResponse"), {"type": "null"}]}})
+    d["LiveJobsData"] = obj({"items": array(REF("LiveJobData"), maxItems=100)})
+    d["LiveFavoriteData"] = obj({"id": ID, "favorite": {"type": "boolean"}})
+    d["LiveDetailData"] = obj({"card": REF("LiveCard"), "history": array(obj({"question": STR,"answer": STR,"response": REF("AnswerResponse"),"created_at": milliseconds})),
+        "versions": array(obj({"id": ID,"revision": STR,"created_at": milliseconds,"stale": {"type":"boolean"}}))})
+    # Operational telemetry is deliberately extensible; LLM output contracts remain strict.
+    d["LiveStatusData"] = {"type": "object"}
+    d["BudgetStatusData"] = {"type": "object"}
+    for name in ["LiveFeedData", "LiveSubscriptionData", "LiveJobData", "LiveJobsData", "LiveFavoriteData", "LiveDetailData", "LiveStatusData", "BudgetStatusData", "Profile", "CompaniesData", "RankData", "SearchData", "RagData", "ResolveData", "Analysis", "Answer", "HealthData", "FeedbackData", "LearningStatusData", "PreparedContextData", "IngestData", "FeedRefreshData", "FeedStatusData", "RuntimeData"]:
         d[name + "Response"] = obj({"meta": REF("Meta"), "data": REF(name)})
     routes = [
+        ("get", "/v1/live/feed", None, "LiveFeedDataResponse", 5),
+        ("get", "/v1/live/status", None, "LiveStatusDataResponse", 5),
+        ("get", "/v1/budget", None, "BudgetStatusDataResponse", 5),
+        ("post", "/v1/live/subscriptions", "LiveSubscribeRequest", "LiveSubscriptionDataResponse", 5),
+        ("post", "/v1/live/scan", "LiveScanRequest", "LiveStatusDataResponse", 5),
+        ("get", "/v1/live/jobs", None, "LiveJobsDataResponse", 5),
+        ("get", "/v1/live/jobs/{job_id}", None, "LiveJobDataResponse", 5),
+        ("get", "/v1/live/analyses/{analysis_id}", None, "LiveDetailDataResponse", 5),
+        ("post", "/v1/live/analyses/{analysis_id}/favorite", "LiveFavoriteRequest", "LiveFavoriteDataResponse", 5),
+        ("post", "/v1/live/analyses/{analysis_id}/questions", "LiveQuestionRequest", "LiveJobDataResponse", 5),
         ("post", "/v1/learning/feedback", "FeedbackRequest", "FeedbackDataResponse", 5),
         ("get", "/v1/learning/status", None, "LearningStatusDataResponse", 5),
         ("get", "/v1/health", None, "HealthDataResponse", 5),
+        ("get", "/v1/runtime", None, "RuntimeDataResponse", 5),
         ("get", "/v1/companies", None, "CompaniesDataResponse", 1),
         ("get", "/v1/companies/{company_id}", None, "ProfileResponse", 1),
         ("post", "/v1/rank", "RankRequest", "RankDataResponse", 1),
         ("post", "/v1/tools/search_news", "SearchRequest", "SearchDataResponse", 3),
         ("post", "/v1/news", "IngestRequest", "IngestDataResponse", 3),
         ("post", "/v1/feeds/refresh", "FeedRefreshRequest", "FeedRefreshDataResponse", 3),
+        ("get", "/v1/feeds/status", None, "FeedStatusDataResponse", 3),
         ("post", "/v1/tools/rag_bank_analytics", "RagRequest", "RagDataResponse", 3),
         ("post", "/v1/tools/resolve_sources", "ResolveRequest", "ResolveDataResponse", 3),
         ("post", "/v1/analyze", "AnalyzeRequest", "AnalysisResponse", 2),
@@ -208,7 +266,7 @@ def generate():
     paths = {}
     for method, path, request, response, owner in routes:
         params = []
-        for key in ["company_id", "analysis_id"]:
+        for key in ["company_id", "analysis_id", "job_id"]:
             if "{" + key + "}" in path:
                 params.append({"name": key, "in": "path", "required": True, "schema": ID})
         if path == "/v1/companies":
@@ -220,15 +278,21 @@ def generate():
               "tags": [f"role-{owner}"], "parameters": params,
               "responses": {"200": {"description": "Validated result", "content": {"application/json": {"schema": REF(response)}}},
                             **{str(code): {"description": "Error", "content": {"application/json": {"schema": REF("Error")}}}
-                               for code in [400, 403, 404, 409, 413, 415, 422, 429, 500, 502, 503, 504]}}}
+                               for code in [400, 401, 403, 404, 409, 413, 415, 422, 429, 500, 502, 503, 504]}}}
         if path.startswith("/v1/learning/"):
-            op["security"] = [{"LearningToken": []}]
+            op["security"] = [{"BearerAuth": [], "LearningToken": []}, {"BrowserSession": [], "LearningToken": []}]
+        elif path == "/v1/health":
+            op["security"] = []
+        elif path.startswith("/v1/agent/"):
+            op["security"] = [{"InternalToken": []}]
+        if method == "post" and path.startswith("/v1/live/") and (path.endswith("/questions")):
+            op["responses"]["202"] = op["responses"].pop("200")
         if request:
             op["requestBody"] = {"required": True, "content": {"application/json": {"schema": REF(request)}}}
         paths.setdefault(path, {})[method] = op
     api = {"openapi": "3.1.0", "info": {"title": "Alfa News integration API", "version": "1.0.0",
-            "description": "Local development API. Company selection scopes data, it is not authentication. /v1/agent/analyze is internal."},
-           "servers": [{"url": "http://localhost:8000"}], "paths": paths, "components": {"schemas": copy.deepcopy(d), "securitySchemes": {"LearningToken": {"type": "apiKey", "in": "header", "name": "X-Learning-Token"}}}}
+            "description": "Gateway: OIDC company grants and private analysis ownership. Explicit development mode only is unauthenticated. /v1/agent/* belongs to a private service, not the gateway."},
+           "servers": [{"url": "http://localhost:8000"}], "security": [{"BearerAuth": []}, {"BrowserSession": []}], "paths": paths, "components": {"schemas": copy.deepcopy(d), "securitySchemes": {"BearerAuth": {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}, "BrowserSession": {"type": "apiKey", "in": "cookie", "name": "__Host-alfa-session"}, "InternalToken": {"type": "apiKey", "in": "header", "name": "X-Internal-Token"}, "LearningToken": {"type": "apiKey", "in": "header", "name": "X-Learning-Token"}}}}
     api = json.loads(json.dumps(api).replace("#/$defs/", "#/components/schemas/"))
     return {"schema.json": {"$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "urn:alfa:integration:v1", "$defs": d},
             "openapi.json": api}

@@ -1,3 +1,4 @@
+import { withLlmBudgetContext } from "../llm-budget.js";
 import { generationContext } from "./generation-context.js";
 import { randomUUID } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
@@ -38,7 +39,7 @@ async function generate(settings: Settings, db: Store, prompt: string, data: Jso
   for (let attempt = 0; attempt < 2; attempt++) {
     // Transport/auth/quota/refusal errors are outside the repair block: never retry a billed POST blindly.
     let message: Json;
-    try { message = await complete(messages, undefined, true, responseSchema, settings.generationMaxTokens); }
+    try { message = await withLlmBudgetContext({companyId:data.input?.company_id ?? data.prepared_input?.company_id,purpose:responseSchema.name === "GeneratedAnswer" ? "question" : "analysis"}, () => complete(messages, undefined, true, responseSchema, settings.generationMaxTokens)); }
     catch (error) {
       if (error instanceof ModelError && diagnostics) error.diagnostics = { ...diagnostics, attempts: attempt + 1 };
       throw error;
@@ -88,15 +89,15 @@ export async function generatePrepared(settings: Settings, db: Store, input: Jso
   ];
   return envelope({ ...draft, id: randomUUID(), company_id: input.company_id, news_id: input.event.news_id,
     created_at: new Date().toISOString(), sources: context.sources, mode: "live",
-    limitations: [...new Set([...draft.limitations, ...notices])],
+    // Service notices have their own envelope channel, never model grounding.
     trace: [{ step: "prepared_context", detail: "sha256=" + context.sha256 },
       { step: "grounding_check", detail: `${PROMPT_VERSION}; attempts=${attempts}; JSON, quotes, references, profile fields and conditions checked; semantics require expert review` },
+      ...input.research.limitations.filter((n:string)=>/\d/.test(n)).slice(0,20).map((n:string)=>({step:"retrieval_limitation",detail:n.slice(0,1000)})),
       ...(diagnostics ? [{ step: "response_repair", detail: `diagnostic_id=${diagnostics.generation_id}; draft_saved=${diagnostics.draft_saved}; ${describeDiagnostics(diagnostics)}` }] : [])] }, id,
-    input.is_mock || context.sources.some(s => s.is_mock) ? "mock" : "live");
+    input.is_mock || context.sources.some(s => s.is_mock) ? "mock" : "live", [...new Set(notices)]);
 }
 /** Rebind a follow-up to the full reviewed input, including dates, ranking and its explanations. */
 export function prepareQuestionContext(input: Json, maxBytes = 200000) {
-  if (Buffer.byteLength(JSON.stringify(input)) > maxBytes) throw new ApiFault(422, "VALIDATION_ERROR", "Question context is too large");
   validate("AgentQuestionRequest", input, true);
   if (!input.prepared_input) throw new ApiFault(422, "VALIDATION_ERROR", "Live questions require prepared_input from the original analysis");
   const context = prepareContext(input.prepared_input, maxBytes), analysis = input.analysis;
@@ -111,14 +112,20 @@ export function prepareQuestionContext(input: Json, maxBytes = 200000) {
     && analysis.sources.every((s: Json) => isDeepStrictEqual(s, expected.get(s.id))), "Question changed saved evidence");
   fail(analysis.trace.some((t: Json) => t.step === "prepared_context" && t.detail === "sha256=" + context.sha256), "Question changed reviewed context");
   validateGrounding(analysisDraft(analysis), context, true);
+  // Count the actual deduplicated provider view, not repeated full evidence.
+  if (Buffer.byteLength(JSON.stringify(generationContext(context, input))) > maxBytes)
+    throw new ApiFault(422, "VALIDATION_ERROR", "Question context is too large");
   return context;
 }
 export async function answerPrepared(settings: Settings, db: Store, input: Json, id: string, request: typeof fetch = fetch) {
   const context = prepareQuestionContext(input, settings.maxContextBytes);
-  const { draft } = await generate(settings, db, QUESTION_PROMPT,
-    { ...generationContext(context, input),
-      advice_constraints: adviceConstraints(context.input), response_guidance: responseGuidance(context, settings.apiKey, "question"),
-      ...(settings.responseFormat === "json_schema" ? { strict_claims_layout: STRICT_CLAIMS_LAYOUT } : {}) },
+  const data = { ...generationContext(context, input),
+    advice_constraints: adviceConstraints(context.input), response_guidance: responseGuidance(context, settings.apiKey, "question"),
+    ...(settings.responseFormat === "json_schema" ? { strict_claims_layout: STRICT_CLAIMS_LAYOUT } : {}) };
+  // Guidance is part of the actual input too; reject before spending a call.
+  if (Buffer.byteLength(JSON.stringify(data)) > (settings.maxContextBytes ?? 200000))
+    throw new ApiFault(422, "VALIDATION_ERROR", "Question context is too large");
+  const { draft } = await generate(settings, db, QUESTION_PROMPT, data,
     withBudget(value => validateQuestionGrounding(value, context, true)), request,
     strictResponseSchema("GeneratedAnswer", settings.strictMaxClaimString));
   return envelope({ ...draft, analysis_id: input.analysis.id, company_id: input.company_id,

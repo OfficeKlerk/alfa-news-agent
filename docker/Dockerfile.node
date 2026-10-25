@@ -14,9 +14,11 @@ COPY package.json ./
 COPY frontend/ frontend/
 COPY integration/frontend/ integration/frontend/
 COPY integration/analysis_ui/ integration/analysis_ui/
+COPY integration/live_ui/ integration/live_ui/
 COPY integration/learning_ui/ integration/learning_ui/
 COPY integration/fixtures/ integration/fixtures/
 COPY contracts/ contracts/
+COPY config/*.json config/
 COPY data/*.gz data/research.json data/demo_news.json data/reviewed_news.json data/
 RUN mkdir -p var && chown node:node var
 USER node

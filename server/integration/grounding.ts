@@ -17,6 +17,15 @@ const nonblank = (s: unknown) => typeof s === "string" && Boolean(s.trim());
 function numbers(text: string) {
   return text.replace(/(\d)[\s\u00a0\u202f](?=\d{3}(?:\D|$))/g, "$1").match(/[-+−]?\d+(?:[.,]\d+)?/g)?.map(s => s.replace(",", ".").replace("−", "-").replace(/^\+/, "")) ?? [];
 }
+/** Only request horizons are exempt; amounts, rates and assertions remain checked.
+ * This view is used for recommendations/missing-data requests, never for claims. */
+export function dataRequestView(text: string): string {
+  return text.split(/(?<=[.!?;])\s+|\n/u).map(part => {
+    if (!/(?:график|истори[яию]|данные|отч[её]т|план\s+плат[её]ж|запроси|уточни|предостав|собра|получ|провер)/iu.test(part)
+      || /(?:составля|выраст|сниз|равн|увелич|достиг|превыс|потеряет|сэкономит|получит)/iu.test(part)) return part;
+    return part.replace(/((?:на|за)\s+(?:ближайш[а-яё]*|следующ[а-яё]*|последн[а-яё]*|предыдущ[а-яё]*|прошл[а-яё]*)\s+)\d{1,3}(?=\s+(?:дн(?:я|ей)|недел[а-яё]*|месяц[а-яё]*|квартал[а-яё]*|год[а-яё]*|лет)(?![а-яё]))/giu, "$1[горизонт]");
+  }).join("\n");
+}
 /** Financial figures belong in verbatim fact/bank quotes, not generated company impact.
  * Token membership alone would accept "company loses 14%" from a 14% policy rate.
  * This deliberately conservative lexical guard is not a general semantic validator.
@@ -146,14 +155,15 @@ export function validateGrounding(answer: Json, context: PreparedContext, server
         reject("Recommendation condition and required data must match: condition must match its AI claim", groundingPath + "/condition"); });
       run(() => { if (rec && !rec.required_data.every((item: string) => answer.missing_data.includes(item)))
         reject("Recommendation condition and required data must match: required_data must match missing_data", groundingPath + "/required_data"); });
-      section(text + (rec ? " " + rec.condition + " " + rec.required_data.join(" ") : ""), refs, "ai", path, refsPath);
+      section((rec ? dataRequestView(text) + " " + rec.condition + " " + rec.required_data.map(dataRequestView).join(" ") : text), refs, "ai", path, refsPath);
     }));
   }
   const allowedNotes = new Set(supports.flatMap(value => scan(value)));
   for (const key of ["limitations", "missing_data"]) for (const [i, note] of answer[key].entries()) {
     const path = "/" + key + "/" + i;
-    run(() => { if (scan(note).some(n => !allowedNotes.has(n))) reject("Unsupported limitation or missing-data number", path); });
-    run(() => { if (hasFinancialFigure(withoutCompanyId(note), okvedByClaim.flat())) reject("Financial figures are not allowed in limitations or missing_data", path); });
+    const checkedNote = key === "missing_data" ? dataRequestView(note) : note;
+    run(() => { if (scan(checkedNote).some(n => !allowedNotes.has(n))) reject("Unsupported limitation or missing-data number", path); });
+    run(() => { if (hasFinancialFigure(withoutCompanyId(checkedNote), okvedByClaim.flat())) reject("Financial figures are not allowed in limitations or missing_data", path); });
     for (const rule of cautiousLanguageRules(note, context.input)) run(() => reject(rule, path));
   }
   if (collectAll) {

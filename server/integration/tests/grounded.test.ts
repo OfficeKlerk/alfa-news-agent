@@ -92,8 +92,8 @@ test("live generation sends full original context, repairs once and exposes dete
       if(calls === 1) return reply({summary:"Invalid"}); return reply(referenceDraft(scenario));
     }) as typeof fetch);
     assert.equal(calls, 2); assert.equal(result.data.mode, "live");
-    assert.ok(result.data.limitations.some((s: string) => s.includes("Банковские материалы отсутствуют")));
-    assert.ok(result.data.limitations.some((s: string) => s.includes("синтетические")));
+    assert.ok(result.meta.warnings.some((s: string) => s.includes("Банковские материалы отсутствуют")));
+    assert.ok(result.meta.warnings.some((s: string) => s.includes("синтетические")));
     const prepared = JSON.parse(seen[0].messages[1].content);
     assert.deepEqual(prepared.input.profile, generationProfile(scenario.input.profile)); assert.equal(prepared.sha256, prepareContext(scenario.input).sha256);
     assert.deepEqual(prepared.input.ranked_item, scenario.input.ranked_item);

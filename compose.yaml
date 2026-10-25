@@ -7,6 +7,7 @@ services:
     ports:
       - "127.0.0.1:${GATEWAY_PORT:-8000}:8000"
     environment:
+      AUTH_MODE: development
       HOST: 0.0.0.0
       PORT: 8000
       ML_URL: ${ML_URL:-http://ml:8101}
@@ -46,6 +47,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.python
     environment:
+      AUTH_MODE: development
       CONTEXT_MODE: fixture
       CONTEXT_DB: /app/var/integration/context.sqlite3
       RANK_MODE: mock
@@ -62,6 +64,7 @@ services:
       dockerfile: docker/Dockerfile.node
     command: ["node", "dist/integration/mock-server.js"]
     environment:
+      AUTH_MODE: development
       HOST: 0.0.0.0
       PORT: 8102
     healthcheck:

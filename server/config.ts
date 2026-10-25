@@ -42,6 +42,34 @@ export interface Settings {
   host: string;
   port: number;
   feeds: string[];
+  newsEnabled?: boolean;
+  newsPollSeconds?: number;
+  newsSeedMode?: "demo" | "reviewed" | "none";
+  analysisEnabled?: boolean;
+  maxDailyTokens?: number;
+  maxCompanyDailyCalls?: number;
+  questionReserveCalls?: number;
+  questionReserveTokens?: number;
+  newsFullTextEnabled?: boolean;
+  newsFullTextConcurrency?: number;
+  newsFullTextMaxPerSource?: number;
+  newsFullTextRefreshSeconds?: number;
+  newsSourceConcurrency?: number;
+  liveEnabled?: boolean;
+  liveScanSeconds?: number;
+  liveLookbackDays?: number;
+  liveMaxCandidates?: number;
+  liveCompanyNewsLimit?: number;
+  liveMaxCompanies?: number;
+  liveWorkerConcurrency?: number;
+  liveMinScore?: number;
+}
+
+function flag(value: string | undefined, fallback: boolean, name: string): boolean {
+  if (value === undefined) return fallback;
+  if (["1", "true"].includes(value)) return true;
+  if (["0", "false"].includes(value)) return false;
+  throw new Error(name + " должен быть 0|1|false|true");
 }
 
 function integer(value: string | undefined, fallback: number, min = 0) {
@@ -102,10 +130,16 @@ export function loadSettings(env: NodeJS.ProcessEnv = process.env): Settings {
   if (
     !Array.isArray(feeds) ||
     !feeds.every(
-      (url) => typeof url === "string" && new URL(url).protocol === "https:",
+      (url) => typeof url === "string" && new URL(url).protocol === "https:"
+        && !new URL(url).username && !new URL(url).password,
     )
   )
     throw new Error("NEWS_FEEDS_JSON должен содержать HTTPS-адреса");
+  if (feeds.length > 64) throw new Error("NEWS_FEEDS_JSON поддерживает не более 64 источников");
+  const newsSeedMode = values.NEWS_SEED_MODE ?? "demo";
+  if (!["demo", "reviewed", "none"].includes(newsSeedMode)) throw new Error("NEWS_SEED_MODE должен быть demo|reviewed|none");
+  const newsEnabled = flag(values.NEWS_ENABLED, false, "NEWS_ENABLED");
+  if (newsEnabled && !feeds.length) throw new Error("Для NEWS_ENABLED=1 задайте NEWS_FEEDS_JSON");
   return {
     root: ROOT,
     data: resolve(values.DATA_DIR ?? resolve(ROOT, "data")),
@@ -132,5 +166,26 @@ export function loadSettings(env: NodeJS.ProcessEnv = process.env): Settings {
     host: values.HOST ?? "127.0.0.1",
     port: integer(values.PORT, 8000),
     feeds,
+    newsEnabled,
+    newsPollSeconds: integer(values.NEWS_POLL_SECONDS, 300, 30),
+    newsSeedMode: newsSeedMode as Settings["newsSeedMode"],
+    analysisEnabled: flag(values.ANALYSIS_ENABLED, true, "ANALYSIS_ENABLED"),
+    maxDailyTokens: integer(values.MAX_DAILY_LLM_TOKENS, 2_000_000),
+    maxCompanyDailyCalls: integer(values.MAX_COMPANY_DAILY_LLM_CALLS, 20),
+    questionReserveCalls: integer(values.LLM_QUESTION_RESERVE_CALLS, Math.min(10, Math.floor(integer(values.MAX_DAILY_LLM_CALLS, 100) / 5))),
+    questionReserveTokens: integer(values.LLM_QUESTION_RESERVE_TOKENS, Math.min(200_000, Math.floor(integer(values.MAX_DAILY_LLM_TOKENS, 2_000_000) / 5))),
+    newsFullTextEnabled: flag(values.NEWS_FULL_TEXT_ENABLED, false, "NEWS_FULL_TEXT_ENABLED"),
+    newsFullTextMaxPerSource: Math.min(100, integer(values.NEWS_FULL_TEXT_MAX_PER_SOURCE, 20, 1)),
+    newsFullTextConcurrency: Math.min(8, integer(values.NEWS_FULL_TEXT_CONCURRENCY, 3, 1)),
+    newsFullTextRefreshSeconds: integer(values.NEWS_FULL_TEXT_REFRESH_SECONDS, 3600, 60),
+    newsSourceConcurrency: Math.min(8, integer(values.NEWS_SOURCE_CONCURRENCY, 3, 1)),
+    liveEnabled: flag(values.LIVE_PIPELINE_ENABLED, false, "LIVE_PIPELINE_ENABLED"),
+    liveScanSeconds: integer(values.LIVE_SCAN_SECONDS, 60, 10),
+    liveLookbackDays: Math.min(90, integer(values.LIVE_LOOKBACK_DAYS, 7, 1)),
+    liveMaxCandidates: Math.min(1000, integer(values.LIVE_MAX_CANDIDATES, 500, 1)),
+    liveCompanyNewsLimit: Math.min(50, integer(values.LIVE_COMPANY_NEWS_LIMIT, 5, 1)),
+    liveMaxCompanies: Math.min(1000, integer(values.LIVE_MAX_COMPANIES, 100, 1)),
+    liveWorkerConcurrency: Math.min(8, integer(values.LIVE_WORKER_CONCURRENCY, 2, 1)),
+    liveMinScore: 0.2,
   };
 }

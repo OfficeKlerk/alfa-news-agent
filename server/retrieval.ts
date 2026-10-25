@@ -1,3 +1,4 @@
+import { BankSearch } from "./bank-search.js";
 import type { Store } from "./db.js";
 import type { Company, News, Json } from "./types.js";
 import { newsArticlesAsOf, normalizePublicationDate } from "./news-events.js";
@@ -21,61 +22,10 @@ const intersection = (a: Iterable<string>, b: Iterable<string>) => {
   return [...new Set(a)].filter((x) => right.has(x));
 };
 export class Retrieval {
+  private bank?: BankSearch;
   constructor(private db: Store) {}
   research(query: string, limit = 5, asOf?: string): Json[] {
-    const words = tokens(query),
-      themes = tags(query),
-      chunks: Json[] = [];
-    for (const row of this.db.all("SELECT payload FROM research")) {
-      const doc = JSON.parse(row.payload);
-      if (asOf) {
-        const publishedAt = normalizePublicationDate(doc.published_at ?? doc.published ?? doc.date).value;
-        if (!publishedAt || Date.parse(publishedAt) > Date.parse(asOf)) continue;
-      }
-      for (let start = 0; start < doc.text.length; start += 1400) {
-        const text = doc.text.slice(Math.max(0, start - 150), start + 1600),
-          terms = new Set(tokens(text));
-        const score =
-          intersection(words, terms).length / Math.sqrt(Math.max(1, terms.size)) + 0.3 * intersection(themes, tags(text)).length;
-        if (score > 0)
-          chunks.push({
-            ...doc,
-            id: doc.id + ":c" + start,
-            text,
-            score: Math.round(score * 1000) / 1000,
-          });
-      }
-    }
-    chunks.sort((a, b) => b.score - a.score);
-    // Show the strongest matching chunk from each document before extra context.
-    // This ordering is independent of limit, so a larger request preserves its prefix.
-    if (limit <= 0) return [];
-    const pages = new Map<string, number>(),
-      documents = new Set<string>(),
-      selected = new Set<string>(),
-      out: Json[] = [];
-    const documentKey = (doc: Json) => doc.document_id ?? doc.filename ?? doc.id.split(":c")[0];
-    const append = (doc: Json) => {
-      const page = JSON.stringify([documentKey(doc), doc.page]),
-        count = pages.get(page) ?? 0;
-      if (selected.has(doc.id) || count >= 2) return;
-      out.push(doc);
-      selected.add(doc.id);
-      pages.set(page, count + 1);
-    };
-    for (const doc of chunks) {
-      const key = documentKey(doc);
-      if (documents.has(key)) continue;
-      documents.add(key);
-      append(doc);
-      if (out.length >= limit) return out;
-    }
-    // Small corpora still provide additional chunks, with at most two per page.
-    for (const doc of chunks) {
-      append(doc);
-      if (out.length >= limit) break;
-    }
-    return out;
+    return (this.bank ??= new BankSearch(this.db)).search(query, limit, asOf);
   }
   rank(company: Company, news: News) {
     const interest = new Set(tags(company.industry));

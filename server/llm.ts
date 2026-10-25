@@ -1,6 +1,7 @@
 import type { Store } from "./db.js";
 import { RESERVED_BODY_KEYS, type Settings } from "./config.js";
 import { ModelError, type Json } from "./types.js";
+import { reserveLlmCall, settleLlmCall } from "./llm-budget.js";
 import { SPECULATIVE_ABSENCE } from "./integration/generation-budget.js";
 export type ResponseSchema = { name: string; schema: Json };
 export type Complete = (messages: Json[], tools?: Json[], jsonMode?: boolean, responseSchema?: ResponseSchema, maxTokens?: number) => Promise<Json>;
@@ -39,19 +40,6 @@ export function createComplete(settings: Settings, db: Store, request: typeof fe
     try { base = new URL(settings.baseUrl); } catch { throw new ModelError("Некорректный адрес LLM API."); }
     if (base.protocol !== "https:" || base.username || base.password || base.search || base.hash)
       throw new ModelError("Для API нужен HTTPS-адрес без учётных данных и параметров.");
-    const day = new Date(Date.now() + 3 * 3600000).toISOString().slice(0, 10);
-    // No await inside the reservation: parallel jobs cannot overspend the local count limit.
-    db.connection.exec("BEGIN IMMEDIATE");
-    let callId: number | bigint;
-    try {
-      if (db.get("SELECT count(*) n FROM llm_calls WHERE day=?", day)!.n >= settings.maxCalls)
-        throw new ModelError("Достигнут локальный лимит вызовов модели за день (сброс в 00:00 МСК).", "MODEL_LIMIT", 429);
-      callId = db.run("INSERT INTO llm_calls(day,model) VALUES(?,?)", day, settings.model).lastInsertRowid;
-      db.connection.exec("COMMIT");
-    } catch (error) {
-      db.connection.exec("ROLLBACK");
-      throw error;
-    }
     // A technical cap, not a prompt plea: REPORT8 loops ran to 6000 tokens while accepted answers stayed under 1800.
     const outputLimit = jsonMode ? Math.min(settings.maxOutputTokens, maxTokens ?? settings.maxOutputTokens) : settings.maxPlanningTokens;
     const strict = jsonMode && settings.responseFormat === "json_schema" && !!responseSchema;
@@ -72,6 +60,7 @@ export function createComplete(settings: Settings, db: Store, request: typeof fe
     for (const extra of [settings.extraBody, strict ? settings.strictExtraBody : undefined])
       if (extra) for (const [key, value] of Object.entries(extra))
         if (!RESERVED_BODY_KEYS.includes(key)) payload[key] = value;
+    const callId = reserveLlmCall(settings, db, payload, outputLimit);
     try {
       const response = await request(settings.baseUrl + "/chat/completions", {
         method: "POST",
@@ -106,18 +95,13 @@ export function createComplete(settings: Settings, db: Store, request: typeof fe
         }
       } finally { await reader.cancel(); }
       const result: Json = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+      settleLlmCall(db, callId, result?.usage);
       if (!result || typeof result !== "object" || !Array.isArray(result.choices) || !result.choices.length)
         throw new ModelError("API модели вернул неожиданный формат ответа.");
       const choice = result.choices?.[0];
       const message = choice?.message;
       if (!message || typeof message !== "object" || Array.isArray(message)) throw new ModelError("API модели вернул неожиданный формат ответа.");
       const tokens = (v: unknown) => Number.isSafeInteger(v) && (v as number) >= 0 ? v as number : 0;
-      db.run(
-        "UPDATE llm_calls SET prompt_tokens=?,completion_tokens=? WHERE id=?",
-        tokens(result.usage?.prompt_tokens),
-        tokens(result.usage?.completion_tokens),
-        callId,
-      );
       // Token usage is recorded even when the provider truncates the answer.
       // A truncated response is not repairable JSON: do not spend another call on a blind repair.
       if (choice.finish_reason === "length" || choice.finish_reason === "max_tokens") {
@@ -139,6 +123,7 @@ export function createComplete(settings: Settings, db: Store, request: typeof fe
       }
       return message;
     } catch (error) {
+      settleLlmCall(db, callId);
       if (error instanceof ModelError) throw error;
       const details = error as { name?: string; cause?: { code?: string } };
       if (details?.name === "TimeoutError" || details?.name === "AbortError") {

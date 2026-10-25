@@ -1,3 +1,4 @@
+import { developmentAccess, enforceTenant, type Access } from "../access.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import express from "express";
@@ -36,8 +37,8 @@ function mlClient(mutate?: (path: string, value: Json) => void) {
     return Response.json(value);
   }) as typeof fetch);
 }
-async function harness(options: { agent?: AgentPort; retrieval?: RetrievalPort; ml?: ContractClient; maxSessions?: number; ttlMs?: number; maxContextBytes?: number } = {}) {
-  const app = createGateway({ ml: options.ml ?? mlClient(), retrieval: new MockRetrieval(), agent: options.agent ?? new MockAgent(), ...options });
+async function harness(options: { access?: Access; agent?: AgentPort; retrieval?: RetrievalPort; ml?: ContractClient; maxSessions?: number; ttlMs?: number; maxContextBytes?: number } = {}) {
+  const app = createGateway({ access: developmentAccess, ml: options.ml ?? mlClient(), retrieval: new MockRetrieval(), agent: options.agent ?? new MockAgent(), ...options });
   const server = app.listen(0, "127.0.0.1");
   await new Promise<void>(resolve => server.once("listening", resolve));
   const address = server.address(); assert.ok(address && typeof address !== "string");
@@ -377,4 +378,36 @@ test("preview applies the configured context limit before calling an agent", asy
     const result = await h.call("/v1/analysis-context",{company_id:"U_A",event,as_of:asOf,audience_role:"cfo"});
     assert.equal(result.status,422); assert.equal(result.value.error.code,"VALIDATION_ERROR");
   } finally { await h.close(); }
+});
+
+
+test("actual gateway filters company enumeration and binds saved analyses/questions to the authenticated owner", async () => {
+  const users = { alice: { subject: "alice", companies: ["U_A", "U_C"], roles: [] }, bob: { subject: "bob", companies: ["U_A", "U_C"], roles: [] }, outsider: { subject: "outsider", companies: ["U_C"], roles: [] } };
+  // Test-only identity injection; production OIDC signature and cookies are covered separately.
+  const access: Access = { secured: false, install(app) { app.use((req,res,next) => {
+    const p=users[req.get("X-Test-User") as keyof typeof users]; if(!p) throw new ApiFault(401,"UNAUTHORIZED","Login required");
+    res.locals.principal=p; enforceTenant(req,p); next();
+  }); } };
+  const h=await harness({access});
+  const call=async(user:string,path:string,data?:Json)=>{const r=await fetch(h.base+path,{headers:{...headers,"X-Test-User":user},method:data?"POST":"GET",...(data?{body:JSON.stringify(data)}:{})});return {status:r.status,value:await r.json() as Json};};
+  try {
+    assert.deepEqual((await call("outsider","/v1/companies")).value.data.items,["U_C"]);
+    assert.equal((await call("outsider","/v1/companies/U_A")).status,403);
+    assert.equal((await call("outsider","/v1/analyze",body)).status,403);
+    const a=await call("alice","/v1/analyze",body);assert.equal(a.status,200);const id=a.value.data.id;
+    assert.equal((await call("alice",`/v1/analyses/${id}?company_id=U_A`)).status,200);
+    assert.equal((await call("alice",`/v1/analyses/${id}?company_id=U_C`)).status,404);
+    assert.equal((await call("bob",`/v1/analyses/${id}?company_id=U_A`)).status,404,"same-company user cannot read a private analysis");
+    assert.equal((await call("outsider",`/v1/analyses/${id}?company_id=U_A`)).status,403);
+    assert.equal((await call("outsider",`/v1/analyses/${id}?company_id=U_C`)).status,404);
+    for(const user of ["bob","outsider"]) assert.equal((await call(user,`/v1/analyses/${id}/questions`,{company_id:"U_A",question:"Что уточнить?"})).status,user==="bob"?404:403);
+    assert.equal((await call("alice",`/v1/analyses/${id}/questions`,{company_id:"U_A",question:"Что уточнить?"})).status,200);
+  } finally {await h.close();}
+});
+test("authenticated gateway fails closed on demonstration and synthetic dependencies", async () => {
+  const h=await harness({access:{secured:true,install(){}}});
+  try {
+    const result=await h.call("/v1/companies/U_A");assert.equal(result.status,502);assert.equal(result.value.error.code,"CONTRACT_VIOLATION");
+    assert.equal((await h.call("/v1/analyze",body)).status,422,"no external generation from synthetic input");
+  } finally {await h.close();}
 });

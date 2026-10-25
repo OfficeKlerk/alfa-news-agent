@@ -1,3 +1,4 @@
+import { developmentAccess } from "../access.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
@@ -130,7 +131,7 @@ test("manual news is enriched before both direct ranking and analysis-context ML
       news_id:e.news_id,event_id:e.event_id,score:0.5,score_kind:"mock",reasons:[{code:"synthetic",text:"Тест подготовки события",profile_paths:["/industry/okved_code"]}],warnings:[]
     })),excluded_future_news_ids:[],truncated:false}, requestId, "mock"));
   }) as typeof fetch);
-  const server = createGateway({ml,agent:new MockAgent(),retrieval:new MockRetrieval()}).listen(0, "127.0.0.1");
+  const server = createGateway({ access: developmentAccess,ml,agent:new MockAgent(),retrieval:new MockRetrieval()}).listen(0, "127.0.0.1");
   await new Promise<void>(resolve => server.once("listening", resolve));
   const address = server.address(); assert.ok(address && typeof address !== "string");
   try {
