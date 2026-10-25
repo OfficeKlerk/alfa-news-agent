@@ -101,7 +101,7 @@ const referenceMetrics=Object.fromEntries([1,3,5].map(k=>[k,aggregateMetrics(ref
 let commit:string|null=null;try{commit=execFileSync("git",["rev-parse","HEAD"],{cwd:ROOT,encoding:"utf8"}).trim();}catch{}
 const evaluation={schema_version:"server_retrieval_evaluation_v1",generated_at:new Date().toISOString(),as_of:asOf,base_commit:commit,
  provenance:{corpus_sha256:hash(read("data/research.json")),queries_sha256:hash(read("data/demo/rag/queries.json")),
-  retrieval_code_sha256:hash(read("server/retrieval.ts")),adapter_code_sha256:hash(read("server/integration/retrieval.ts")),
+  retrieval_code_sha256:hash(read("server/retrieval.ts")),bank_index_code_sha256:hash(read("server/bank-search.ts")),bank_query_code_sha256:hash(read("server/integration/bank-query.ts")),adapter_code_sha256:hash(read("server/integration/retrieval.ts")),
   bm25_code_sha256:hash(read("scripts/rag_reference_retriever.py")),evaluator_code_sha256:hash(read("scripts/evaluate_server_retrieval.ts")),metrics_code_sha256:hash(read("server/integration/retrieval-evaluation.ts")),freshness_code_sha256:hash(read("server/integration/retrieval-freshness.ts")),eligible_corpus_sha256:hash(readFileSync(eligibleCorpusPath)),reference_sha256:hash(readFileSync(referencePath))},
  protocol:{query_count:queries.length,corpus_pages:pages.length,corpus_documents:new Set(pages.map(p=>p.document_id)).size,
  eligible_pages:eligiblePages.length,eligible_documents:new Set(eligiblePages.map(p=>p.document_id)).size,source_pool_depth:depth,repeats,warmup_per_query:1,node:process.version,platform:process.platform,

@@ -49,14 +49,14 @@ export class Store {
       const documents: Json[] = JSON.parse(readFileSync(join(this.settings.data, 'research.json'), 'utf8'));
       const putDocument = this.connection.prepare('INSERT OR REPLACE INTO research VALUES(?,?)');
       for (const doc of documents) putDocument.run(doc.id, JSON.stringify(doc));
-      if (!this.get('SELECT 1 FROM news LIMIT 1')) {
+      if ((this.settings.newsSeedMode ?? 'demo') === 'demo' && !this.get('SELECT 1 FROM news LIMIT 1')) {
         const items: Json[] = JSON.parse(readFileSync(join(this.settings.data, 'demo_news.json'), 'utf8'));
         const insert = this.connection.prepare('INSERT INTO news VALUES(?,?,?,?,?,?,?)');
         for (const n of items) insert.run(n.id, n.title, n.text, n.url ?? '', n.published, JSON.stringify(n.tags), 1);
       }
       this.connection.exec('COMMIT');
     } catch (error) { this.connection.exec('ROLLBACK'); throw error; }
-    importReviewedNews(this, join(this.settings.data, 'reviewed_news.json'));
+    if (this.settings.newsSeedMode !== 'none') importReviewedNews(this, join(this.settings.data, 'reviewed_news.json'));
   }
   private async importCsv(filename: string, sql: string, convert: (row: Json) => SQLInputValue[]) {
     const input = createReadStream(join(this.settings.data, filename + '.gz'));

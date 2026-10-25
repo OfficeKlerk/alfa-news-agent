@@ -88,10 +88,14 @@ class RankAdapter:
                 features = card["company_evidence"]["features"]
                 basis = {"rule_subject_taxonomy": "тематическое сопоставление по правилам; применимость условий не подтверждена",
                          "explicit_target_okved": "совпадение явно указанного целевого ОКВЭД"}
+                # Explain actual score contributions, not zero-weight flags which
+                # happen to be present in the feature vector.
+                active = {entry["feature"] for entry in card["model_assessment"]["feature_contributions"]
+                          if entry["contribution"] != 0}
                 reasons = [{"code": key, "text": f"{key}: {features['values'][key]}" +
                             (" (" + basis[value["match_basis"]] + ")" if value.get("match_basis") in basis else ""),
                             "profile_paths": value["profile_pointers"]}
-                           for key, value in features["evidence"].items() if features["values"][key]]
+                           for key, value in features["evidence"].items() if key in active]
                 contributions = [{"feature": entry["feature"], "value": entry["value"],
                                   "coefficient": entry["coefficient"], "contribution": entry["contribution"],
                                   "scale": entry["scale"],
@@ -103,7 +107,8 @@ class RankAdapter:
                               "feature_version": features["version"], "feature_contributions": contributions,
                               "score_kind": card["score_kind"], "reasons": reasons or [
                                   {"code": "baseline", "text": "Базовая оценка; прямое влияние не подтверждено", "profile_paths": []}],
-                              "warnings": card["self_check"]["warnings"]})
+                              "warnings": sorted(set(card["self_check"]["warnings"] +
+                                  (["freshness_only_no_company_signal"] if active == {"freshness"} else [])))})
             data = {"company_id": result["company_id"], "as_of": result["as_of"], "items": items,
                     "excluded_future_news_ids": result["excluded_future_news_ids"], "truncated": result["truncated"]}
             if self.learning and exposure_id:

@@ -93,3 +93,28 @@ def test_model_path_cannot_be_ignored_in_mock_mode(monkeypatch, model_file):
     monkeypatch.setenv("RANK_MODEL_PATH", str(model_file))
     with pytest.raises(ValueError, match="requires RANK_MODE=news-analysis"):
         RankAdapter()
+
+
+def test_zero_weight_features_are_not_presented_as_personal_reasons(tmp_path, monkeypatch, model_file):
+    configure(monkeypatch, tmp_path, model_file)
+    body = json.loads((ROOT / "contracts/v1/examples/rank-request.json").read_text())
+    with TestClient(create_app()) as client:
+        response = client.post("/v1/rank", json=body)
+        assert response.status_code == 200, response.text
+        items = response.json()["data"]["items"]
+        assert items
+        for item in items:
+            assert all(c["contribution"] == 0 for c in item["feature_contributions"])
+            assert [reason["code"] for reason in item["reasons"]] == ["baseline"]
+
+
+def test_explanations_always_correspond_to_actual_score_contributions(tmp_path, monkeypatch):
+    configure(monkeypatch, tmp_path)
+    body = json.loads((ROOT / "contracts/v1/examples/rank-request.json").read_text())
+    with TestClient(create_app()) as client:
+        response = client.post("/v1/rank", json=body)
+        assert response.status_code == 200, response.text
+        for item in response.json()["data"]["items"]:
+            active = {c["feature"] for c in item["feature_contributions"] if c["contribution"] != 0}
+            assert {r["code"] for r in item["reasons"]} == (active or {"baseline"})
+            assert ("freshness_only_no_company_signal" in item["warnings"]) == (active == {"freshness"})

@@ -26,6 +26,14 @@ class ApiError(Exception):
 def create_app():
     @asynccontextmanager
     async def lifespan(app):
+        mode = os.environ.get("AUTH_MODE", "oidc")
+        if mode not in {"oidc", "development"}:
+            raise ValueError("AUTH_MODE must be oidc or development")
+        if mode != "development":
+            if not re.fullmatch(r"[A-Za-z0-9_-]{32,}", os.environ.get("INTERNAL_API_TOKEN", "")):
+                raise ValueError("A random INTERNAL_API_TOKEN is required")
+            if os.environ.get("CONTEXT_MODE") != "existing" or os.environ.get("RANK_MODE") != "news-analysis":
+                raise ValueError("Production ML requires existing company data and news-analysis, without fixtures or mock ranker")
         app.state.database, app.state.context_mode = prepare_context()
         app.state.ranker = RankAdapter()
         app.state.learning = None
@@ -65,6 +73,11 @@ def create_app():
     async def boundary(request: Request, call_next):
         candidate = request.headers.get("X-Request-ID", "")
         request.state.request_id = candidate if re.fullmatch(r"[A-Za-z0-9_:.\-]{1,160}", candidate) else str(uuid4())
+        if request.url.path != "/v1/health" and os.environ.get("AUTH_MODE") != "development":
+            expected = os.environ.get("INTERNAL_API_TOKEN", "")
+            supplied = request.headers.get("X-Internal-Token", "")
+            if len(expected) < 32 or not hmac.compare_digest(supplied.encode(), expected.encode()):
+                return failure(request, 401, "UNAUTHORIZED", "Service authentication required")
         # Bound the stream, including requests without Content-Length.
         body = bytearray()
         async for chunk in request.stream():
@@ -182,7 +195,6 @@ def create_app():
         from starlette.concurrency import run_in_threadpool
         def compute():
             with ContextStore(app.state.database) as store:
-                store.get_company_profile(body["company_id"])
                 return app.state.ranker.rank(store, body, request.state.request_id)
         data = await run_in_threadpool(compute)
         return result(request, "RankDataResponse", data,

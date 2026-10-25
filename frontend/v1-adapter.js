@@ -45,6 +45,7 @@
       headers: { "Content-Type": "application/json", ...(companyId ? { "X-Company-ID": companyId } : {}) },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
+    if (r.status === 401) window.location.assign("/auth/login");
     const v = await r.json();
     if (!r.ok) {
       const diagnostics = v.error?.diagnostics;
@@ -89,7 +90,7 @@
     };
   }
 
-  function mapAnalysis(a, role) {
+  function mapAnalysis(a, role, warnings = []) {
     const ev = eventsCache.get(a.news_id);
     return {
       id: a.id, news_id: a.news_id, company_id: a.company_id,
@@ -97,7 +98,7 @@
       summary: a.summary, why_relevant: a.why_relevant,
       claims: (a.claims || []).map((c) => ({ kind: c.kind, text: c.text, source_ids: c.source_ids || [] })),
       risks: a.risks || [], opportunities: a.opportunities || [],
-      actions: a.recommendations || [], limitations: a.limitations || [],
+      actions: a.recommendations || [], limitations: [...new Set([...(a.limitations || []), ...warnings])],
       sources: (a.sources || []).map(mapSource),
       trace: (a.trace || []).map((t, i) => ({
         step: t.step || "шаг " + (i + 1), detail: t.detail || "", elapsed_ms: t.elapsed_ms || 0,
@@ -181,7 +182,7 @@
     if (p === "/api/analysis" && method === "POST") {
       const role = ROLE[body.role] || "cfo";
       const r = await v1("/v1/analyze", { company_id: companyId, news_id: body.news_id, as_of: nowIso(), audience_role: role }, companyId);
-      const mapped = mapAnalysis(r.data, body.role || "");
+      const mapped = mapAnalysis(r.data, body.role || "", r.meta.warnings);
       const jobId = "v1-" + mapped.id;
       jobs.set(jobId, mapped);
       return { job_id: jobId };
@@ -203,7 +204,7 @@
     if (p.startsWith("/api/analyses/") && method === "GET") {
       const id = decodeURIComponent(p.slice("/api/analyses/".length));
       const r = await v1("/v1/analyses/" + encodeURIComponent(id));
-      return mapAnalysis(r.data, "");
+      return mapAnalysis(r.data, "", r.meta.warnings);
     }
 
     if (p === "/api/news" && method === "POST") {

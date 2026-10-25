@@ -65,7 +65,7 @@ const denied = (text: string) => /(?:опроверг|недостовер|ок�
 const excludedScope = (text: string) => /(?:не\s+(?:применя|распространя|каса|затрагива|участв|относи)|за\s+исключением|кроме\s|исключен[а-я]*\s+из)/i.test(text);
 type RateObservation = { quote: string; direction: string; magnitude: number | null; level: number | null; date: string | null; forecast: boolean };
 function rateObservation(quote: string): RateObservation | null {
-  const lower = quote.toLowerCase().replaceAll("ё", "е");
+  const lower = quote.toLowerCase().replaceAll("ё", "е").replace(/\s+/g," ");
   if (denied(lower)) return null;
   const issuer = "(?:совет директоров банка россии|банк россии|цб(?: рф)?)";
   const date = "(?:\\d{1,2}\\s+(?:" + MONTHS.join("|") + ")\\s+\\d{4}(?:\\s+года)?)";
@@ -281,6 +281,9 @@ export function articleToEvent(article: Json): Json | null {
     event_type: "other", published_at: published.value, event_at: null, fact_status: "reported", okved_divisions: [], countries: [], regions: [], company_ids: [], entity_mapping_source: null,
     sources: [{ id: sourceId, kind: "news", title: article.title, url: article.url || "https://example.invalid/demo/" + article.id,
       excerpt: article.title + "\n" + article.text, document_id: null, page: null, published_at: article.available_at ?? published.value, is_mock: Boolean(article.is_demo) }], is_mock: Boolean(article.is_demo) });
+  if (article.content_scope || article.material_version_id || article.version_id) event.content = {
+    scope: article.content_scope ?? "provided", material_revision: article.material_version_id ?? article.version_id ?? sourceId,
+    version_id: article.version_id ?? sourceId, warnings: article.warnings ?? [] };
   event.event_id = eventIdentity(event);
   return event;
 }
@@ -305,8 +308,10 @@ export function newsArticlesAsOf(db: Store, asOf: string, newsId?: string): News
 
 export function clusterEvents(events: Json[]): Json[] {
   const grouped = new Map<string, Json>();
+  const members = new Map<string,Json[]>();
   // First announcement defines freshness; later reporting adds evidence, not recency.
   for (const event of [...events].sort((a, b) => a.published_at.localeCompare(b.published_at) || a.news_id.localeCompare(b.news_id))) {
+    members.set(event.event_id,[...(members.get(event.event_id) ?? []),event]);
     const prior = grouped.get(event.event_id);
     if (!prior) { grouped.set(event.event_id, structuredClone(event)); continue; }
     for (const source of event.sources) if (!prior.sources.some((s: Json) => s.id === source.id)) prior.sources.push(source);
@@ -324,6 +329,29 @@ export function clusterEvents(events: Json[]): Json[] {
       }
       for (const row of event.event_details.evidence) if (!prior.event_details.evidence.some((e: Json) => JSON.stringify(e) === JSON.stringify(row))) prior.event_details.evidence.push(row);
     }
+  }
+  for (const [eventId,group] of members) {
+    if (group.length < 2 || !group.some(event => event.content)) continue;
+    const merged=grouped.get(eventId)!;
+    // The logical news ID and first publication stay stable. Full evidence may
+    // come from a later source, and must agree with the promoted content scope.
+    const quality=(event:Json) => (({article_full:3,feed_content:2,provided:1,feed_excerpt:0} as Record<string,number>)[event.content?.scope as string] ?? 1);
+    const official=(event:Json) => event.event_type === "rate_change" && event.sources.some((source:Json)=> {
+      try { return /(?:^|\.)cbr\.ru$/i.test(new URL(source.url).hostname); } catch { return false; }
+    }) ? 1 : 0;
+    const preferred=[...group].sort((a,b)=>quality(b)-quality(a) || official(b)-official(a) || b.text.length-a.text.length || a.published_at.localeCompare(b.published_at) || a.news_id.localeCompare(b.news_id))[0];
+    merged.title=preferred.title;merged.text=preferred.text;
+    const revisions=[...new Set(group.map(event => event.content?.material_revision ?? fingerprint(JSON.stringify([event.title,event.text,event.published_at]))))].sort();
+    const warnings=new Set<string>(preferred.content?.warnings ?? []);
+    for (const member of group) if (member !== preferred) for (const warning of member.content?.warnings ?? []) {
+      if (/rss_excerpt_only_full_article_not_fetched|full_article_fetch_failed|full_article_waiting_for_fetch_slot/.test(warning)) warnings.add("cluster_has_partial_secondary_sources");
+      else if (/source_text_truncated/.test(warning)) warnings.add("cluster_has_truncated_secondary_sources");
+      else warnings.add(warning);
+    }
+    merged.content={scope:preferred.content?.scope ?? "provided",
+      material_revision:revisions.length===1 ? revisions[0] : fingerprint(JSON.stringify(revisions)),
+      version_id:"cluster:"+fingerprint(JSON.stringify(merged.sources.map((source:Json)=>source.id).sort())),
+      warnings:[...warnings]};
   }
   return [...grouped.values()].sort((a, b) => b.published_at.localeCompare(a.published_at) || a.news_id.localeCompare(b.news_id));
 }

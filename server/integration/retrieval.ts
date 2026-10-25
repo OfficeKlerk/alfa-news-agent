@@ -5,10 +5,12 @@ import type { Json } from "../types.js";
 import type { Store } from "../db.js";
 import type { Retrieval } from "../retrieval.js";
 import type { Settings } from "../config.js";
+import type { NewsCollector } from "../news-collector.js";
 import { saveNews, ingestFeeds } from "../news.js";
 import { articleToEvent, clusterEvents, newsArticlesAsOf, normalizePublicationDate } from "../news-events.js";
 import { ApiFault, envelope, validate, type Envelope } from "./contracts.js";
 import { ContractClient } from "./client.js";
+import { sourceBalancedCandidates } from "./news-candidates.js";
 
 export interface RetrievalPort {
   search(body: Json, requestId: string): Promise<Envelope>;
@@ -16,6 +18,7 @@ export interface RetrievalPort {
   resolve(body: Json, requestId: string): Promise<Envelope>;
   ingest?(body: Json, requestId: string): Promise<Envelope>;
   refresh?(body: Json, requestId: string): Promise<Envelope>;
+  status?(requestId: string): Promise<Envelope>;
 }
 export class HttpRetrieval implements RetrievalPort {
   constructor(private client: ContractClient) {}
@@ -23,7 +26,9 @@ export class HttpRetrieval implements RetrievalPort {
   rag(body: Json, id: string) { return this.client.call("/v1/tools/rag_bank_analytics", "RagDataResponse", id, body); }
   resolve(body: Json, id: string) { return this.client.call("/v1/tools/resolve_sources", "ResolveDataResponse", id, body); }
   ingest(body: Json, id: string) { return this.client.call("/v1/news", "IngestDataResponse", id, body); }
-  refresh(body: Json, id: string) { return this.client.call("/v1/feeds/refresh", "FeedRefreshDataResponse", id, body); }
+  // Five configured feeds may each consume their 20-second deadline.
+  refresh(body: Json, id: string) { return this.client.call("/v1/feeds/refresh", "FeedRefreshDataResponse", id, body, {}, 120_000); }
+  status(id: string) { return this.client.call("/v1/feeds/status", "FeedStatusDataResponse", id); }
 }
 export class MockRetrieval implements RetrievalPort {
   private events: Json[] = JSON.parse(readFileSync(resolve(ROOT, "integration/fixtures/events.json"), "utf8"));
@@ -46,15 +51,30 @@ const date = (value: unknown) => normalizePublicationDate(value).value;
 
 /** SQLite projection with publication-time filtering and source-preserving event clustering. */
 export class LegacyRetrieval implements RetrievalPort {
-  constructor(private db: Store, private retrieval: Retrieval, private settings: Settings = db.settings) {}
+  constructor(private db: Store, private retrieval: Retrieval, private settings: Settings = db.settings, private collector?: NewsCollector, private allowSynthetic = true) {}
   private articles(asOf: string, newsId?: string): Json[] {
     return newsArticlesAsOf(this.db, asOf, newsId);
   }
   async search(body: Json, id: string) {
-    const events = this.articles(body.as_of, body.news_id).map(articleToEvent).filter((event): event is Json => event !== null);
-    const items = clusterEvents(events).filter(event => !body.query || [event.title, event.text, ...event.sources.map((s: Json) => s.excerpt)].join(" ").toLowerCase().includes(body.query.toLowerCase())).slice(0, body.limit);
+    const articles = this.articles(body.as_of);
+    // Build the complete cluster before selecting a publication window, otherwise
+    // candidate and worker lookups would disagree on their evidence/revision hash.
+    const events = articles.map(articleToEvent).filter((event): event is Json => event !== null && (this.allowSynthetic || !event.is_mock));
+    const requested = body.news_id ? events.find(event=>event.news_id===body.news_id) : undefined;
+    const candidates = clusterEvents(body.news_id ? events.filter(event=>event.event_id===requested?.event_id) : events)
+      .filter(event=>!body.since || body.news_id || Date.parse(event.published_at)>=Date.parse(body.since))
+      .filter(event => !body.query || [event.title, event.text, ...event.sources.map((s: Json) => s.excerpt)].join(" ").toLowerCase().includes(body.query.toLowerCase()));
+    // A worker must receive the same complete event cluster as candidate search;
+    // the requested logical article ID continues to bind its job/card history.
+    if (body.news_id) for (const event of candidates) event.news_id=body.news_id;
+    const selection = body.news_id ? { items: candidates.slice(0, body.limit), balanced: false } : sourceBalancedCandidates(candidates, body.candidate_limit ?? body.limit);
+    const offset = body.offset ?? 0;
+    const items = selection.items.slice(offset, offset + body.limit);
     for (const event of items) validate("Event", event, true);
-    return envelope({ items }, id, items.some(e => e.is_mock) ? "mock" : "live", ["conservative_rule_extraction", "undated_invalid_future_news_excluded", "date_only_news_assume_utc_end_of_day"]);
+    const shown = new Set(items.flatMap(e => e.sources.map((s: Json) => s.id)));
+    const contentWarnings = articles.filter(a => shown.has(a.source_id)).flatMap(a => (a.warnings ?? [])
+      .filter((warning: string) => ["rss_excerpt_only_full_article_not_fetched", "source_text_truncated_18000"].includes(warning)));
+    return envelope({ items, total_candidates: selection.items.length, next_offset: offset + items.length < selection.items.length ? offset + items.length : null }, id, items.some(e => e.is_mock) ? "mock" : "live", [...new Set(["conservative_rule_extraction", "undated_invalid_future_news_excluded", "date_only_news_assume_utc_end_of_day", ...(selection.balanced ? ["source_balanced_candidate_window"] : []), ...contentWarnings])]);
   }
   async ingest(body: Json, id: string) {
     const saved = saveNews(this.db, body);
@@ -63,7 +83,11 @@ export class LegacyRetrieval implements RetrievalPort {
     return envelope({ item, news_id: saved.id, date_status: saved.date_status, ingestion_status: saved.ingestion_status, warnings: saved.warnings }, id, "live", saved.warnings);
   }
   async refresh(_body: Json, id: string) {
-    return envelope(await ingestFeeds(this.settings, this.db), id, "live");
+    return envelope(await (this.collector ? this.collector.refresh() : ingestFeeds(this.settings, this.db)), id, "live");
+  }
+  async status(id: string) {
+    if (!this.collector) throw new ApiFault(503, "DEPENDENCY_UNAVAILABLE", "Collector status is unavailable");
+    return envelope(this.collector.status(), id, "live");
   }
   async rag(body: Json, id: string) {
     const items = this.retrieval.research(body.query, body.limit, body.as_of).map(doc => ({ id: "research:" + doc.id, kind: "bank", title: doc.title,
@@ -100,7 +124,7 @@ export class LegacyRetrieval implements RetrievalPort {
           }
         }
       }
-      if (source) items.push(source); else unknown_ids.push(key);
+      if (source && (this.allowSynthetic || !source.is_mock)) items.push(source); else unknown_ids.push(key);
     }
     return envelope({ items, unknown_ids }, id, items.some(s => s.is_mock) ? "mock" : "live", ["undated_bank_pages_excluded"]);
   }

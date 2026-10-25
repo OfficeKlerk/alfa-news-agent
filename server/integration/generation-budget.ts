@@ -13,13 +13,16 @@ export function generationBudgetIssues(draft: Json): FieldIssue[] {
   if (draft.claims.filter((c: Json) => c?.kind === "bank").length > GENERATION_BANK_CLAIM_LIMIT)
     issues.push({ stage: "grounding", path: "/claims", rule: "Too many bank claims", limit: GENERATION_BANK_CLAIM_LIMIT });
   // REPORT8 truncations were loops of one claim; a complete draft with a copy gets the same compact rebuild.
-  // REPORT9: loops also produced near-copies that differ only in punctuation or one word.
-  const texts: { kind: string; words: Set<string>; norm: string }[] = draft.claims.filter((c: Json) => typeof c?.text === "string").map((c: Json) => {
+  // Punctuation-only copies remain duplicates; changing one word may change a fact.
+  const texts: { kind: string; norm: string; quantities: string }[] = draft.claims.filter((c: Json) => typeof c?.text === "string").map((c: Json) => {
     const norm = c.text.toLowerCase().replaceAll("ё", "е").replace(/[^\p{L}\d]+/gu, " ").trim();
-    return { kind: c.kind, norm, words: new Set(norm.split(" ").filter(Boolean)) };
+    const quantities = JSON.stringify(c.text.match(/[+−-]?\d+(?:[.,]\d+)?|[%₽$€£]/gu) ?? []);
+    return { kind: c.kind, norm: norm.split(" ").filter((word: string) => !/^(?:также|же|именно|соответственно)$/.test(word)).join(" "), quantities };
   });
-  const near = (a: typeof texts[number], b: typeof texts[number]) => a.kind === b.kind && (a.norm === b.norm
-    || Math.min(a.words.size, b.words.size) >= 6 && [...a.words].filter(w => b.words.has(w)).length / new Set([...a.words, ...b.words]).size >= 0.9);
+  // Verbatim evidence is allowed to differ by one meaningful token (a year,
+  // amount, entity or negation). Lexical similarity cannot establish fact identity.
+  // Reject exact normalized repetitions, not merely overlapping vocabularies.
+  const near = (a: typeof texts[number], b: typeof texts[number]) => a.kind === b.kind && a.norm === b.norm && a.quantities === b.quantities;
   if (texts.some((a, i) => texts.slice(i + 1).some(b => near(a, b)))) issues.push({ stage: "grounding", path: "/claims", rule: "Repeated claim text" });
   // REPORT8 transport-dentist and REPORT9 bank-forecast grew into lists of what the news does not say.
   if (draft.claims.filter((c: Json) => c?.kind === "ai" && typeof c.text === "string" && SPECULATIVE_ABSENCE.test(c.text)).length >= 2)

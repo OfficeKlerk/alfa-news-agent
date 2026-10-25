@@ -1,7 +1,13 @@
 import { createApplication } from "./app.js";
-import { loadSettings } from "./config.js";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { loadEnvFile } from "node:process";
+import { ROOT, loadSettings } from "./config.js";
 
+if (existsSync(resolve(ROOT, ".env"))) loadEnvFile(resolve(ROOT, ".env"));
 const settings = loadSettings();
+if (process.env.AUTH_MODE !== "development" || settings.mode === "live")
+  throw new Error("Legacy standalone API is offline-development only. Use npm run integration:start with OIDC for authenticated access.");
 
 console.log("Подготовка базы данных.");
 

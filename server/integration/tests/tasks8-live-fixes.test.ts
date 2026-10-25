@@ -60,7 +60,7 @@ test("strict end to end: the provider sees typed arrays and the layout note; a t
   mkdirSync(resolve(ROOT, "var"), { recursive: true });
   const folder = mkdtempSync(resolve(ROOT, "var/llm-test-"));
   const settings = { ...loadSettings({ LLM_MODE: "live", LLM_API_KEY: "local-test-secret", LLM_BASE_URL: "https://provider.invalid/v1",
-    LLM_RESPONSE_FORMAT: "json_schema" }), dbPath: resolve(folder, "calls.sqlite3"), maxCalls: 10, timeout: 1000 };
+    LLM_RESPONSE_FORMAT: "json_schema" }), dbPath: resolve(folder, "calls.sqlite3"), maxCalls: 10, questionReserveCalls: 0, timeout: 1000 };
   const db = new Store(settings), s = evaluationCases()[0]; let payload: Json = {}, calls = 0;
   db.connection.exec("CREATE TABLE llm_calls(id INTEGER PRIMARY KEY,day TEXT,model TEXT,prompt_tokens INTEGER DEFAULT 0,completion_tokens INTEGER DEFAULT 0)");
   try {

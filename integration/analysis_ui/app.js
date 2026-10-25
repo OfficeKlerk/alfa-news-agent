@@ -2,12 +2,14 @@ import { AlfaApi } from '/integration/client.js';
 import { AnalysisState, safeUrl, sourceAnchor } from './state.js';
 const api = new AlfaApi(), state = new AnalysisState(), $ = id => document.getElementById(id);
 let company = '', events = [], selected = null, offset = 0, busy = false, companyRevision = 0, newsRevision = 0, listRevision = 0;
+let polling = false;
+let generationEnabled = false;
 const node = (tag, text, className) => { const n = document.createElement(tag); if(text !== undefined) n.textContent = text; if(className) n.className = className; return n; };
 const localDate = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0,16);
 $('as-of').value = localDate(); $('news-form').elements.published.value = localDate();
 function status(message, error = false) { $('status').textContent = message; $('status').dataset.error = String(error); }
 function fail(e) { if(e.name !== 'AbortError') status(`${e.code || 'ERROR'}: ${e.message}${e.requestId ? ' · запрос ' + e.requestId : ''}${e.diagnostics?.generation_id ? ' · диагностика ' + e.diagnostics.generation_id : ''}${e.diagnostics?.draft_saved === false ? ' · снимок черновика не сохранён' : ''}`, true); }
-function controls() { $('prepare').disabled = !company || !selected || busy; $('generate').disabled = busy || !state.preview; $('ask').disabled = busy || !state.result; $('cancel').hidden = !busy; }
+function controls() { $('prepare').disabled = !company || !selected || busy; $('generate').disabled = !generationEnabled || busy || !state.preview; $('ask').disabled = !generationEnabled || busy || !state.result; $('cancel').hidden = !busy; }
 function invalidate(message) {
   state.reset(); busy = false; $('preview').hidden = true; $('answer').hidden = true; $('empty').hidden = false;
   $('history').replaceChildren(); controls(); if(message) status(message);
@@ -23,25 +25,71 @@ async function companies() {
     $('prev').disabled = offset === 0; $('next').disabled = value.data.items.length < 100;
   } catch(e) { fail(e); }
 }
-async function loadCompany(id) {
+async function loadCompany(id, refreshNews = true) {
   const rev = ++companyRevision; company = ''; invalidate('Загружаю профиль…'); $('profile').textContent = 'Загрузка…';
   if(!id) { $('profile').textContent = 'Профиль не выбран'; return; }
   try { const value = await api.profile(id); if(rev !== companyRevision) return; company = value.data.company_id; $('company-id').value = company;
     const p = value.data; $('profile').textContent = `${p.industry.name || 'Отрасль неизвестна'} · ${p.geography.region || 'Регион неизвестен'} · ${value.meta.mode === 'mock' ? 'Учебный профиль' : 'Профиль из базы'}`;
-    status('Компания выбрана. Выберите новость и подготовьте контекст.'); controls();
+    controls(); if(refreshNews) await search(); if(rev === companyRevision) status(refreshNews ? 'Компания выбрана. Новости отсортированы по её профилю.' : 'Компания выбрана.');
   } catch(e) { if(rev === companyRevision) { $('profile').textContent = 'Профиль не загружен'; fail(e); } }
 }
-function setEvents(items) {
-  newsRevision++; events = items; selected = null; $('news').replaceChildren(node('option', 'Выберите новость')); $('news').firstChild.value = '';
+function setEvents(items, preserve = false) {
+  const previous = selected;
+  // Keep the reviewed snapshot visible until the user chooses a newer revision.
+  if (preserve && previous && !items.some(item => JSON.stringify(item) === JSON.stringify(previous))) items = [previous, ...items];
+  newsRevision++; events = items; selected = preserve ? previous : null; $('news').replaceChildren(node('option', 'Выберите новость')); $('news').firstChild.value = '';
   items.forEach((event, i) => { const o = node('option', `${event.is_mock ? '[Учебная] ' : ''}${event.title}`); o.value = String(i); $('news').append(o); });
-  invalidate(items.length ? 'Выберите новость из списка.' : 'Новостей на эту дату нет. Добавьте свою новость или импортируйте JSON.');
+  if (preserve && previous) { $('news').value = String(items.findIndex(item => JSON.stringify(item) === JSON.stringify(previous))); controls(); }
+  else invalidate(items.length ? 'Выберите новость из списка. Порядок учитывает выбранную компанию.' : 'Доступных новостей пока нет. Проверьте статус источников.');
 }
-async function search() {
-  const rev = ++newsRevision;
+async function search(preserve = false) {
+  const rev = ++newsRevision, companyAtStart = company;
   try { const date = new Date($('as-of').value); if(!Number.isFinite(date.getTime())) throw new Error('Укажите дату анализа');
-    const value = await api.search($('search').value, date.toISOString()); if(rev !== newsRevision) return; setEvents(value.data.items);
+    const value = await api.search($('search').value, date.toISOString()); if(rev !== newsRevision) return;
+    let items = value.data.items;
+    if (companyAtStart && items.length) {
+      const ranked = await api.rank(companyAtStart, items, date.toISOString());
+      if(rev !== newsRevision || company !== companyAtStart) return;
+      const byId = new Map(items.map(item => [item.event_id, item]));
+      items = ranked.data.items.map(item => byId.get(item.event_id)).filter(Boolean);
+    }
+    setEvents(items, preserve);
   } catch(e) { if(rev === newsRevision) fail(e); }
 }
+async function collectionStatus() {
+  try {
+    const value = await api.feedStatus(), s = value.data;
+    const ok = s.feeds.filter(feed => feed.last_success), failed = s.feeds.filter(feed => feed.last_error);
+    $('collection-status').textContent = `${s.enabled ? 'Автосбор включён' : 'Автосбор выключен'} · ${ok.length}/${s.feeds.length} источников загружено` +
+      (s.running ? ' · идёт загрузка' : '') + (s.last_success ? ` · последнее обновление ${new Date(s.last_success).toLocaleString('ru-RU')}` : '') +
+      failed.map(feed => ` · ${new URL(feed.url).hostname}: ${feed.last_error}`).join('');
+    return s;
+  } catch(e) { $('collection-status').textContent = 'Статус сбора недоступен: ' + e.message; return null; }
+}
+async function runtimeStatus() {
+  try {
+    const value = await api.runtimeStatus(); generationEnabled = value.data.generation_enabled;
+    $('generation-status').textContent = generationEnabled ? 'Генерация включена. Анализ и уточняющие вопросы расходуют вызовы модели.' :
+      'Сбор новостей и персональный отбор работают. Генерация выводов выключена до подключения модели.';
+  } catch(e) { generationEnabled = false; $('generation-status').textContent = 'Не удалось проверить доступность генерации: ' + e.message; }
+  controls();
+}
+async function pollNews() {
+  if(polling || document.hidden) return;
+  polling = true;
+  try {
+    const s = await collectionStatus();
+    if(s && $('follow-news').checked && !busy && !state.preview && !state.result && !selected) {
+      $('as-of').value = localDate();
+      await search(true);
+    }
+  } finally { polling = false; }
+}
+$('collect-news').onclick = async () => {
+  $('collect-news').disabled = true;
+  try { await api.refreshFeeds(); await collectionStatus(); if(!busy && !state.preview && !state.result) { if($('follow-news').checked) $('as-of').value = localDate(); await search(true); } }
+  catch(e) { fail(e); } finally { $('collect-news').disabled = false; }
+};
 function pickEvent(index) {
   selected = events[index] || null; invalidate(selected ? 'Новость выбрана. Подготовьте контекст.' : 'Выберите новость.');
   $('news-info').textContent = selected ? `${new Date(selected.published_at).toLocaleString('ru-RU')} · ${selected.is_mock ? 'Синтетические данные' : 'Источник требует проверки'} · ${selected.text}` : '';
@@ -82,8 +130,8 @@ $('load-company').onclick = () => loadCompany($('company-id').value.trim());
 $('company-id').oninput = () => { companyRevision++; company = ''; invalidate('Загрузите профиль по введённому ID.'); };
 $('companies').onchange = () => loadCompany($('companies').value);
 $('next').onclick = () => { offset += 100; companies(); }; $('prev').onclick = () => { offset = Math.max(0, offset - 100); companies(); };
-$('find').onclick = search; $('news').onchange = () => pickEvent($('news').value);
-$('as-of').oninput = () => { newsRevision++; invalidate('Дата изменена. Подготовьте новый контекст.'); }; $('role').onchange = () => invalidate('Роль изменена. Подготовьте новый контекст.');
+$('find').onclick = () => search(); $('news').onchange = () => pickEvent($('news').value);
+$('as-of').oninput = () => { $('follow-news').checked = false; newsRevision++; invalidate('Дата изменена. Подготовьте новый контекст.'); }; $('role').onchange = () => invalidate('Роль изменена. Подготовьте новый контекст.');
 $('news-form').onsubmit = e => {
   e.preventDefault(); const f = e.target.elements, url = safeUrl(f.url.value); if(!url) { fail(new Error('Укажите HTTP/HTTPS-адрес источника без логина и пароля')); return; }
   const published = new Date(f.published.value); if(!Number.isFinite(published.getTime())) { fail(new Error('Укажите дату публикации')); return; }
@@ -99,7 +147,7 @@ $('import').onchange = async e => {
   try { if(file.size > 1000000) throw new Error('JSON больше 1 МБ'); const data = JSON.parse(await file.text()); if(rev !== state.revision) return;
     const items = Array.isArray(data) ? data : data.events || [data.event || data];
     if(!items.length || items.length > 100 || !items.every(item => typeof item.title === 'string' && typeof item.news_id === 'string')) throw new Error('Нужен Event, AnalysisEventRequest или RankRequest, до 100 событий');
-    setEvents(items); if(data.company_id) await loadCompany(data.company_id);
+    if(data.company_id) await loadCompany(data.company_id, false); setEvents(items);
   } catch(e) { fail(e); } finally { e.target.value = ''; }
 };
 $('prepare').onclick = async () => {
@@ -114,7 +162,7 @@ $('prepare').onclick = async () => {
   } catch(e) { if(state.current(job)) fail(e); } finally { if(state.current(job)) { busy = false; controls(); } }
 };
 $('generate').onclick = async () => {
-  if(!state.preview || busy) return; const job = state.start(), preview = state.preview; busy = true; controls(); status('Формирую и проверяю ответ…');
+  if(!generationEnabled || !state.preview || busy) return; const job = state.start(), preview = state.preview; busy = true; controls(); status('Формирую и проверяю ответ…');
   state.result = null; $('answer').hidden = true; $('history').replaceChildren();
   try { const value = await api.analyzeEvent({ ...preview.body, expected_context_sha256: preview.value.data.sha256 }, job.signal);
     if(!state.current(job)) return; state.result = value; render(value); $('history').replaceChildren(); status('Анализ готов. Основания и ограничения приведены ниже.');
@@ -123,7 +171,7 @@ $('generate').onclick = async () => {
 };
 $('cancel').onclick = () => invalidate('Ожидание прекращено. Уже отправленный запрос LLM может завершиться и быть учтён в лимите.');
 $('question-form').onsubmit = async e => {
-  e.preventDefault(); if(!state.result || busy) return; const job = state.start(), question = $('question').value.trim(), a = state.result.data;
+  e.preventDefault(); if(!generationEnabled || !state.result || busy) return; const job = state.start(), question = $('question').value.trim(), a = state.result.data;
   busy = true; controls(); status('Готовлю ответ на уточнение…');
   try { const value = await api.question(a.id, a.company_id, question, job.signal); if(!state.current(job)) return;
     const box = node('div', undefined, 'message'); box.append(node('strong', question)); box.append(node('p', value.data.answer));
@@ -135,4 +183,6 @@ $('question-form').onsubmit = async e => {
 };
 $('download').onclick = () => { if(!state.result) return; const url = URL.createObjectURL(new Blob([JSON.stringify(state.result, null, 2)], {type:'application/json'}));
   const a = node('a'); a.href = url; a.download = 'analysis-' + state.result.data.company_id + '.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
-await Promise.all([companies(), search()]); controls();
+await Promise.all([companies(), search(), collectionStatus(), runtimeStatus()]); controls();
+const pollTimer = setInterval(() => void pollNews(), 30000);
+window.addEventListener('pagehide', () => clearInterval(pollTimer), { once: true });

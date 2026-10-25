@@ -38,6 +38,14 @@ def main():
     if args.context_db and not Path(args.context_db).is_file():
         raise SystemExit("--context-db must point to an existing database")
     if args.live:
+        if os.environ.get("AUTH_MODE") == "development":
+            raise SystemExit("Live startup requires AUTH_MODE=oidc")
+        # Only the private-service credential must reach Python; Node loads its own .env.
+        env_file = ROOT / ".env"
+        if env_file.is_file() and not os.environ.get("INTERNAL_API_TOKEN"):
+            for line in env_file.read_text(encoding="utf-8-sig").splitlines():
+                if line.strip().startswith("INTERNAL_API_TOKEN="):
+                    os.environ["INTERNAL_API_TOKEN"] = line.split("=", 1)[1].strip().strip("\"'")
         if not args.context_db:
             raise SystemExit("--live requires --context-db with real company profiles")
         args.native_providers = True
@@ -67,7 +75,7 @@ def main():
             ml_port = free_port() if args.smoke else int(os.environ.get("ML_PORT", "8101"))
             mock_port = free_port() if args.smoke else int(os.environ.get("MOCK_PORT", "8102"))
             agent_port = free_port() if args.smoke else int(os.environ.get("AGENT_PORT", "8202"))
-            env = {**os.environ, "HOST": "127.0.0.1", "LLM_MODE": "demo", "CONTEXT_MODE": "fixture",
+            env = {**os.environ, "AUTH_MODE": os.environ.get("AUTH_MODE", "oidc" if args.live else "development"), "HOST": "127.0.0.1", "LLM_MODE": "demo", "CONTEXT_MODE": "fixture",
                    "CONTEXT_DB": str(directory / "context.sqlite3"),
                    "DATA_DIR": str(Path(args.data_dir).resolve() if args.data_dir else ROOT / "data" if args.live else node_fixture(directory / "node-data")),
                    "DB_PATH": str(directory / "node.sqlite3"), "ML_URL": f"http://127.0.0.1:{ml_port}",

@@ -10,7 +10,8 @@ import { Store } from "./db.js";
 import { Retrieval } from "./retrieval.js";
 import { Agent, VERSION } from "./agent.js";
 import { createComplete, type Complete } from "./llm.js";
-import { saveNews, ingestFeeds } from "./news.js";
+import { saveNews } from "./news.js";
+import { NewsCollector } from "./news-collector.js";
 import { AppError, ModelError, type Json } from "./types.js";
 
 class AnalysisQueue {
@@ -68,6 +69,7 @@ export async function createApplication(
     );
   const queue = new AnalysisQueue(),
     app = express();
+  const collector = new NewsCollector(settings, db, { request: override?.request });
   app.disable("x-powered-by");
   app.use((req, res, next) => {
     res.set({
@@ -200,9 +202,11 @@ export async function createApplication(
     res.status(201).json(saveNews(db, req.body));
   });
   app.post("/api/feeds/refresh", async (_req, res) => {
-    res.json(await ingestFeeds(settings, db, override?.request));
+    res.json(await collector.refresh());
   });
+  app.get("/api/feeds/status", (_req, res) => res.json(collector.status()));
   app.post("/api/analysis", (req, res) => {
+    if (settings.analysisEnabled === false) throw new AppError("Генерация выключена. Настройте ключ LLM и запустите с --with-llm; сбор и ранжирование уже доступны.", 503);
     const cid = companyId(req),
       nid = String(req.body.news_id ?? ""),
       role = req.body.role ?? ROLES[0];
@@ -247,6 +251,7 @@ export async function createApplication(
     res.status(202).json({ job_id: id });
   });
   app.post("/api/analyses/:id/questions", async (req, res) => {
+    if (settings.analysisEnabled === false) throw new AppError("Генерация выключена. Запустите с --with-llm после настройки ключа LLM.", 503);
     const cid = companyId(req),
       question = String(req.body.question ?? "").trim();
     if (question.length < 3 || question.length > 2000)
@@ -284,13 +289,16 @@ export async function createApplication(
             : "Внутренняя ошибка сервера";
     res.status(status).json({ error: message });
   });
+  collector.start();
   return {
     app,
     db,
     agent,
     retrieval,
     queue,
+    collector,
     async close() {
+      await collector.stop();
       await queue.idle();
       db.close();
     },
