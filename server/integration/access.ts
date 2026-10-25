@@ -1,5 +1,6 @@
 /** OIDC authentication and tenant authorization. No client-supplied company ID grants access. */
 import type { Express, Request, Response, NextFunction } from "express";
+import { publicAccess } from "./public-access.js";
 import * as oidc from "openid-client";
 import { createRemoteJWKSet, jwtVerify, EncryptJWT, jwtDecrypt, type JWTPayload, type JWTVerifyGetKey } from "jose";
 import { ApiFault } from "./contracts.js";
@@ -41,6 +42,7 @@ function https(value: string | undefined, name: string) {
 }
 export async function accessFromEnv(env: NodeJS.ProcessEnv): Promise<Access> {
   const mode = env.AUTH_MODE ?? "oidc";
+  if (mode === "public") return publicAccess(env);
   if (mode === "development") {
     if (env.LLM_MODE === "live") throw new Error("Live runtime requires OIDC; AUTH_MODE=development is only for explicit offline development");
     return developmentAccess;
