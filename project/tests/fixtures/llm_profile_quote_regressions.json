@@ -1,0 +1,8 @@
+{
+  "provenance": "Reconstructed from user observations labelled power-trader, metal-borrower, power-software. The original REPORT2 draft/input JSON was not supplied and is not in the repository; this is not the real failed transcript.",
+  "cases": [
+    {"id": "power-trader", "profile_paths": ["/payment_summary/counterparty_context/in/industry_distribution", "/payment_summary/counterparty_context/out/industry_distribution"], "rule": "Profile path must select a concrete value"},
+    {"id": "metal-borrower", "text": "Регулятор оставил ставку без изменений; влияние на компанию требует проверки.", "quote_from": "selected_allowed_news_excerpt", "rule": "Claim text must equal its verbatim quote"},
+    {"id": "power-software", "text": "Прямая связь новости с деятельностью компании отсутствует.", "rule": "Unconfirmed linkage must not be stated as proven absence"}
+  ]
+}

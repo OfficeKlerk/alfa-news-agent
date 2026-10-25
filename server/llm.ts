@@ -1,3 +1,4 @@
+import { callIdentity, savedCall, markSending, saveReceived, executionSignal, noteProviderReceipt } from "./model-execution.js";
 import type { Store } from "./db.js";
 import { RESERVED_BODY_KEYS, type Settings } from "./config.js";
 import { ModelError, type Json } from "./types.js";
@@ -35,7 +36,7 @@ export function truncationCause(content: unknown): string {
 }
 export function createComplete(settings: Settings, db: Store, request: typeof fetch = fetch): Complete {
   return async (messages, tools, jsonMode = false, responseSchema, maxTokens) => {
-    if (!settings.apiKey.trim()) throw new ModelError("Нет LLM_API_KEY. Укажите ключ в .env и перезапустите сервер.", "MODEL_AUTH_ERROR");
+    if (!settings.apiKey.trim()) throw Object.assign(new ModelError("Нет LLM_API_KEY. Укажите ключ в .env и перезапустите сервер.", "MODEL_AUTH_ERROR"),{beforeSend:true});
     let base: URL;
     try { base = new URL(settings.baseUrl); } catch { throw new ModelError("Некорректный адрес LLM API."); }
     if (base.protocol !== "https:" || base.username || base.password || base.search || base.hash)
@@ -60,9 +61,13 @@ export function createComplete(settings: Settings, db: Store, request: typeof fe
     for (const extra of [settings.extraBody, strict ? settings.strictExtraBody : undefined])
       if (extra) for (const [key, value] of Object.entries(extra))
         if (!RESERVED_BODY_KEYS.includes(key)) payload[key] = value;
-    const callId = reserveLlmCall(settings, db, payload, outputLimit);
+    const identity = callIdentity(payload, settings.baseUrl);
+    const cached = identity ? savedCall(db,identity) : undefined;
+    const callerSignal=executionSignal();
+    if(callerSignal?.aborted && !cached)throw Object.assign(new ModelError("Запрос отменён до отправки.","MODEL_CANCELLED",503),{beforeSend:true});
+    const callId = cached ? cached.callId : reserveLlmCall(settings, db, payload, outputLimit, undefined, Date.now(), id => {if(identity)markSending(db,identity,id,settings.timeout);});
     try {
-      const response = await request(settings.baseUrl + "/chat/completions", {
+      const response = cached ? new Response(cached.body,{status:cached.status}) : await request(settings.baseUrl + "/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,19 +75,9 @@ export function createComplete(settings: Settings, db: Store, request: typeof fe
         },
         body: JSON.stringify(payload),
         redirect: "error",
-        signal: AbortSignal.timeout(settings.timeout),
+        signal: AbortSignal.any([AbortSignal.timeout(settings.timeout),...(callerSignal?[callerSignal]:[])]),
       });
-      if (!response.ok) {
-        await response.body?.cancel();
-        const errors: Record<number, string> = {
-          401: "Ключ отклонён API.",
-          403: "У ключа нет доступа.",
-          429: "Лимит API или общий бюджет исчерпан.",
-        };
-        throw new ModelError(errors[response.status] ?? "API модели вернул HTTP " + response.status + ".",
-          [401, 403].includes(response.status) ? "MODEL_AUTH_ERROR" : response.status === 429 ? "MODEL_LIMIT" : response.status >= 500 ? "MODEL_UNAVAILABLE" : "MODEL_RESPONSE_INVALID",
-          response.status === 429 ? 429 : response.status >= 500 ? 503 : 502);
-      }
+      if(identity && !cached)noteProviderReceipt(db,identity,response.status,response.headers.get("x-request-id"));
       const reader = response.body?.getReader();
       if (!reader) throw new ModelError("Пустой ответ API модели.");
       const chunks: Uint8Array[] = []; let size = 0;
@@ -94,8 +89,20 @@ export function createComplete(settings: Settings, db: Store, request: typeof fe
           chunks.push(value);
         }
       } finally { await reader.cancel(); }
-      const result: Json = JSON.parse(Buffer.concat(chunks).toString("utf8"));
-      settleLlmCall(db, callId, result?.usage);
+      const rawBody = Buffer.concat(chunks).toString("utf8");
+      if(identity && !cached)saveReceived(db,identity,response.status,rawBody,response.headers.get("x-request-id"));
+      if (!response.ok) {
+        const errors: Record<number, string> = {
+          401: "Ключ отклонён API.",
+          403: "У ключа нет доступа.",
+          429: "Лимит API или общий бюджет исчерпан.",
+        };
+        throw new ModelError(errors[response.status] ?? "API модели вернул HTTP " + response.status + ".",
+          [401, 403].includes(response.status) ? "MODEL_AUTH_ERROR" : response.status === 429 ? "MODEL_LIMIT" : response.status >= 500 ? "MODEL_UNAVAILABLE" : "MODEL_RESPONSE_INVALID",
+          response.status === 429 ? 429 : response.status >= 500 ? 503 : 502);
+      }
+      const result: Json = JSON.parse(rawBody);
+      if(callId !== undefined)settleLlmCall(db, callId, result?.usage);
       if (!result || typeof result !== "object" || !Array.isArray(result.choices) || !result.choices.length)
         throw new ModelError("API модели вернул неожиданный формат ответа.");
       const choice = result.choices?.[0];
@@ -123,7 +130,7 @@ export function createComplete(settings: Settings, db: Store, request: typeof fe
       }
       return message;
     } catch (error) {
-      settleLlmCall(db, callId);
+      if(callId !== undefined)settleLlmCall(db, callId);
       if (error instanceof ModelError) throw error;
       const details = error as { name?: string; cause?: { code?: string } };
       if (details?.name === "TimeoutError" || details?.name === "AbortError") {

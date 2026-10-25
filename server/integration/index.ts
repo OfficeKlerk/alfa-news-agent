@@ -1,3 +1,5 @@
+import { executionConfiguration } from './execution-config.js';
+import { DurableAgent } from "../model-execution.js";
 import { accessFromEnv } from "./access.js";
 import { createApplication } from "../app.js";
 import { loadSettings, ROOT } from "../config.js";
@@ -26,7 +28,7 @@ const retrievalClient = client(process.env.RETRIEVAL_URL ?? "http://127.0.0.1:81
 const agentClient = client(process.env.AGENT_URL ?? "http://127.0.0.1:8102", 2 * settings.timeout + 15000);
 const retrieval = retrievalMode === "legacy" ? new LegacyRetrieval(runtime.db, runtime.retrieval, settings, runtime.collector, !access.secured) : retrievalMode === "mock" ? new MockRetrieval()
   : new HttpRetrieval(retrievalClient);
-const agent = agentMode === "legacy" ? new LegacyAgent(settings) : agentMode === "mock" ? new MockAgent()
+const agent = agentMode === "legacy" ? (settings.mode === "live" ? new DurableAgent(runtime.db,new LegacyAgent(settings),executionConfiguration(settings)) : new LegacyAgent(settings)) : agentMode === "mock" ? new MockAgent()
   : new HttpAgent(agentClient);
 const healthClients = [retrievalMode === "http" ? retrievalClient : null,
   agentMode === "http" ? client(process.env.AGENT_URL ?? "http://127.0.0.1:8102", 3000) : null].filter((c): c is ContractClient => c !== null);

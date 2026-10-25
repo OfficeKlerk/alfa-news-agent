@@ -58,7 +58,7 @@ test("runtime exposes the configured generation gate without calling any provide
       const result = await h.call("/v1/runtime");
       assert.equal(result.status, 200);
       validate("RuntimeDataResponse", result.value);
-      assert.deepEqual(result.value.data, { generation_enabled: analysisEnabled !== false });
+      assert.deepEqual(result.value.data, { generation_enabled: analysisEnabled !== false, viewer_key: "development" });
       assert.equal(result.value.meta.request_id, requestId);
       assert.deepEqual(h.calls, []);
     } finally { await h.close(); }

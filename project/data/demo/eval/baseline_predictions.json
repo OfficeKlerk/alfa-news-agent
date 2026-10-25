@@ -1,0 +1,29 @@
+{
+  "_source": "news_analysis.analyze_news baseline (no trained model)",
+  "companies": {
+    "U_34911": [
+      "rate-hold-2026-09",
+      "grain-export-duty",
+      "rub-weakens",
+      "counterparty-trouble",
+      "power-tariff-reform",
+      "road-program"
+    ],
+    "U_99262": [
+      "counterparty-trouble",
+      "rate-hold-2026-09",
+      "road-program",
+      "grain-export-duty",
+      "rub-weakens",
+      "power-tariff-reform"
+    ],
+    "U_4909": [
+      "power-tariff-reform",
+      "counterparty-trouble",
+      "rub-weakens",
+      "grain-export-duty",
+      "road-program",
+      "rate-hold-2026-09"
+    ]
+  }
+}

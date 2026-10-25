@@ -1,0 +1,57 @@
+{
+  "schema_version": "reviewed_primary_news_v1",
+  "note": "Selected literal primary-source excerpts, not full articles or generated summaries. Day precision; no unverified timezone is invented. Source HTML is not distributed. The CBR landing URL is mutable; use this reviewed content snapshot and hashes, never silently replace its date/content. Real source provenance does not by itself prove any business impact.",
+  "articles": [
+    {
+      "article_id": "cbr_hold_20261023",
+      "publisher": "Банк России",
+      "title": "Банк России принял решение сохранить ключевую ставку на уровне 14,00% годовых",
+      "url": "https://www.cbr.ru/press/keypr/",
+      "published": "2026-10-23",
+      "published_display": "23 октября 2026 года",
+      "publication_precision": "day",
+      "text": "Совет директоров Банка России 23 октября 2026 года принял решение сохранить ключевую ставку на уровне 14,00% годовых. Экономика в целом в 2п26 растет умеренными темпами. Текущее ценовое давление сохраняется повышенным. Инфляционные ожидания остаются высокими. По оценке Банка России, устойчивый рост цен не снижается и находится в диапазоне 5–6% в пересчете на год, прежде всего из-за влияния временного сокращения производственных мощностей в отдельных отраслях. Это требует сдержанного роста совокупного спроса для возобновления снижения устойчивой инфляции.",
+      "text_kind": "primary_excerpt",
+      "is_mock": false,
+      "reviewed_on": "2026-10-24",
+      "raw_html_sha256": "a6b57237e85c5d90a99abb665a2b4882d2c3303ec4b2ddf44fa94bab5a3cc551",
+      "content_sha256": "e778aa92616f1d9961e03adc1d0a89ba1b6b40b102b6cae44da0237d35c6c773",
+      "record_sha256": "8d0ad0a59be578dd99730cd7a7d2299ee3c2907f1e9e260f7cbea62ddba60be7",
+      "mutable_url": true
+    },
+    {
+      "article_id": "power_standards_20261023",
+      "publisher": "АО «СО ЕЭС»",
+      "title": "Межгосударственный технический комитет по стандартизации «Электроэнергетика» приступил к разработке 14 новых ГОСТов",
+      "url": "https://www.so-ups.ru/news/press/press-release-view/news/31251/",
+      "published": "2026-10-23",
+      "published_display": "23.10.2026 11:24",
+      "publication_precision": "day",
+      "text": "Межгосударственный технический комитет по стандартизации «Электроэнергетика» (МТК 541) на очередном осеннем заседании обсудил итоги работы в 2026 году и основные задачи на 2027–2028 годы.",
+      "text_kind": "primary_excerpt",
+      "is_mock": false,
+      "reviewed_on": "2026-10-24",
+      "raw_html_sha256": "0678c4b4c8ffc176b7aab66966d91e021a41c710c54c8b4d4b7b1be5fbcc78fb",
+      "content_sha256": "8fab460e7b795cf1cf31d955271908a73e42d5e55258d028a780631e50088b31",
+      "record_sha256": "efce9aa612169c0b47611fa8ede8199050cf8f0c6e5eccd20225825d9e1b0026",
+      "mutable_url": false
+    },
+    {
+      "article_id": "transport_budget_20261022",
+      "publisher": "Минтранс России",
+      "title": "Минтранс представил в Госдуме проект трехлетнего транспортного бюджета объемом более 5,6 трлн рублей",
+      "url": "https://mintrans.gov.ru/press-center/news/13080",
+      "published": "2026-10-22",
+      "published_display": "22 Октября 2026",
+      "publication_precision": "day",
+      "text": "На заседании Комитета Государственной Думы по бюджету и налогам состоялось обсуждение ключевых направлений и объемов финансирования государственной программы «Развитие транспортной системы» на 2027 год и плановый период 2028–2029 годов, подготовленных к первому чтению законопроекта о бюджете. Заседание прошло под председательством главы Комитета Андрея Макарова. В мероприятии приняли участие Министр транспорта Дмитрий Ядров, глава Комитета по транспорту и развитию транспортной инфраструктуры Евгений Москвичёв, представители Минтранса России, Минфина России и Счетной палаты.",
+      "text_kind": "primary_excerpt",
+      "is_mock": false,
+      "reviewed_on": "2026-10-24",
+      "raw_html_sha256": "5bd9cd00fd376153bd58df622c10d79e57ed381465ced533847edc5dfcc731fc",
+      "content_sha256": "846ee6feb6ce10bab0c262061d21ceb502703f914c19a7ed517ef64167995940",
+      "record_sha256": "970dff00bdd95dadec8c1190daa3b8e65c0a912d9142a132c27e89c0194cb308",
+      "mutable_url": false
+    }
+  ]
+}

@@ -1,0 +1,465 @@
+{
+  "note": "Existing reviewed primary excerpts with synthetic company profiles, not the missing original failed LLM traces.",
+  "as_of": "2026-10-24T18:00:00Z",
+  "feature_version": "company_event_v2",
+  "model": "manual_feature_baseline",
+  "network_calls": 0,
+  "llm_calls": 0,
+  "rows": [
+    {
+      "article_id": "cbr_hold_20261023",
+      "url": "https://www.cbr.ru/press/keypr/",
+      "published": "2026-10-23",
+      "synthetic_company": "synthetic-carrier",
+      "before": {
+        "subject_codes": [],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Отметить сохранение ключевой ставки и проверить даты пересмотра условий по отмеченным в профиле продуктам: кредит, лизинг.",
+            "condition": "Новость не содержит нового изменения ключевой ставки и не доказывает неизменность всех условий финансирования. Сохранение ключевой ставки не подтверждает неизменность ставок договоров, банковских предложений, комиссий или стоимости финансирования; наличие отметки продукта не подтверждает условия договора.",
+            "required_data": [
+              "условия договоров по отмеченным продуктам, если они есть",
+              "тип ставки и даты пересмотра условий",
+              "актуальные банковские предложения и комиссии"
+            ],
+            "profile_evidence": [
+              "/bank_products"
+            ],
+            "status": "monitoring_only"
+          }
+        ]
+      },
+      "after": {
+        "subject_codes": [],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Отметить сохранение ключевой ставки и проверить даты пересмотра условий по отмеченным в профиле продуктам: кредит, лизинг.",
+            "condition": "Новость не содержит нового изменения ключевой ставки и не доказывает неизменность всех условий финансирования. Сохранение ключевой ставки не подтверждает неизменность ставок договоров, банковских предложений, комиссий или стоимости финансирования; наличие отметки продукта не подтверждает условия договора.",
+            "required_data": [
+              "условия договоров по отмеченным продуктам, если они есть",
+              "тип ставки и даты пересмотра условий",
+              "актуальные банковские предложения и комиссии"
+            ],
+            "profile_evidence": [
+              "/bank_products"
+            ],
+            "status": "monitoring_only"
+          }
+        ]
+      }
+    },
+    {
+      "article_id": "cbr_hold_20261023",
+      "url": "https://www.cbr.ru/press/keypr/",
+      "published": "2026-10-23",
+      "synthetic_company": "synthetic-dentistry",
+      "before": {
+        "subject_codes": [],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Отметить сохранение ключевой ставки и проверить даты пересмотра условий по отмеченным в профиле продуктам: кредит, лизинг.",
+            "condition": "Новость не содержит нового изменения ключевой ставки и не доказывает неизменность всех условий финансирования. Сохранение ключевой ставки не подтверждает неизменность ставок договоров, банковских предложений, комиссий или стоимости финансирования; наличие отметки продукта не подтверждает условия договора.",
+            "required_data": [
+              "условия договоров по отмеченным продуктам, если они есть",
+              "тип ставки и даты пересмотра условий",
+              "актуальные банковские предложения и комиссии"
+            ],
+            "profile_evidence": [
+              "/bank_products"
+            ],
+            "status": "monitoring_only"
+          }
+        ]
+      },
+      "after": {
+        "subject_codes": [],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Отметить сохранение ключевой ставки и проверить даты пересмотра условий по отмеченным в профиле продуктам: кредит, лизинг.",
+            "condition": "Новость не содержит нового изменения ключевой ставки и не доказывает неизменность всех условий финансирования. Сохранение ключевой ставки не подтверждает неизменность ставок договоров, банковских предложений, комиссий или стоимости финансирования; наличие отметки продукта не подтверждает условия договора.",
+            "required_data": [
+              "условия договоров по отмеченным продуктам, если они есть",
+              "тип ставки и даты пересмотра условий",
+              "актуальные банковские предложения и комиссии"
+            ],
+            "profile_evidence": [
+              "/bank_products"
+            ],
+            "status": "monitoring_only"
+          }
+        ]
+      }
+    },
+    {
+      "article_id": "cbr_hold_20261023",
+      "url": "https://www.cbr.ru/press/keypr/",
+      "published": "2026-10-23",
+      "synthetic_company": "synthetic-power_trader",
+      "before": {
+        "subject_codes": [],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Отметить сохранение ключевой ставки и проверить даты пересмотра условий по отмеченным в профиле продуктам: кредит, лизинг.",
+            "condition": "Новость не содержит нового изменения ключевой ставки и не доказывает неизменность всех условий финансирования. Сохранение ключевой ставки не подтверждает неизменность ставок договоров, банковских предложений, комиссий или стоимости финансирования; наличие отметки продукта не подтверждает условия договора.",
+            "required_data": [
+              "условия договоров по отмеченным продуктам, если они есть",
+              "тип ставки и даты пересмотра условий",
+              "актуальные банковские предложения и комиссии"
+            ],
+            "profile_evidence": [
+              "/bank_products"
+            ],
+            "status": "monitoring_only"
+          }
+        ]
+      },
+      "after": {
+        "subject_codes": [],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Отметить сохранение ключевой ставки и проверить даты пересмотра условий по отмеченным в профиле продуктам: кредит, лизинг.",
+            "condition": "Новость не содержит нового изменения ключевой ставки и не доказывает неизменность всех условий финансирования. Сохранение ключевой ставки не подтверждает неизменность ставок договоров, банковских предложений, комиссий или стоимости финансирования; наличие отметки продукта не подтверждает условия договора.",
+            "required_data": [
+              "условия договоров по отмеченным продуктам, если они есть",
+              "тип ставки и даты пересмотра условий",
+              "актуальные банковские предложения и комиссии"
+            ],
+            "profile_evidence": [
+              "/bank_products"
+            ],
+            "status": "monitoring_only"
+          }
+        ]
+      }
+    },
+    {
+      "article_id": "power_standards_20261023",
+      "url": "https://www.so-ups.ru/news/press/press-release-view/news/31251/",
+      "published": "2026-10-23",
+      "synthetic_company": "synthetic-carrier",
+      "before": {
+        "subject_codes": [],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Оставить новость для наблюдения; пока нет подтверждённой связи с бизнесом, изменение операций не предлагается.",
+            "condition": "Доступные признаки не показывают отраслевой, продуктовый, географический или контрагентский канал. Это не доказательство отсутствия влияния: профиль и извлечение события могут быть неполными.",
+            "required_data": [],
+            "profile_evidence": [
+              "/industry",
+              "/bank_products",
+              "/geography",
+              "/foreign_trade",
+              "/payment_summary"
+            ],
+            "status": "no_confirmed_link"
+          }
+        ]
+      },
+      "after": {
+        "subject_codes": [
+          "35"
+        ],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Сначала проверить применимость новости к операциям компании; по имеющемуся профилю прямое совпадение с целевой группой не подтверждено.",
+            "condition": "Известные отраслевые или продуктовые сведения не совпадают с целевой группой. Дополнительные виды деятельности и условия нормы могут отсутствовать в профиле.",
+            "required_data": [
+              "полные условия применимости",
+              "дополнительные виды деятельности",
+              "фактически затронутые операции и договоры"
+            ],
+            "profile_evidence": [
+              "/industry",
+              "/bank_products",
+              "/foreign_trade"
+            ],
+            "status": "applicability_check"
+          }
+        ]
+      }
+    },
+    {
+      "article_id": "power_standards_20261023",
+      "url": "https://www.so-ups.ru/news/press/press-release-view/news/31251/",
+      "published": "2026-10-23",
+      "synthetic_company": "synthetic-dentistry",
+      "before": {
+        "subject_codes": [],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Оставить новость для наблюдения; пока нет подтверждённой связи с бизнесом, изменение операций не предлагается.",
+            "condition": "Доступные признаки не показывают отраслевой, продуктовый, географический или контрагентский канал. Это не доказательство отсутствия влияния: профиль и извлечение события могут быть неполными.",
+            "required_data": [],
+            "profile_evidence": [
+              "/industry",
+              "/bank_products",
+              "/geography",
+              "/foreign_trade",
+              "/payment_summary"
+            ],
+            "status": "no_confirmed_link"
+          }
+        ]
+      },
+      "after": {
+        "subject_codes": [
+          "35"
+        ],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Сначала проверить применимость новости к операциям компании; по имеющемуся профилю прямое совпадение с целевой группой не подтверждено.",
+            "condition": "Известные отраслевые или продуктовые сведения не совпадают с целевой группой. Дополнительные виды деятельности и условия нормы могут отсутствовать в профиле.",
+            "required_data": [
+              "полные условия применимости",
+              "дополнительные виды деятельности",
+              "фактически затронутые операции и договоры"
+            ],
+            "profile_evidence": [
+              "/industry",
+              "/bank_products",
+              "/foreign_trade"
+            ],
+            "status": "applicability_check"
+          }
+        ]
+      }
+    },
+    {
+      "article_id": "power_standards_20261023",
+      "url": "https://www.so-ups.ru/news/press/press-release-view/news/31251/",
+      "published": "2026-10-23",
+      "synthetic_company": "synthetic-power_trader",
+      "before": {
+        "subject_codes": [],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Оставить новость для наблюдения; пока нет подтверждённой связи с бизнесом, изменение операций не предлагается.",
+            "condition": "Доступные признаки не показывают отраслевой, продуктовый, географический или контрагентский канал. Это не доказательство отсутствия влияния: профиль и извлечение события могут быть неполными.",
+            "required_data": [],
+            "profile_evidence": [
+              "/industry",
+              "/bank_products",
+              "/geography",
+              "/foreign_trade",
+              "/payment_summary"
+            ],
+            "status": "no_confirmed_link"
+          }
+        ]
+      },
+      "after": {
+        "subject_codes": [
+          "35"
+        ],
+        "industry_match": 1,
+        "industry_contribution": 0.75,
+        "advice": [
+          {
+            "action": "Проверить участие компании в затронутых проектах и наличие соответствующих договоров.",
+            "condition": "Отрасль связана с темой новости. Совпадение отрасли не подтверждает контракты, участие в проектах, получение средств или обязательность требований.",
+            "required_data": [
+              "участие в конкретных проектах",
+              "условия договоров, если они есть",
+              "стадия решения и условия применимости"
+            ],
+            "profile_evidence": [
+              "/industry/okved_code",
+              "/industry/okved_division"
+            ],
+            "status": "conditional_direction"
+          }
+        ]
+      }
+    },
+    {
+      "article_id": "transport_budget_20261022",
+      "url": "https://mintrans.gov.ru/press-center/news/13080",
+      "published": "2026-10-22",
+      "synthetic_company": "synthetic-carrier",
+      "before": {
+        "subject_codes": [],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Оставить новость для наблюдения; пока нет подтверждённой связи с бизнесом, изменение операций не предлагается.",
+            "condition": "Доступные признаки не показывают отраслевой, продуктовый, географический или контрагентский канал. Это не доказательство отсутствия влияния: профиль и извлечение события могут быть неполными.",
+            "required_data": [],
+            "profile_evidence": [
+              "/industry",
+              "/bank_products",
+              "/geography",
+              "/foreign_trade",
+              "/payment_summary"
+            ],
+            "status": "no_confirmed_link"
+          }
+        ]
+      },
+      "after": {
+        "subject_codes": [
+          "49",
+          "50",
+          "51",
+          "52"
+        ],
+        "industry_match": 1,
+        "industry_contribution": 0.75,
+        "advice": [
+          {
+            "action": "Проверить участие компании в затронутых проектах и наличие соответствующих договоров.",
+            "condition": "Отрасль связана с темой новости. Совпадение отрасли не подтверждает контракты, участие в проектах, получение средств или обязательность требований.",
+            "required_data": [
+              "участие в конкретных проектах",
+              "условия договоров, если они есть",
+              "стадия решения и условия применимости"
+            ],
+            "profile_evidence": [
+              "/industry/okved_code",
+              "/industry/okved_division"
+            ],
+            "status": "conditional_direction"
+          }
+        ]
+      }
+    },
+    {
+      "article_id": "transport_budget_20261022",
+      "url": "https://mintrans.gov.ru/press-center/news/13080",
+      "published": "2026-10-22",
+      "synthetic_company": "synthetic-dentistry",
+      "before": {
+        "subject_codes": [],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Оставить новость для наблюдения; пока нет подтверждённой связи с бизнесом, изменение операций не предлагается.",
+            "condition": "Доступные признаки не показывают отраслевой, продуктовый, географический или контрагентский канал. Это не доказательство отсутствия влияния: профиль и извлечение события могут быть неполными.",
+            "required_data": [],
+            "profile_evidence": [
+              "/industry",
+              "/bank_products",
+              "/geography",
+              "/foreign_trade",
+              "/payment_summary"
+            ],
+            "status": "no_confirmed_link"
+          }
+        ]
+      },
+      "after": {
+        "subject_codes": [
+          "49",
+          "50",
+          "51",
+          "52"
+        ],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Сначала проверить применимость новости к операциям компании; по имеющемуся профилю прямое совпадение с целевой группой не подтверждено.",
+            "condition": "Известные отраслевые или продуктовые сведения не совпадают с целевой группой. Дополнительные виды деятельности и условия нормы могут отсутствовать в профиле.",
+            "required_data": [
+              "полные условия применимости",
+              "дополнительные виды деятельности",
+              "фактически затронутые операции и договоры"
+            ],
+            "profile_evidence": [
+              "/industry",
+              "/bank_products",
+              "/foreign_trade"
+            ],
+            "status": "applicability_check"
+          }
+        ]
+      }
+    },
+    {
+      "article_id": "transport_budget_20261022",
+      "url": "https://mintrans.gov.ru/press-center/news/13080",
+      "published": "2026-10-22",
+      "synthetic_company": "synthetic-power_trader",
+      "before": {
+        "subject_codes": [],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Оставить новость для наблюдения; пока нет подтверждённой связи с бизнесом, изменение операций не предлагается.",
+            "condition": "Доступные признаки не показывают отраслевой, продуктовый, географический или контрагентский канал. Это не доказательство отсутствия влияния: профиль и извлечение события могут быть неполными.",
+            "required_data": [],
+            "profile_evidence": [
+              "/industry",
+              "/bank_products",
+              "/geography",
+              "/foreign_trade",
+              "/payment_summary"
+            ],
+            "status": "no_confirmed_link"
+          }
+        ]
+      },
+      "after": {
+        "subject_codes": [
+          "49",
+          "50",
+          "51",
+          "52"
+        ],
+        "industry_match": 0,
+        "industry_contribution": 0,
+        "advice": [
+          {
+            "action": "Сначала проверить применимость новости к операциям компании; по имеющемуся профилю прямое совпадение с целевой группой не подтверждено.",
+            "condition": "Известные отраслевые или продуктовые сведения не совпадают с целевой группой. Дополнительные виды деятельности и условия нормы могут отсутствовать в профиле.",
+            "required_data": [
+              "полные условия применимости",
+              "дополнительные виды деятельности",
+              "фактически затронутые операции и договоры"
+            ],
+            "profile_evidence": [
+              "/industry",
+              "/bank_products",
+              "/foreign_trade"
+            ],
+            "status": "applicability_check"
+          }
+        ]
+      }
+    }
+  ],
+  "base_commit": "e4ab0a0f136cfe45a488c08900b533442cb0421b",
+  "comparison_scope": "Old vs current Node event extraction with the SAME current Python ML baseline; advice fields are not a before/after comparison of pipeline versions.",
+  "provenance": {
+    "data/reviewed_news.json": "2c9be386a6276bc1c1bee48c05a211be9c378a1fd38c89e948dec342f8841f7b",
+    "server/news-subjects.ts": "b594101e8006bbd490519888e8b7ac8cc8aeaa5706fefd97fc138d370afdcc02",
+    "server/news-events.ts": "90dd1328a2fc185191340755adc92d7765281ba36c7570ac7762932e615be114",
+    "server/integration/event-interpretation.ts": "cea8c9fed26af051c1a054e4c77c32d08a6224fd8f3c7e120771e61a3e5b7052",
+    "news_analysis/features.py": "7071a43f05953cb88a74b7b0da3ef3e5aa721aa078e797a5985ab6bb8b6eb1fd",
+    "news_analysis/pipeline.py": "daa3167a4626f408bc04c9995d5e41599df32d74e3973e2ee2a6773b871815a9"
+  }
+}

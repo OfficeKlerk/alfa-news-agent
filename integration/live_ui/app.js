@@ -1,6 +1,10 @@
 const $ = id => document.getElementById(id);
 const node = (tag, text, className) => { const element = document.createElement(tag); if (text !== undefined) element.textContent = String(text); if (className) element.className = className; return element; };
-const STORAGE = 'alfa.live.v1';
+let viewerKey;
+const viewer = await request('/v1/runtime');
+if(typeof viewer.data?.viewer_key!=='string')throw new Error('Viewer identity is required');
+viewerKey=viewer.data.viewer_key;
+const STORAGE = 'alfa.live.v2.' + viewerKey;
 let persisted = {};
 try { persisted = JSON.parse(localStorage.getItem(STORAGE) || '{}'); } catch { /* Browsing remains available without storage. */ }
 let company = '', role = ['cfo', 'ceo', 'treasury'].includes(persisted.role) ? persisted.role : 'cfo';
@@ -19,6 +23,7 @@ function friendlyError(error) {
   if (error.status === 404) return 'Запись не найдена. Проверьте компанию или обновите ленту.';
   if (error.status === 409) return 'Данные изменились. Обновите карточку перед повторной отправкой.';
   if (error.status === 422 || error.status === 400) return 'Проверьте введённые данные.';
+  if (error.code === 'MODEL_OUTCOME_UNKNOWN') return 'Результат запроса уточняется. Повторная отправка не выполняется.';
   if (error.status === 429) return 'Достигнут лимит обработки. Сбор продолжится, новые ответы будут подготовлены позже.';
   if (error.status >= 500) return 'Один из сервисов временно недоступен. Повторная проверка выполнится автоматически.';
   return 'Не удалось связаться с сервисом. Проверьте локальный запуск и повторите действие.';
@@ -26,9 +31,10 @@ function friendlyError(error) {
 async function request(path, body) {
   const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 25000);
   try {
-    const response = await fetch(path, { method: body === undefined ? 'GET' : 'POST', signal: controller.signal, headers: { Accept: 'application/json', ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+    const response = await fetch(path, { method: body === undefined ? 'GET' : 'POST', signal: controller.signal, headers: { Accept: 'application/json', ...(viewerKey ? {'X-Viewer-Key':viewerKey} : {}), ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
     if(response.status === 401) window.location.assign("/auth/login");
     let value; try { value = await response.json(); } catch { const error = new Error('Invalid response'); error.status = response.status || 502; throw error; }
+    if(value.error?.code==='SESSION_CHANGED'){ $('feed').replaceChildren(); $('jobs').replaceChildren(); window.location.reload(); throw new Error('Session changed'); }
     if (!response.ok) { const error = new Error(value.error?.message || 'API error'); error.status = response.status; error.code = value.error?.code; throw error; }
     return value;
   } finally { clearTimeout(timer); }
@@ -195,7 +201,7 @@ async function refreshDetails(id) {
         }
       }
     }
-    const pending = jobs.filter(job => job.kind === 'question' && job.analysis_id === id && ['queued', 'running', 'deferred', 'failed'].includes(job.status));
+    const pending = jobs.filter(job => job.kind === 'question' && job.analysis_id === id && ['queued', 'running', 'deferred', 'unknown', 'failed'].includes(job.status));
     article.querySelector('[data-question-status]').textContent = pending.length ? pending.map(job => jobState(job) + (job.error ? ': ' + reasonText(job.error) : '')).join(' · ') : (value.history?.length ? 'История сохранена.' : '');
   } catch (error) { if (rev === epoch) elements.get(id)?.querySelector('[data-question-status]')?.replaceChildren(node('span', friendlyError(error))); }
   finally { detailsLoading.delete(id); }
@@ -287,7 +293,7 @@ function reasonText(reason) {
   if (/^[\p{L}\p{N}\s.,:;!?()«»—–-]+$/u.test(value) && /[а-яё]/iu.test(value)) return value.slice(0, 220);
   return 'Обработка отложена; подробности доступны в журнале сервиса';
 }
-function jobState(job) { return ({ queued: 'В очереди', running: 'Готовится и проверяется', deferred: 'Отложено', succeeded: 'Готово', failed: 'Требует проверки', superseded: 'Заменено новой версией' })[job.status] || 'Обрабатывается'; }
+function jobState(job) { return ({ unknown: 'Исход запроса уточняется; повторная отправка заблокирована', queued: 'В очереди', running: 'Готовится и проверяется', deferred: 'Отложено', succeeded: 'Готово', failed: 'Требует проверки', superseded: 'Заменено новой версией' })[job.status] || 'Обрабатывается'; }
 function renderJobs() {
   const visible = jobs.filter(job => job.status !== 'superseded').slice(0, 12); $('jobs').replaceChildren();
   $('jobs-summary').textContent = visible.length ? 'Сохранённые задачи выбранной компании.' : 'Новых задач пока нет. Подбор запускается отдельно от просмотра ленты.';
@@ -310,7 +316,7 @@ async function refreshJobs(rev = epoch) {
 function displayRuntime(value) {
   runtime = value; generationEnabled = Boolean(value.generation_enabled);
   $('model-notice').hidden = generationEnabled;
-  $('model-notice').textContent = 'Генерация Qwen пока не подключена. Сбор новостей, отбор и сохранение очереди работают. Выводы появятся после настройки ключа модели.';
+  $('model-notice').textContent = value.recovery_review_required ? 'Генерация приостановлена: после восстановления базы требуется проверка оператором. Сохранённые карточки доступны.' : 'Генерация Qwen пока не подключена. Сбор новостей, отбор и сохранение очереди работают. Выводы появятся после настройки ключа модели.';
   const collector = unbox(value.collector) || {}, feeds = collector.feeds || [];
   const successful = feeds.filter(feed => feed.last_success).length, failed = feeds.filter(feed => feed.last_error).length;
   $('source-count').textContent = feeds.length ? `${successful} / ${feeds.length}` : '—';

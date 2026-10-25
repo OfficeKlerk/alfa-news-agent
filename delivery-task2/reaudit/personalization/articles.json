@@ -1,0 +1,1259 @@
+{
+  "schema_version": "personalization_extraction_v1",
+  "mode": "articles",
+  "input_sha256": "e6ca30f7e8c3bf2037ae601d5782d7d5b8d7ee9f1b8970f41c46e187a57f8216",
+  "extractor_sha256": "6c16f50abb9bd1bd56da62188798d9708d46a3b1692935ee05cc8f9e4f870fa6",
+  "taxonomy_sha256": "b594101e8006bbd490519888e8b7ac8cc8aeaa5706fefd97fc138d370afdcc02",
+  "exporter_sha256": "84887de7c8f3599429a8e02d26653907f8d3afe890e672b009ac030a6f95882d",
+  "source_availability_policy": "preserve explicit source date, otherwise inherit conservative event publication date",
+  "limitation": "Actual historical source facts, but text is an AI factual paraphrase; this is not an original full-text extraction benchmark.",
+  "records": [
+    {
+      "news_id": "cbr_rate_20260213",
+      "before": {
+        "news_id": "cbr_rate_20260213",
+        "event_id": "cbr_rate_20260213",
+        "title": "Решение Банка России по ключевой ставке: 15,50%",
+        "text": "Банк России снизил ключевую ставку на 50 базисных пунктов, до 15,50% годовых.",
+        "event_type": "other",
+        "published_at": "2026-02-13T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:68bdef4e6ec43c80ba1be7e8",
+            "kind": "news",
+            "title": "Решение Банка России по ключевой ставке: 15,50%",
+            "url": "https://www.cbr.ru/press/pr/?file=13022026_133000key.htm",
+            "excerpt": "Решение Банка России по ключевой ставке: 15,50%\nБанк России снизил ключевую ставку на 50 базисных пунктов, до 15,50% годовых.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-02-13T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      },
+      "after": {
+        "news_id": "cbr_rate_20260213",
+        "event_id": "event:4290ad2aa57b9028edc5c15c",
+        "title": "Решение Банка России по ключевой ставке: 15,50%",
+        "text": "Банк России снизил ключевую ставку на 50 базисных пунктов, до 15,50% годовых.",
+        "event_type": "rate_change",
+        "published_at": "2026-02-13T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:68bdef4e6ec43c80ba1be7e8",
+            "kind": "news",
+            "title": "Решение Банка России по ключевой ставке: 15,50%",
+            "url": "https://www.cbr.ru/press/pr/?file=13022026_133000key.htm",
+            "excerpt": "Решение Банка России по ключевой ставке: 15,50%\nБанк России снизил ключевую ставку на 50 базисных пунктов, до 15,50% годовых.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-02-13T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false,
+        "event_details": {
+          "direction": "decrease",
+          "magnitude": 50,
+          "magnitude_unit": "bps",
+          "effective_at": null,
+          "decision_status": "announced",
+          "target_roles": [],
+          "target_okved_codes": [],
+          "evidence": [
+            {
+              "field": "event_type",
+              "quote": "Банк России снизил ключевую ставку на 50 базисных пунктов, до 15,50% годовых.",
+              "source_ids": [
+                "audit:68bdef4e6ec43c80ba1be7e8"
+              ]
+            },
+            {
+              "field": "decision_status",
+              "quote": "Банк России снизил ключевую ставку на 50 базисных пунктов, до 15,50% годовых.",
+              "source_ids": [
+                "audit:68bdef4e6ec43c80ba1be7e8"
+              ]
+            },
+            {
+              "field": "direction",
+              "quote": "Банк России снизил ключевую ставку на 50 базисных пунктов, до 15,50% годовых.",
+              "source_ids": [
+                "audit:68bdef4e6ec43c80ba1be7e8"
+              ]
+            },
+            {
+              "field": "magnitude",
+              "quote": "Банк России снизил ключевую ставку на 50 базисных пунктов, до 15,50% годовых.",
+              "source_ids": [
+                "audit:68bdef4e6ec43c80ba1be7e8"
+              ]
+            },
+            {
+              "field": "magnitude_unit",
+              "quote": "Банк России снизил ключевую ставку на 50 базисных пунктов, до 15,50% годовых.",
+              "source_ids": [
+                "audit:68bdef4e6ec43c80ba1be7e8"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "news_id": "cbr_rate_20260911",
+      "before": {
+        "news_id": "cbr_rate_20260911",
+        "event_id": "cbr_rate_20260911",
+        "title": "Решение Банка России по ключевой ставке: 14,00%",
+        "text": "Банк России сохранил ключевую ставку на уровне 14,00% годовых.",
+        "event_type": "other",
+        "published_at": "2026-09-11T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:e17c6c1c7cf27faba491eb69",
+            "kind": "news",
+            "title": "Решение Банка России по ключевой ставке: 14,00%",
+            "url": "https://www.cbr.ru/press/pr/?file=11092026_133000key.htm",
+            "excerpt": "Решение Банка России по ключевой ставке: 14,00%\nБанк России сохранил ключевую ставку на уровне 14,00% годовых.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-09-11T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      },
+      "after": {
+        "news_id": "cbr_rate_20260911",
+        "event_id": "event:7427f093b98be2d28b73b99c",
+        "title": "Решение Банка России по ключевой ставке: 14,00%",
+        "text": "Банк России сохранил ключевую ставку на уровне 14,00% годовых.",
+        "event_type": "rate_change",
+        "published_at": "2026-09-11T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:e17c6c1c7cf27faba491eb69",
+            "kind": "news",
+            "title": "Решение Банка России по ключевой ставке: 14,00%",
+            "url": "https://www.cbr.ru/press/pr/?file=11092026_133000key.htm",
+            "excerpt": "Решение Банка России по ключевой ставке: 14,00%\nБанк России сохранил ключевую ставку на уровне 14,00% годовых.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-09-11T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false,
+        "event_details": {
+          "direction": "unchanged",
+          "magnitude": 0,
+          "magnitude_unit": "bps",
+          "effective_at": null,
+          "decision_status": "announced",
+          "target_roles": [],
+          "target_okved_codes": [],
+          "evidence": [
+            {
+              "field": "event_type",
+              "quote": "Банк России сохранил ключевую ставку на уровне 14,00% годовых.",
+              "source_ids": [
+                "audit:e17c6c1c7cf27faba491eb69"
+              ]
+            },
+            {
+              "field": "decision_status",
+              "quote": "Банк России сохранил ключевую ставку на уровне 14,00% годовых.",
+              "source_ids": [
+                "audit:e17c6c1c7cf27faba491eb69"
+              ]
+            },
+            {
+              "field": "direction",
+              "quote": "Банк России сохранил ключевую ставку на уровне 14,00% годовых.",
+              "source_ids": [
+                "audit:e17c6c1c7cf27faba491eb69"
+              ]
+            },
+            {
+              "field": "magnitude",
+              "quote": "Банк России сохранил ключевую ставку на уровне 14,00% годовых.",
+              "source_ids": [
+                "audit:e17c6c1c7cf27faba491eb69"
+              ]
+            },
+            {
+              "field": "magnitude_unit",
+              "quote": "Банк России сохранил ключевую ставку на уровне 14,00% годовых.",
+              "source_ids": [
+                "audit:e17c6c1c7cf27faba491eb69"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "news_id": "vat_2026",
+      "before": {
+        "news_id": "vat_2026",
+        "event_id": "vat_2026",
+        "title": "ФНС разъяснила повышение основной ставки НДС в 2026 году",
+        "text": "С 1 января 2026 года основная ставка НДС повышается с 20% до 22%; ставки 10%, 0%, а также специальные ставки 5% и 7% сохраняются.",
+        "event_type": "other",
+        "published_at": "2025-12-17T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:5378367fed028fb4ae17a3fb",
+            "kind": "news",
+            "title": "ФНС разъяснила повышение основной ставки НДС в 2026 году",
+            "url": "https://www.nalog.gov.ru/rn91/ifns/ifns7/info/16590442/",
+            "excerpt": "ФНС разъяснила повышение основной ставки НДС в 2026 году\nС 1 января 2026 года основная ставка НДС повышается с 20% до 22%; ставки 10%, 0%, а также специальные ставки 5% и 7% сохраняются.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2025-12-17T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      },
+      "after": {
+        "news_id": "vat_2026",
+        "event_id": "event:6235b8c4863c0cc4fad05f8f",
+        "title": "ФНС разъяснила повышение основной ставки НДС в 2026 году",
+        "text": "С 1 января 2026 года основная ставка НДС повышается с 20% до 22%; ставки 10%, 0%, а также специальные ставки 5% и 7% сохраняются.",
+        "event_type": "tax_change",
+        "published_at": "2025-12-17T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:5378367fed028fb4ae17a3fb",
+            "kind": "news",
+            "title": "ФНС разъяснила повышение основной ставки НДС в 2026 году",
+            "url": "https://www.nalog.gov.ru/rn91/ifns/ifns7/info/16590442/",
+            "excerpt": "ФНС разъяснила повышение основной ставки НДС в 2026 году\nС 1 января 2026 года основная ставка НДС повышается с 20% до 22%; ставки 10%, 0%, а также специальные ставки 5% и 7% сохраняются.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2025-12-17T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false,
+        "event_details": {
+          "direction": "unknown",
+          "magnitude": null,
+          "magnitude_unit": "unknown",
+          "effective_at": null,
+          "decision_status": "unknown",
+          "target_roles": [],
+          "target_okved_codes": [],
+          "evidence": [
+            {
+              "field": "event_type",
+              "quote": "ФНС разъяснила повышение основной ставки НДС в 2026 году",
+              "source_ids": [
+                "audit:5378367fed028fb4ae17a3fb"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "news_id": "fao_202609",
+      "before": {
+        "news_id": "fao_202609",
+        "event_id": "fao_202609",
+        "title": "ФАО: в сентябре выросли цены на зерновые и общий продовольственный индекс",
+        "text": "Сентябрьский индекс составил 136,0 пункта, на 1,5% выше августовского. Индекс зерновых вырос на 5,1%, цены на пшеницу — на 6,3%.",
+        "event_type": "other",
+        "published_at": "2026-10-02T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:eb439fcad5f6c675ab1b8690",
+            "kind": "news",
+            "title": "ФАО: в сентябре выросли цены на зерновые и общий продовольственный индекс",
+            "url": "https://www.fao.org/newsroom/detail/fao-food-price-index-rises-in-september-amid-weather-concerns-and-transport-disruptions/ru",
+            "excerpt": "ФАО: в сентябре выросли цены на зерновые и общий продовольственный индекс\nСентябрьский индекс составил 136,0 пункта, на 1,5% выше августовского. Индекс зерновых вырос на 5,1%, цены на пшеницу — на 6,3%.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-10-02T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      },
+      "after": {
+        "news_id": "fao_202609",
+        "event_id": "event:5cc42d4c3ee4fadbf78620d1",
+        "title": "ФАО: в сентябре выросли цены на зерновые и общий продовольственный индекс",
+        "text": "Сентябрьский индекс составил 136,0 пункта, на 1,5% выше августовского. Индекс зерновых вырос на 5,1%, цены на пшеницу — на 6,3%.",
+        "event_type": "commodity_price_change",
+        "published_at": "2026-10-02T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:eb439fcad5f6c675ab1b8690",
+            "kind": "news",
+            "title": "ФАО: в сентябре выросли цены на зерновые и общий продовольственный индекс",
+            "url": "https://www.fao.org/newsroom/detail/fao-food-price-index-rises-in-september-amid-weather-concerns-and-transport-disruptions/ru",
+            "excerpt": "ФАО: в сентябре выросли цены на зерновые и общий продовольственный индекс\nСентябрьский индекс составил 136,0 пункта, на 1,5% выше августовского. Индекс зерновых вырос на 5,1%, цены на пшеницу — на 6,3%.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-10-02T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false,
+        "event_details": {
+          "direction": "unknown",
+          "magnitude": null,
+          "magnitude_unit": "unknown",
+          "effective_at": null,
+          "decision_status": "unknown",
+          "target_roles": [],
+          "target_okved_codes": [],
+          "evidence": [
+            {
+              "field": "event_type",
+              "quote": "ФАО: в сентябре выросли цены на зерновые и общий продовольственный индекс",
+              "source_ids": [
+                "audit:eb439fcad5f6c675ab1b8690"
+              ]
+            },
+            {
+              "field": "subject_okved_codes",
+              "quote": "ФАО: в сентябре выросли цены на зерновые и общий продовольственный индекс",
+              "source_ids": [
+                "audit:eb439fcad5f6c675ab1b8690"
+              ]
+            },
+            {
+              "field": "subject_okved_codes",
+              "quote": "Индекс зерновых вырос на 5,1%, цены на пшеницу — на 6,3%.",
+              "source_ids": [
+                "audit:eb439fcad5f6c675ab1b8690"
+              ]
+            }
+          ],
+          "subject_okved_codes": [
+            "01.11",
+            "46.21"
+          ],
+          "taxonomy_origin": "rule_inference",
+          "taxonomy_version": "business-subjects-v1"
+        }
+      }
+    },
+    {
+      "news_id": "eu_agri_tariffs_20250612",
+      "before": {
+        "news_id": "eu_agri_tariffs_20250612",
+        "event_id": "eu_agri_tariffs_20250612",
+        "title": "ЕС принял новые пошлины на часть агропродукции и удобрений из РФ и Беларуси",
+        "text": "Совет ЕС утвердил дополнительные пошлины на ранее не охваченные ими сельскохозяйственные товары и отдельные удобрения российского и белорусского происхождения.",
+        "event_type": "other",
+        "published_at": "2025-06-12T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:e31bef703da76d9d0a301a48",
+            "kind": "news",
+            "title": "ЕС принял новые пошлины на часть агропродукции и удобрений из РФ и Беларуси",
+            "url": "https://www.consilium.europa.eu/en/press/press-releases/2025/06/12/trade-eu-adopts-new-tariffs-on-russian-and-belarusian-agricultural-goods-and-fertilisers/",
+            "excerpt": "ЕС принял новые пошлины на часть агропродукции и удобрений из РФ и Беларуси\nСовет ЕС утвердил дополнительные пошлины на ранее не охваченные ими сельскохозяйственные товары и отдельные удобрения российского и белорусского происхождения.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2025-06-12T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      },
+      "after": {
+        "news_id": "eu_agri_tariffs_20250612",
+        "event_id": "event:47f6f573f52fe6a896d84471",
+        "title": "ЕС принял новые пошлины на часть агропродукции и удобрений из РФ и Беларуси",
+        "text": "Совет ЕС утвердил дополнительные пошлины на ранее не охваченные ими сельскохозяйственные товары и отдельные удобрения российского и белорусского происхождения.",
+        "event_type": "trade_restriction",
+        "published_at": "2025-06-12T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:e31bef703da76d9d0a301a48",
+            "kind": "news",
+            "title": "ЕС принял новые пошлины на часть агропродукции и удобрений из РФ и Беларуси",
+            "url": "https://www.consilium.europa.eu/en/press/press-releases/2025/06/12/trade-eu-adopts-new-tariffs-on-russian-and-belarusian-agricultural-goods-and-fertilisers/",
+            "excerpt": "ЕС принял новые пошлины на часть агропродукции и удобрений из РФ и Беларуси\nСовет ЕС утвердил дополнительные пошлины на ранее не охваченные ими сельскохозяйственные товары и отдельные удобрения российского и белорусского происхождения.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2025-06-12T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false,
+        "event_details": {
+          "direction": "unknown",
+          "magnitude": null,
+          "magnitude_unit": "unknown",
+          "effective_at": null,
+          "decision_status": "announced",
+          "target_roles": [],
+          "target_okved_codes": [],
+          "evidence": [
+            {
+              "field": "event_type",
+              "quote": "ЕС принял новые пошлины на часть агропродукции и удобрений из РФ и Беларуси",
+              "source_ids": [
+                "audit:e31bef703da76d9d0a301a48"
+              ]
+            },
+            {
+              "field": "decision_status",
+              "quote": "ЕС принял новые пошлины на часть агропродукции и удобрений из РФ и Беларуси",
+              "source_ids": [
+                "audit:e31bef703da76d9d0a301a48"
+              ]
+            },
+            {
+              "field": "target_roles",
+              "quote": "ЕС принял новые пошлины на часть агропродукции и удобрений из РФ и Беларуси",
+              "source_ids": [
+                "audit:e31bef703da76d9d0a301a48"
+              ]
+            },
+            {
+              "field": "subject_okved_codes",
+              "quote": "ЕС принял новые пошлины на часть агропродукции и удобрений из РФ и Беларуси",
+              "source_ids": [
+                "audit:e31bef703da76d9d0a301a48"
+              ]
+            },
+            {
+              "field": "target_roles",
+              "quote": "Совет ЕС утвердил дополнительные пошлины на ранее не охваченные ими сельскохозяйственные товары и отдельные удобрения российского и белорусского происхождения.",
+              "source_ids": [
+                "audit:e31bef703da76d9d0a301a48"
+              ]
+            },
+            {
+              "field": "subject_okved_codes",
+              "quote": "Совет ЕС утвердил дополнительные пошлины на ранее не охваченные ими сельскохозяйственные товары и отдельные удобрения российского и белорусского происхождения.",
+              "source_ids": [
+                "audit:e31bef703da76d9d0a301a48"
+              ]
+            }
+          ],
+          "subject_okved_codes": [
+            "20.15",
+            "46.75"
+          ],
+          "taxonomy_origin": "rule_inference",
+          "taxonomy_version": "business-subjects-v1"
+        }
+      }
+    },
+    {
+      "news_id": "eu_fertiliser_20260522",
+      "before": {
+        "news_id": "eu_fertiliser_20260522",
+        "event_id": "eu_fertiliser_20260522",
+        "title": "ЕС приостановил часть пошлин на удобрения, исключив РФ и Беларусь",
+        "text": "Совет ЕС решил на год приостановить пошлины на определённые азотные удобрения в пределах квоты. Продукция из России и Беларуси исключена из послабления.",
+        "event_type": "other",
+        "published_at": "2026-05-22T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:cee457c1779da5098d374af6",
+            "kind": "news",
+            "title": "ЕС приостановил часть пошлин на удобрения, исключив РФ и Беларусь",
+            "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/05/22/council-suspends-customs-tariffs-on-certain-fertilisers-for-one-year/",
+            "excerpt": "ЕС приостановил часть пошлин на удобрения, исключив РФ и Беларусь\nСовет ЕС решил на год приостановить пошлины на определённые азотные удобрения в пределах квоты. Продукция из России и Беларуси исключена из послабления.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-05-22T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      },
+      "after": {
+        "news_id": "eu_fertiliser_20260522",
+        "event_id": "event:c28c23888e7dec93f1a10043",
+        "title": "ЕС приостановил часть пошлин на удобрения, исключив РФ и Беларусь",
+        "text": "Совет ЕС решил на год приостановить пошлины на определённые азотные удобрения в пределах квоты. Продукция из России и Беларуси исключена из послабления.",
+        "event_type": "trade_restriction",
+        "published_at": "2026-05-22T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:cee457c1779da5098d374af6",
+            "kind": "news",
+            "title": "ЕС приостановил часть пошлин на удобрения, исключив РФ и Беларусь",
+            "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/05/22/council-suspends-customs-tariffs-on-certain-fertilisers-for-one-year/",
+            "excerpt": "ЕС приостановил часть пошлин на удобрения, исключив РФ и Беларусь\nСовет ЕС решил на год приостановить пошлины на определённые азотные удобрения в пределах квоты. Продукция из России и Беларуси исключена из послабления.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-05-22T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false,
+        "event_details": {
+          "direction": "unknown",
+          "magnitude": null,
+          "magnitude_unit": "unknown",
+          "effective_at": null,
+          "decision_status": "announced",
+          "target_roles": [],
+          "target_okved_codes": [],
+          "evidence": [
+            {
+              "field": "subject_okved_codes",
+              "quote": "ЕС приостановил часть пошлин на удобрения, исключив РФ и Беларусь",
+              "source_ids": [
+                "audit:cee457c1779da5098d374af6"
+              ]
+            },
+            {
+              "field": "event_type",
+              "quote": "Совет ЕС решил на год приостановить пошлины на определённые азотные удобрения в пределах квоты.",
+              "source_ids": [
+                "audit:cee457c1779da5098d374af6"
+              ]
+            },
+            {
+              "field": "decision_status",
+              "quote": "Совет ЕС решил на год приостановить пошлины на определённые азотные удобрения в пределах квоты.",
+              "source_ids": [
+                "audit:cee457c1779da5098d374af6"
+              ]
+            },
+            {
+              "field": "target_roles",
+              "quote": "Совет ЕС решил на год приостановить пошлины на определённые азотные удобрения в пределах квоты.",
+              "source_ids": [
+                "audit:cee457c1779da5098d374af6"
+              ]
+            },
+            {
+              "field": "subject_okved_codes",
+              "quote": "Совет ЕС решил на год приостановить пошлины на определённые азотные удобрения в пределах квоты.",
+              "source_ids": [
+                "audit:cee457c1779da5098d374af6"
+              ]
+            }
+          ],
+          "subject_okved_codes": [
+            "20.15",
+            "46.75"
+          ],
+          "taxonomy_origin": "rule_inference",
+          "taxonomy_version": "business-subjects-v1"
+        }
+      }
+    },
+    {
+      "news_id": "fuel_exports_20260730",
+      "before": {
+        "news_id": "fuel_exports_20260730",
+        "event_id": "fuel_exports_20260730",
+        "title": "Правительство ввело ограничения на экспорт отдельных видов топлива",
+        "text": "Запрет на вывоз бензина, дизельного и судового топлива, газойлей действует с августа 2026 по январь 2027 года. С сентября предусмотрено исключение для производителей дизеля, судового топлива и газойлей; существуют и специальные исключения.",
+        "event_type": "other",
+        "published_at": "2026-07-30T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:8e12f1235512210b2a433294",
+            "kind": "news",
+            "title": "Правительство ввело ограничения на экспорт отдельных видов топлива",
+            "url": "https://government.ru/news/59474/",
+            "excerpt": "Правительство ввело ограничения на экспорт отдельных видов топлива\nЗапрет на вывоз бензина, дизельного и судового топлива, газойлей действует с августа 2026 по январь 2027 года. С сентября предусмотрено исключение для производителей дизеля, судового топлива и газойлей; существуют и специальные исключения.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-07-30T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      },
+      "after": {
+        "news_id": "fuel_exports_20260730",
+        "event_id": "event:c8982c6eb1b7a4f474e6339f",
+        "title": "Правительство ввело ограничения на экспорт отдельных видов топлива",
+        "text": "Запрет на вывоз бензина, дизельного и судового топлива, газойлей действует с августа 2026 по январь 2027 года. С сентября предусмотрено исключение для производителей дизеля, судового топлива и газойлей; существуют и специальные исключения.",
+        "event_type": "trade_restriction",
+        "published_at": "2026-07-30T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:8e12f1235512210b2a433294",
+            "kind": "news",
+            "title": "Правительство ввело ограничения на экспорт отдельных видов топлива",
+            "url": "https://government.ru/news/59474/",
+            "excerpt": "Правительство ввело ограничения на экспорт отдельных видов топлива\nЗапрет на вывоз бензина, дизельного и судового топлива, газойлей действует с августа 2026 по январь 2027 года. С сентября предусмотрено исключение для производителей дизеля, судового топлива и газойлей; существуют и специальные исключения.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-07-30T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false,
+        "event_details": {
+          "direction": "unknown",
+          "magnitude": null,
+          "magnitude_unit": "unknown",
+          "effective_at": null,
+          "decision_status": "announced",
+          "target_roles": [
+            "exporter"
+          ],
+          "target_okved_codes": [],
+          "evidence": [
+            {
+              "field": "event_type",
+              "quote": "Правительство ввело ограничения на экспорт отдельных видов топлива",
+              "source_ids": [
+                "audit:8e12f1235512210b2a433294"
+              ]
+            },
+            {
+              "field": "decision_status",
+              "quote": "Правительство ввело ограничения на экспорт отдельных видов топлива",
+              "source_ids": [
+                "audit:8e12f1235512210b2a433294"
+              ]
+            },
+            {
+              "field": "target_roles",
+              "quote": "Правительство ввело ограничения на экспорт отдельных видов топлива",
+              "source_ids": [
+                "audit:8e12f1235512210b2a433294"
+              ]
+            },
+            {
+              "field": "subject_okved_codes",
+              "quote": "Запрет на вывоз бензина, дизельного и судового топлива, газойлей действует с августа 2026 по январь 2027 года.",
+              "source_ids": [
+                "audit:8e12f1235512210b2a433294"
+              ]
+            },
+            {
+              "field": "subject_okved_codes",
+              "quote": "С сентября предусмотрено исключение для производителей дизеля, судового топлива и газойлей",
+              "source_ids": [
+                "audit:8e12f1235512210b2a433294"
+              ]
+            }
+          ],
+          "subject_okved_codes": [
+            "19.20",
+            "46.71"
+          ],
+          "taxonomy_origin": "rule_inference",
+          "taxonomy_version": "business-subjects-v1"
+        }
+      }
+    },
+    {
+      "news_id": "cash_fx_20260306",
+      "before": {
+        "news_id": "cash_fx_20260306",
+        "event_id": "cash_fx_20260306",
+        "title": "ЦБ продлил ограничения на выдачу наличной иностранной валюты",
+        "text": "Ограничения продлены до 9 сентября 2026 года. Для юридических лиц-резидентов выдача наличных долларов, евро, фунтов и иен допускается на командировочные расходы в пределах нормативов.",
+        "event_type": "other",
+        "published_at": "2026-03-06T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:5a24ca473dc8b89cb8c20729",
+            "kind": "news",
+            "title": "ЦБ продлил ограничения на выдачу наличной иностранной валюты",
+            "url": "https://www.cbr.ru/press/event/?id=28360",
+            "excerpt": "ЦБ продлил ограничения на выдачу наличной иностранной валюты\nОграничения продлены до 9 сентября 2026 года. Для юридических лиц-резидентов выдача наличных долларов, евро, фунтов и иен допускается на командировочные расходы в пределах нормативов.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-03-06T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      },
+      "after": {
+        "news_id": "cash_fx_20260306",
+        "event_id": "event:76f42d7ba67fb08205ebf81b",
+        "title": "ЦБ продлил ограничения на выдачу наличной иностранной валюты",
+        "text": "Ограничения продлены до 9 сентября 2026 года. Для юридических лиц-резидентов выдача наличных долларов, евро, фунтов и иен допускается на командировочные расходы в пределах нормативов.",
+        "event_type": "other",
+        "published_at": "2026-03-06T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:5a24ca473dc8b89cb8c20729",
+            "kind": "news",
+            "title": "ЦБ продлил ограничения на выдачу наличной иностранной валюты",
+            "url": "https://www.cbr.ru/press/event/?id=28360",
+            "excerpt": "ЦБ продлил ограничения на выдачу наличной иностранной валюты\nОграничения продлены до 9 сентября 2026 года. Для юридических лиц-резидентов выдача наличных долларов, евро, фунтов и иен допускается на командировочные расходы в пределах нормативов.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-03-06T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      }
+    },
+    {
+      "news_id": "nonresident_transfers_20260601",
+      "before": {
+        "news_id": "nonresident_transfers_20260601",
+        "event_id": "nonresident_transfers_20260601",
+        "title": "ЦБ сохранил ограничения на зарубежные переводы отдельных нерезидентов",
+        "text": "На период 8 июня — 7 декабря 2026 года сохраняются ограничения для нерезидентов из недружественных стран. Для юрлиц под российским контролем и отдельных инвестиционных счетов предусмотрены исключения.",
+        "event_type": "other",
+        "published_at": "2026-06-01T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:a823ef487feddfef10ef38ba",
+            "kind": "news",
+            "title": "ЦБ сохранил ограничения на зарубежные переводы отдельных нерезидентов",
+            "url": "https://www.cbr.ru/press/event/?id=32586",
+            "excerpt": "ЦБ сохранил ограничения на зарубежные переводы отдельных нерезидентов\nНа период 8 июня — 7 декабря 2026 года сохраняются ограничения для нерезидентов из недружественных стран. Для юрлиц под российским контролем и отдельных инвестиционных счетов предусмотрены исключения.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-06-01T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      },
+      "after": {
+        "news_id": "nonresident_transfers_20260601",
+        "event_id": "event:613fea17a07b6732c00aba38",
+        "title": "ЦБ сохранил ограничения на зарубежные переводы отдельных нерезидентов",
+        "text": "На период 8 июня — 7 декабря 2026 года сохраняются ограничения для нерезидентов из недружественных стран. Для юрлиц под российским контролем и отдельных инвестиционных счетов предусмотрены исключения.",
+        "event_type": "other",
+        "published_at": "2026-06-01T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:a823ef487feddfef10ef38ba",
+            "kind": "news",
+            "title": "ЦБ сохранил ограничения на зарубежные переводы отдельных нерезидентов",
+            "url": "https://www.cbr.ru/press/event/?id=32586",
+            "excerpt": "ЦБ сохранил ограничения на зарубежные переводы отдельных нерезидентов\nНа период 8 июня — 7 декабря 2026 года сохраняются ограничения для нерезидентов из недружественных стран. Для юрлиц под российским контролем и отдельных инвестиционных счетов предусмотрены исключения.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-06-01T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      }
+    },
+    {
+      "news_id": "hotel_vat_20260112",
+      "before": {
+        "news_id": "hotel_vat_20260112",
+        "event_id": "hotel_vat_20260112",
+        "title": "ФНС разъяснила нулевой НДС для гостиниц на УСН",
+        "text": "Для услуг размещения возможна ставка НДС 0% при выборе общих ставок по иным операциям и соблюдении условий. При специальных ставках 5% или 7% нулевая ставка не применяется.",
+        "event_type": "other",
+        "published_at": "2026-01-12T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:d837c0a630c6cadb254ae64a",
+            "kind": "news",
+            "title": "ФНС разъяснила нулевой НДС для гостиниц на УСН",
+            "url": "https://www.nalog.gov.ru/rn03/news/activities_fts/16594326/",
+            "excerpt": "ФНС разъяснила нулевой НДС для гостиниц на УСН\nДля услуг размещения возможна ставка НДС 0% при выборе общих ставок по иным операциям и соблюдении условий. При специальных ставках 5% или 7% нулевая ставка не применяется.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-01-12T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      },
+      "after": {
+        "news_id": "hotel_vat_20260112",
+        "event_id": "event:df57edddbbdef37aade850cd",
+        "title": "ФНС разъяснила нулевой НДС для гостиниц на УСН",
+        "text": "Для услуг размещения возможна ставка НДС 0% при выборе общих ставок по иным операциям и соблюдении условий. При специальных ставках 5% или 7% нулевая ставка не применяется.",
+        "event_type": "tax_change",
+        "published_at": "2026-01-12T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:d837c0a630c6cadb254ae64a",
+            "kind": "news",
+            "title": "ФНС разъяснила нулевой НДС для гостиниц на УСН",
+            "url": "https://www.nalog.gov.ru/rn03/news/activities_fts/16594326/",
+            "excerpt": "ФНС разъяснила нулевой НДС для гостиниц на УСН\nДля услуг размещения возможна ставка НДС 0% при выборе общих ставок по иным операциям и соблюдении условий. При специальных ставках 5% или 7% нулевая ставка не применяется.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-01-12T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false,
+        "event_details": {
+          "direction": "unknown",
+          "magnitude": null,
+          "magnitude_unit": "unknown",
+          "effective_at": null,
+          "decision_status": "unknown",
+          "target_roles": [],
+          "target_okved_codes": [],
+          "evidence": [
+            {
+              "field": "event_type",
+              "quote": "ФНС разъяснила нулевой НДС для гостиниц на УСН",
+              "source_ids": [
+                "audit:d837c0a630c6cadb254ae64a"
+              ]
+            },
+            {
+              "field": "subject_okved_codes",
+              "quote": "ФНС разъяснила нулевой НДС для гостиниц на УСН",
+              "source_ids": [
+                "audit:d837c0a630c6cadb254ae64a"
+              ]
+            },
+            {
+              "field": "subject_okved_codes",
+              "quote": "Для услуг размещения возможна ставка НДС 0% при выборе общих ставок по иным операциям и соблюдении условий.",
+              "source_ids": [
+                "audit:d837c0a630c6cadb254ae64a"
+              ]
+            }
+          ],
+          "subject_okved_codes": [
+            "55.1"
+          ],
+          "taxonomy_origin": "rule_inference",
+          "taxonomy_version": "business-subjects-v1"
+        }
+      }
+    },
+    {
+      "news_id": "it_contributions_2026",
+      "before": {
+        "news_id": "it_contributions_2026",
+        "event_id": "it_contributions_2026",
+        "title": "ФНС сообщила об изменении взносов для аккредитованных ИТ-организаций",
+        "text": "Для аккредитованных ИТ-организаций тариф взносов в пределах предельной базы с 2026 года увеличивается до 15%; сверх базы сохраняется 7,6%.",
+        "event_type": "other",
+        "published_at": "2025-12-17T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:90ba0fd6031d74825519b793",
+            "kind": "news",
+            "title": "ФНС сообщила об изменении взносов для аккредитованных ИТ-организаций",
+            "url": "https://www.nalog.gov.ru/rn31/news/seminar/16590652/",
+            "excerpt": "ФНС сообщила об изменении взносов для аккредитованных ИТ-организаций\nДля аккредитованных ИТ-организаций тариф взносов в пределах предельной базы с 2026 года увеличивается до 15%; сверх базы сохраняется 7,6%.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2025-12-17T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      },
+      "after": {
+        "news_id": "it_contributions_2026",
+        "event_id": "event:042f0c1893852441a407f031",
+        "title": "ФНС сообщила об изменении взносов для аккредитованных ИТ-организаций",
+        "text": "Для аккредитованных ИТ-организаций тариф взносов в пределах предельной базы с 2026 года увеличивается до 15%; сверх базы сохраняется 7,6%.",
+        "event_type": "tax_change",
+        "published_at": "2025-12-17T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:90ba0fd6031d74825519b793",
+            "kind": "news",
+            "title": "ФНС сообщила об изменении взносов для аккредитованных ИТ-организаций",
+            "url": "https://www.nalog.gov.ru/rn31/news/seminar/16590652/",
+            "excerpt": "ФНС сообщила об изменении взносов для аккредитованных ИТ-организаций\nДля аккредитованных ИТ-организаций тариф взносов в пределах предельной базы с 2026 года увеличивается до 15%; сверх базы сохраняется 7,6%.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2025-12-17T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false,
+        "event_details": {
+          "direction": "unknown",
+          "magnitude": null,
+          "magnitude_unit": "unknown",
+          "effective_at": null,
+          "decision_status": "unknown",
+          "target_roles": [],
+          "target_okved_codes": [],
+          "evidence": [
+            {
+              "field": "subject_okved_codes",
+              "quote": "ФНС сообщила об изменении взносов для аккредитованных ИТ-организаций",
+              "source_ids": [
+                "audit:90ba0fd6031d74825519b793"
+              ]
+            },
+            {
+              "field": "event_type",
+              "quote": "Для аккредитованных ИТ-организаций тариф взносов в пределах предельной базы с 2026 года увеличивается до 15%",
+              "source_ids": [
+                "audit:90ba0fd6031d74825519b793"
+              ]
+            },
+            {
+              "field": "subject_okved_codes",
+              "quote": "Для аккредитованных ИТ-организаций тариф взносов в пределах предельной базы с 2026 года увеличивается до 15%",
+              "source_ids": [
+                "audit:90ba0fd6031d74825519b793"
+              ]
+            }
+          ],
+          "subject_okved_codes": [
+            "62"
+          ],
+          "taxonomy_origin": "rule_inference",
+          "taxonomy_version": "business-subjects-v1"
+        }
+      }
+    },
+    {
+      "news_id": "museum_moscow_20260625",
+      "before": {
+        "news_id": "museum_moscow_20260625",
+        "event_id": "museum_moscow_20260625",
+        "title": "В Москве открылась мультимедийная выставка Эрмитажа",
+        "text": "24 июня 2026 года в Москве открылась мультимедийная выставка «Великолепный Эрмитаж». Сообщение опубликовано на следующий день.",
+        "event_type": "other",
+        "published_at": "2026-06-25T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:1fe20d7c703ffb9f84c429eb",
+            "kind": "news",
+            "title": "В Москве открылась мультимедийная выставка Эрмитажа",
+            "url": "https://hermitagemuseum.org/news/news_185_26",
+            "excerpt": "В Москве открылась мультимедийная выставка Эрмитажа\n24 июня 2026 года в Москве открылась мультимедийная выставка «Великолепный Эрмитаж». Сообщение опубликовано на следующий день.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-06-25T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      },
+      "after": {
+        "news_id": "museum_moscow_20260625",
+        "event_id": "event:bdac7baaa6e9ea0dad1c42cc",
+        "title": "В Москве открылась мультимедийная выставка Эрмитажа",
+        "text": "24 июня 2026 года в Москве открылась мультимедийная выставка «Великолепный Эрмитаж». Сообщение опубликовано на следующий день.",
+        "event_type": "other",
+        "published_at": "2026-06-25T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:1fe20d7c703ffb9f84c429eb",
+            "kind": "news",
+            "title": "В Москве открылась мультимедийная выставка Эрмитажа",
+            "url": "https://hermitagemuseum.org/news/news_185_26",
+            "excerpt": "В Москве открылась мультимедийная выставка Эрмитажа\n24 июня 2026 года в Москве открылась мультимедийная выставка «Великолепный Эрмитаж». Сообщение опубликовано на следующий день.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-06-25T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false,
+        "event_details": {
+          "direction": "unknown",
+          "magnitude": null,
+          "magnitude_unit": "unknown",
+          "effective_at": null,
+          "decision_status": "unknown",
+          "target_roles": [],
+          "target_okved_codes": [],
+          "evidence": [
+            {
+              "field": "subject_okved_codes",
+              "quote": "В Москве открылась мультимедийная выставка Эрмитажа",
+              "source_ids": [
+                "audit:1fe20d7c703ffb9f84c429eb"
+              ]
+            },
+            {
+              "field": "subject_okved_codes",
+              "quote": "24 июня 2026 года в Москве открылась мультимедийная выставка «Великолепный Эрмитаж».",
+              "source_ids": [
+                "audit:1fe20d7c703ffb9f84c429eb"
+              ]
+            }
+          ],
+          "subject_okved_codes": [
+            "82.30"
+          ],
+          "taxonomy_origin": "rule_inference",
+          "taxonomy_version": "business-subjects-v1"
+        }
+      }
+    },
+    {
+      "news_id": "so_ups_equipment_rules_20260812",
+      "before": {
+        "news_id": "so_ups_equipment_rules_20260812",
+        "event_id": "so_ups_equipment_rules_20260812",
+        "title": "СО ЕЭС опубликовал новую редакцию порядка соответствия генерирующего оборудования техническим требованиям",
+        "text": "Системный оператор 12 августа 2026 года сообщил о публикации новой редакции порядка проверки соответствия генерирующего оборудования участников оптового рынка техническим требованиям. По сообщению редакция действует с 10 августа 2026 года.",
+        "event_type": "other",
+        "published_at": "2026-08-12T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:e16033110832286a6c8d1ff1",
+            "kind": "news",
+            "title": "СО ЕЭС опубликовал новую редакцию порядка соответствия генерирующего оборудования техническим требованиям",
+            "url": "https://www.so-ups.ru/news/newonsite-view/news/30816/",
+            "excerpt": "СО ЕЭС опубликовал новую редакцию порядка соответствия генерирующего оборудования техническим требованиям\nСистемный оператор 12 августа 2026 года сообщил о публикации новой редакции порядка проверки соответствия генерирующего оборудования участников оптового рынка техническим требованиям. По сообщению редакция действует с 10 августа 2026 года.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-08-12T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false
+      },
+      "after": {
+        "news_id": "so_ups_equipment_rules_20260812",
+        "event_id": "event:640e93639891108a797266ac",
+        "title": "СО ЕЭС опубликовал новую редакцию порядка соответствия генерирующего оборудования техническим требованиям",
+        "text": "Системный оператор 12 августа 2026 года сообщил о публикации новой редакции порядка проверки соответствия генерирующего оборудования участников оптового рынка техническим требованиям. По сообщению редакция действует с 10 августа 2026 года.",
+        "event_type": "other",
+        "published_at": "2026-08-12T23:59:59.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "audit:e16033110832286a6c8d1ff1",
+            "kind": "news",
+            "title": "СО ЕЭС опубликовал новую редакцию порядка соответствия генерирующего оборудования техническим требованиям",
+            "url": "https://www.so-ups.ru/news/newonsite-view/news/30816/",
+            "excerpt": "СО ЕЭС опубликовал новую редакцию порядка соответствия генерирующего оборудования техническим требованиям\nСистемный оператор 12 августа 2026 года сообщил о публикации новой редакции порядка проверки соответствия генерирующего оборудования участников оптового рынка техническим требованиям. По сообщению редакция действует с 10 августа 2026 года.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-08-12T23:59:59.000Z",
+            "is_mock": false
+          }
+        ],
+        "is_mock": false,
+        "event_details": {
+          "direction": "unknown",
+          "magnitude": null,
+          "magnitude_unit": "unknown",
+          "effective_at": "2026-08-10T00:00:00.000Z",
+          "decision_status": "unknown",
+          "target_roles": [],
+          "target_okved_codes": [],
+          "evidence": [
+            {
+              "field": "subject_okved_codes",
+              "quote": "СО ЕЭС опубликовал новую редакцию порядка соответствия генерирующего оборудования техническим требованиям",
+              "source_ids": [
+                "audit:e16033110832286a6c8d1ff1"
+              ]
+            },
+            {
+              "field": "subject_okved_codes",
+              "quote": "Системный оператор 12 августа 2026 года сообщил о публикации новой редакции порядка проверки соответствия генерирующего оборудования участников оптового рынка техническим требованиям.",
+              "source_ids": [
+                "audit:e16033110832286a6c8d1ff1"
+              ]
+            },
+            {
+              "field": "effective_at",
+              "quote": "По сообщению редакция действует с 10 августа 2026 года.",
+              "source_ids": [
+                "audit:e16033110832286a6c8d1ff1"
+              ]
+            }
+          ],
+          "subject_okved_codes": [
+            "35.11"
+          ],
+          "taxonomy_origin": "rule_inference",
+          "taxonomy_version": "business-subjects-v1"
+        }
+      }
+    }
+  ]
+}

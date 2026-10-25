@@ -4185,6 +4185,192 @@
         }
       }
     },
+    "/v1/agent/operations/{operation_id}": {
+      "get": {
+        "operationId": "AgentOperationData_get__v1_agent_operations_operation_id",
+        "tags": [
+          "role-2"
+        ],
+        "parameters": [
+          {
+            "name": "operation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+            }
+          },
+          {
+            "name": "company_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "analysis",
+                "question"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validated result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOperationDataResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "InternalToken": []
+          }
+        ]
+      }
+    },
     "/v1/agent/analyze": {
       "post": {
         "operationId": "Analysis_post__v1_agent_analyze",
@@ -6327,6 +6513,11 @@
                   "UNSUPPORTED_MEDIA_TYPE",
                   "FORBIDDEN",
                   "UNAUTHORIZED",
+                  "MODEL_OUTCOME_UNKNOWN",
+                  "OPERATION_CONFLICT",
+                  "SESSION_CHANGED",
+                  "MODEL_CANCELLED",
+                  "MODEL_OPERATION_CLOSED",
                   "MODEL_AUTH_ERROR",
                   "MODEL_LIMIT",
                   "MODEL_TIMEOUT",
@@ -8597,6 +8788,10 @@
         "properties": {
           "generation_enabled": {
             "type": "boolean"
+          },
+          "viewer_key": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
           }
         },
         "required": [
@@ -8872,7 +9067,8 @@
               "deferred",
               "succeeded",
               "failed",
-              "superseded"
+              "superseded",
+              "unknown"
             ]
           },
           "title": {
@@ -9036,6 +9232,89 @@
           "versions"
         ]
       },
+      "AgentOperationData": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "enum": [
+              "not_found",
+              "succeeded",
+              "failed",
+              "running",
+              "unknown",
+              "recoverable"
+            ]
+          },
+          "response": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnalysisResponse"
+              },
+              {
+                "$ref": "#/components/schemas/AnswerResponse"
+              }
+            ]
+          },
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "type": "integer",
+                "minimum": 400,
+                "maximum": 599
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "code",
+              "status",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "state": {
+                  "const": "succeeded"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "response"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "state": {
+                  "const": "failed"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "error"
+              ]
+            }
+          }
+        ]
+      },
       "LiveStatusData": {
         "type": "object"
       },
@@ -9147,6 +9426,22 @@
           },
           "data": {
             "$ref": "#/components/schemas/LiveStatusData"
+          }
+        },
+        "required": [
+          "meta",
+          "data"
+        ]
+      },
+      "AgentOperationDataResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AgentOperationData"
           }
         },
         "required": [

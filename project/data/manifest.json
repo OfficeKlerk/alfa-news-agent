@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "file": "demo_news.json",
+      "bytes": 4390,
+      "sha256": "15e1257609eb017b736b0106cd35bf8111bb61538497cb4b835a0173d76d66ba"
+    },
+    {
+      "file": "df_Fid_Uid_link_hack.csv.gz",
+      "bytes": 84,
+      "sha256": "85463c506bc7d76f3e5809432437747336e98a45ec369db53bbf347eeedc98bb"
+    },
+    {
+      "file": "df_Uid_data_hack.csv.gz",
+      "bytes": 363,
+      "sha256": "a5bec3e68fb0bd31a1b1562a878c2e86c6913a3546b6e2d76256cb00f7df720f"
+    },
+    {
+      "file": "df_Uid_payment_hack.csv.gz",
+      "bytes": 115,
+      "sha256": "2d341645ce3001cab0db0aef8d58ecc3fd0421352a61a686bc6ad211e2a0cbb0"
+    },
+    {
+      "file": "research.json",
+      "bytes": 314012,
+      "sha256": "2266f32eb9bd7273829ab5b802dd7ea21c73c75721f564c0b9fd14da6f416f05"
+    },
+    {
+      "file": "reviewed_news.json",
+      "bytes": 5658,
+      "sha256": "2c9be386a6276bc1c1bee48c05a211be9c378a1fd38c89e948dec342f8841f7b"
+    },
+    {
+      "file": "demo/rag/corpus_manifest.json",
+      "bytes": 7741,
+      "sha256": "55b3893c5553d2161d5ff300b0a0ccd397ae4691a4d1209a69635e189b402b8b"
+    }
+  ],
+  "note": "Actual checked-in data bytes. CSV gzip files in this clone are synthetic fixtures; real organizer CSV/PDF are external. OCR text is unchanged; publication metadata is verified separately. Reviewed real-news excerpts are explicitly separate from demo_news.json."
+}
