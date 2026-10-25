@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import type { Settings } from "../config.js";
-import type { Json } from "../types.js";
+import { ModelError, type Json } from "../types.js";
 import type { ContractClient } from "./client.js";
 import { ApiFault, type Envelope } from "./contracts.js";
 import type { RetrievalPort } from "./retrieval.js";
@@ -8,7 +8,7 @@ import type { AnalysisEngine } from "./analysis-engine.js";
 import type { PreparedContext } from "./grounding.js";
 import { prepareEventForRanking } from "./event-interpretation.js";
 import { LiveStore, type LiveJob, type SavedAnalysis, type Subscription } from "./live-store.js";
-import { LiveWorker, DeferredJobError, PermanentJobError } from "./live-worker.js";
+import { LiveWorker, DeferredJobError, PermanentJobError, UnknownJobError } from "./live-worker.js";
 import { selectReason } from "./live-selection.js";
 
 import { canonicalJson } from "./context.js";
@@ -59,7 +59,7 @@ export class LiveService {
     this.worker = new LiveWorker(this.store, (job, signal) => this.process(job, signal), { concurrency: options.settings.liveWorkerConcurrency ?? 2,
       onError: error => { this.lastError = error instanceof Error ? error.message : "Worker failure"; } });
   }
-  get generationEnabled(): boolean { return this.options.settings.analysisEnabled !== false && this.options.settings.mode === "live"; }
+  get generationEnabled(): boolean { return this.options.settings.analysisEnabled !== false && this.options.settings.mode === "live" && !this.store.recoveryHeld(); }
   start(): void {
     if (this.timer) return;
     this.stopped = false; this.worker.start();
@@ -85,6 +85,16 @@ export class LiveService {
     if (this.scanning) return this.scanning;
     if (this.stopped) return Promise.resolve();
     this.scanning = (async () => {
+      if(this.store.recoveryHeld())return;
+      // GET/status only: no paid model request is issued during recovery polling.
+      for(const job of this.store.unknownJobs()) {
+        try {
+          const recovery:Json|undefined=await this.options.engine.recover?.(job.id,job.company_id,job.kind);
+          if(recovery && ["succeeded","recoverable"].includes(recovery.state))this.store.resumeUnknown(job.id);
+          else if(recovery?.state==="failed")this.store.failUnknown(job.id,"model_operation_failed: "+(recovery.error?.code??"failed"));
+        } catch { /* Keep unknown across dependency failures. Never infer a failed send. */ }
+        finally {this.store.recoveryChecked(job.id);}
+      }
       for (const subscription of this.store.dueSubscriptions()) {
         if (this.stopped) break;
         try { await this.discover(subscription); this.lastError = null; }
@@ -244,55 +254,68 @@ export class LiveService {
   private async process(job: LiveJob, signal: AbortSignal) {
     if (!this.generationEnabled) throw new DeferredJobError("generation_disabled_no_key", this.now() + 60_000);
     try {
+      // Check availability BEFORE freezing a dispatch. A missing record AFTER a timeout
+      // is NOT proof that no payment happened (the agent database may have been restored).
+      if(this.options.engine.recover) {
+        const receipt:Json=await this.options.engine.recover(job.id,job.company_id,job.kind);
+        if(receipt.state==="not_found" && job.payload.execution && !job.payload.dispatch_reviewed)throw new UnknownJobError("model_journal_missing_after_dispatch");
+        if(["unknown","running"].includes(receipt.state))throw new UnknownJobError("model_receipt_unresolved");
+        if(receipt.state==="failed")throw new PermanentJobError("model_operation_failed: "+(receipt.error?.code??"failed"));
+      }
       if (job.kind === "question") {
-        const saved = this.store.getAnalysis(job.analysis_id!, job.company_id);
+        const saved = this.store.getAnalysis(job.analysis_id!, job.company_id, job.owner ?? undefined);
         if (!saved?.context || saved.stale) throw new PermanentJobError("analysis_superseded_or_missing");
         await this.assertCurrentRevision(job);
         if (signal.aborted) throw new DeferredJobError("worker_interrupted",this.now()+1000);
-        const response = await this.options.engine.answer({ ...saved, context: saved.context as PreparedContext }, job.payload.question, job.id);
+        const execution=this.store.freezeExecution(job,job.payload.execution ?? {saved:{...saved,context:saved.context},question:job.payload.question});
+        const response = await this.options.engine.answer(execution.saved, execution.question, job.id,signal);
         if (response.meta.mode !== "live") throw new PermanentJobError("Synthetic answers cannot be published");
         await this.assertCurrentRevision(job);
         return { response };
       }
       const subscription = this.store.subscriptions().find(s=>s.company_id===job.company_id&&s.audience_role===job.audience_role);
       if (!subscription?.enabled) throw new DeferredJobError("subscription_paused",this.now()+60_000);
-      const asOf = new Date(this.now()).toISOString();
-      const latest = await this.options.retrieval.search({ query: "", news_id: job.news_id, as_of: asOf, limit: 1 }, job.id);
-      const event = latest.data.items[0];
-      if (!event || latest.meta.mode !== "live") throw new PermanentJobError("source_no_longer_available");
-      const since = this.now() - (this.options.settings.liveLookbackDays ?? 7) * 86_400_000;
-      if (!inPublicationWindow(event, since) && !(job.payload.reanalysis === true && job.created_at >= since))
-        throw new PermanentJobError("publication_window_expired");
-      const body = { ...job.payload, event, as_of: asOf };
-      const prepared = await this.options.engine.assemble(body, job.id);
-      const revision = analysisRevision(event, profileRevision(prepared.input.profile));
-      if (revision !== job.revision) {
-        this.store.invalidate(job.company_id, job.news_id, job.audience_role, revision);
-        this.store.touchSubscription(job.company_id, job.audience_role, this.now());
-        throw new PermanentJobError("news_or_company_changed_before_generation");
+      let execution=job.payload.execution;
+      if(!execution) {
+        const asOf = new Date(this.now()).toISOString();
+        const latest = await this.options.retrieval.search({query:"",news_id:job.news_id,as_of:asOf,limit:1},job.id);
+        const event=latest.data.items[0];
+        if(!event||latest.meta.mode!=="live")throw new PermanentJobError("source_no_longer_available");
+        const since=this.now()-(this.options.settings.liveLookbackDays??7)*86_400_000;
+        if(!inPublicationWindow(event,since)&&!(job.payload.reanalysis===true&&job.created_at>=since))throw new PermanentJobError("publication_window_expired");
+        const body={...job.payload,event,as_of:asOf};
+        const prepared=await this.options.engine.assemble(body,job.id);
+        const revision=analysisRevision(event,profileRevision(prepared.input.profile));
+        if(revision!==job.revision){this.store.invalidate(job.company_id,job.news_id,job.audience_role,revision);this.store.touchSubscription(job.company_id,job.audience_role,this.now());throw new PermanentJobError("news_or_company_changed_before_generation");}
+        const gate=selectReason(event,prepared.input.ranked_item,prepared.input.profile,subscription.min_score);
+        if(!gate.eligible){this.store.invalidate(job.company_id,job.news_id,job.audience_role,"filtered:"+revision,"no_longer_relevant");throw new PermanentJobError(gate.reason);}
+        execution=this.store.freezeExecution(job,{body,prepared});
       }
-      const gate = selectReason(event,prepared.input.ranked_item,prepared.input.profile,subscription.min_score);
-      if (!gate.eligible) { this.store.invalidate(job.company_id,job.news_id,job.audience_role,"filtered:"+revision,"no_longer_relevant"); throw new PermanentJobError(gate.reason); }
-      if (signal.aborted) throw new DeferredJobError("worker_interrupted", this.now() + 1000);
-      const result = await this.options.engine.generate(body, job.id, prepared);
+      if(signal.aborted)throw new UnknownJobError("worker_interrupted_after_snapshot");
+      const result=await this.options.engine.generate(execution.body,job.id,execution.prepared,signal);
       if (result.response.meta.mode !== "live" || result.response.data.mode !== "live") throw new PermanentJobError("Synthetic analyses cannot be published");
       await this.assertCurrentRevision(job);
       return result;
     } catch (error) {
-      if (error instanceof ApiFault) {
+      if((error instanceof ApiFault||error instanceof ModelError) && (["MODEL_OUTCOME_UNKNOWN","OPERATION_CONFLICT"].includes(error.code) || (["DEPENDENCY_TIMEOUT","DEPENDENCY_UNAVAILABLE"].includes(error.code)&&this.store.getJob(job.id)?.payload.execution)))throw new UnknownJobError(error.code);
+      if (error instanceof ApiFault || error instanceof ModelError) {
+        if(["MODEL_LIMIT","MODEL_AUTH_ERROR","MODEL_UNAVAILABLE","MODEL_TIMEOUT"].includes(error.code) && this.options.engine.recover) {
+          const state=await this.options.engine.recover(job.id,job.company_id,job.kind);
+          if(state.state==="failed")throw new PermanentJobError(error.code+": request rejected; operator review required");
+        }
         if (error.code === "MODEL_LIMIT") throw new DeferredJobError("model_budget_exhausted", moscowDayStart(this.now()) + 86_400_000);
         if (error.code === "MODEL_AUTH_ERROR") throw new DeferredJobError("model_authorization_required", this.now() + 300_000);
-        if ([400, 403, 404, 409, 413, 415, 422].includes(error.status) || ["MODEL_RESPONSE_INVALID", "MODEL_INVALID_RESPONSE", "CONTRACT_VIOLATION"].includes(error.code))
+        if ([400, 403, 404, 409, 413, 415, 422].includes(error.status) || ["MODEL_RESPONSE_INVALID", "MODEL_INVALID_RESPONSE", "CONTRACT_VIOLATION","OPERATION_CONFLICT"].includes(error.code))
           throw new PermanentJobError(`${error.code}: ${error.message}`);
       }
       throw error;
     }
   }
-  async status(companyId?: string, role = "cfo"): Promise<Json> {
+  async status(companyId?: string, role = "cfo", owner?: string): Promise<Json> {
     const settled = await Promise.allSettled([this.options.retrieval.status?.(randomUUID()), this.options.budget?.(companyId)]);
     const collector = settled[0].status === "fulfilled" ? settled[0].value?.data ?? null : { error: "collector_unavailable" };
     const budget = settled[1].status === "fulfilled" ? settled[1].value ?? null : { error: "budget_unavailable" };
-    return { generation_enabled: this.generationEnabled, worker: this.worker.status(), queue: this.store.status(companyId),
+    return { generation_enabled: this.generationEnabled, recovery_review_required: this.store.recoveryHeld(), worker: this.worker.status(), queue: this.store.status(companyId, owner),
       subscriptions: this.store.subscriptions().filter(s => !companyId || s.company_id === companyId), budget, collector,
       selection: companyId ? this.selection(companyId, role) : null, error: companyId ? this.store.subscriptions().find(s=>s.company_id===companyId && s.audience_role===role)?.error ?? null : this.lastError };
   }

@@ -29,7 +29,7 @@ def generate():
     d["Meta"] = obj({"schema_version": {"const": "1.0.0"}, "request_id": ID,
                      "mode": {"enum": ["mock", "demo", "live"]}, "warnings": STRINGS})
     d["Error"] = obj({"schema_version": {"const": "1.0.0"}, "request_id": ID,
-                      "error": obj({"code": {"enum": ["VALIDATION_ERROR", "NOT_FOUND", "CONFLICT", "BUSY", "DEPENDENCY_UNAVAILABLE", "DEPENDENCY_TIMEOUT", "CONTRACT_VIOLATION", "INTERNAL_ERROR", "PAYLOAD_TOO_LARGE", "UNSUPPORTED_MEDIA_TYPE", "FORBIDDEN", "UNAUTHORIZED"]},
+                      "error": obj({"code": {"enum": ["VALIDATION_ERROR", "NOT_FOUND", "CONFLICT", "BUSY", "DEPENDENCY_UNAVAILABLE", "DEPENDENCY_TIMEOUT", "CONTRACT_VIOLATION", "INTERNAL_ERROR", "PAYLOAD_TOO_LARGE", "UNSUPPORTED_MEDIA_TYPE", "FORBIDDEN", "UNAUTHORIZED", "MODEL_OUTCOME_UNKNOWN", "OPERATION_CONFLICT", "SESSION_CHANGED", "MODEL_CANCELLED", "MODEL_OPERATION_CLOSED"]},
                                     "message": STR, "retryable": {"type": "boolean"}})})
     rules = json.loads((ROOT / "contracts/diagnostic-rules.json").read_text(encoding="utf-8"))
     d["FieldIssue"] = obj({"stage": {"enum": list(rules)},
@@ -202,7 +202,7 @@ def generate():
     d["CompaniesData"] = obj({"items": array(ID), "offset": {"type": "integer", "minimum": 0},
                               "limit": {"type": "integer", "minimum": 1, "maximum": 100}})
     d["HealthData"] = obj({"status": {"const": "ok"}, "service": STR})
-    d["RuntimeData"] = obj({"generation_enabled": {"type": "boolean"}})
+    d["RuntimeData"] = obj({"generation_enabled": {"type": "boolean"},"viewer_key": ID},["generation_enabled"])
     role = {"enum": ["cfo", "ceo", "treasury"]}
     milliseconds = {"type": "number", "minimum": 0}
     d["LiveSubscribeRequest"] = obj({"company_id": ID, "audience_role": role,
@@ -218,7 +218,7 @@ def generate():
     d["LiveSubscriptionData"] = obj({"company_id": ID, "audience_role": role, "limit": {"type": "integer"}, "min_score": {"type": "number"},
         "enabled": {"type": "boolean"}, "next_scan": milliseconds, "last_scan": {"type": ["number", "null"]}, "error": {"type": ["string", "null"]}})
     d["LiveJobData"] = obj({"id": ID, "kind": {"enum": ["analysis", "question"]}, "company_id": ID,
-        "news_id": ID, "analysis_id": {"type": ["string", "null"]}, "status": {"enum": ["queued", "running", "deferred", "succeeded", "failed", "superseded"]},
+        "news_id": ID, "analysis_id": {"type": ["string", "null"]}, "status": {"enum": ["queued", "running", "deferred", "succeeded", "failed", "superseded", "unknown"]},
         "title": {"type": "string"}, "attempts": {"type": "integer"}, "error": {"type": ["string", "null"]},
         "next_attempt": milliseconds, "created_at": milliseconds, "updated_at": milliseconds,
         "result": {"anyOf": [REF("AnalysisResponse"), REF("AnswerResponse"), {"type": "null"}]}})
@@ -227,9 +227,14 @@ def generate():
     d["LiveDetailData"] = obj({"card": REF("LiveCard"), "history": array(obj({"question": STR,"answer": STR,"response": REF("AnswerResponse"),"created_at": milliseconds})),
         "versions": array(obj({"id": ID,"revision": STR,"created_at": milliseconds,"stale": {"type":"boolean"}}))})
     # Operational telemetry is deliberately extensible; LLM output contracts remain strict.
+    d["AgentOperationData"] = obj({"state":{"enum":["not_found","succeeded","failed","running","unknown","recoverable"]},
+        "response":{"anyOf":[REF("AnalysisResponse"),REF("AnswerResponse")]},
+        "error":obj({"code":STR,"status":{"type":"integer","minimum":400,"maximum":599},"message":STR})},["state"])
+    d["AgentOperationData"]["allOf"]=[{"if":{"properties":{"state":{"const":"succeeded"}}},"then":{"required":["response"]}},
+        {"if":{"properties":{"state":{"const":"failed"}}},"then":{"required":["error"]}}]
     d["LiveStatusData"] = {"type": "object"}
     d["BudgetStatusData"] = {"type": "object"}
-    for name in ["LiveFeedData", "LiveSubscriptionData", "LiveJobData", "LiveJobsData", "LiveFavoriteData", "LiveDetailData", "LiveStatusData", "BudgetStatusData", "Profile", "CompaniesData", "RankData", "SearchData", "RagData", "ResolveData", "Analysis", "Answer", "HealthData", "FeedbackData", "LearningStatusData", "PreparedContextData", "IngestData", "FeedRefreshData", "FeedStatusData", "RuntimeData"]:
+    for name in ["LiveFeedData", "LiveSubscriptionData", "LiveJobData", "LiveJobsData", "LiveFavoriteData", "LiveDetailData", "LiveStatusData", "AgentOperationData", "BudgetStatusData", "Profile", "CompaniesData", "RankData", "SearchData", "RagData", "ResolveData", "Analysis", "Answer", "HealthData", "FeedbackData", "LearningStatusData", "PreparedContextData", "IngestData", "FeedRefreshData", "FeedStatusData", "RuntimeData"]:
         d[name + "Response"] = obj({"meta": REF("Meta"), "data": REF(name)})
     routes = [
         ("get", "/v1/live/feed", None, "LiveFeedDataResponse", 5),
@@ -258,6 +263,7 @@ def generate():
         ("post", "/v1/analyze", "AnalyzeRequest", "AnalysisResponse", 2),
         ("post", "/v1/analysis-context", "AnalysisEventRequest", "PreparedContextDataResponse", 5),
         ("post", "/v1/analyze-event", "AnalysisEventRequest", "AnalysisResponse", 2),
+        ("get", "/v1/agent/operations/{operation_id}", None, "AgentOperationDataResponse", 2),
         ("post", "/v1/agent/analyze", "AgentRequest", "AnalysisResponse", 2),
         ("post", "/v1/agent/questions", "AgentQuestionRequest", "AnswerResponse", 2),
         ("get", "/v1/analyses/{analysis_id}", None, "AnalysisResponse", 2),
@@ -266,9 +272,12 @@ def generate():
     paths = {}
     for method, path, request, response, owner in routes:
         params = []
-        for key in ["company_id", "analysis_id", "job_id"]:
+        for key in ["company_id", "analysis_id", "job_id", "operation_id"]:
             if "{" + key + "}" in path:
                 params.append({"name": key, "in": "path", "required": True, "schema": ID})
+        if path == "/v1/agent/operations/{operation_id}":
+            params += [{"name": "company_id", "in": "query", "required": True, "schema": ID},
+                       {"name": "kind", "in": "query", "required": True, "schema": {"enum": ["analysis", "question"]}}]
         if path == "/v1/companies":
             params += [{"name": "offset", "in": "query", "schema": {"type": "integer", "minimum": 0, "default": 0}},
                        {"name": "limit", "in": "query", "schema": {"type": "integer", "minimum": 1, "maximum": 100, "default": 20}}]

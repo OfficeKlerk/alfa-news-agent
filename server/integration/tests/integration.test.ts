@@ -354,7 +354,7 @@ test("live follow-ups retain analysis date, role and grounded company/source con
 });
 test("model error types reach the UI without turning into generic validation failures", async () => {
   const mock = new MockAgent();
-  const agent: AgentPort = {answer:mock.answer.bind(mock),async analyze() {throw new ModelError("Лимит исчерпан","MODEL_LIMIT",429);}};
+  const agent: AgentPort = {answer:mock.answer.bind(mock),async analyze() {throw Object.assign(new ModelError("Локальный лимит исчерпан","MODEL_LIMIT",429),{budgetExhausted:true});}};
   const h = await harness({agent});
   try { const r = await h.call("/v1/analyze",body); assert.equal(r.status,429); assert.equal(r.value.error.code,"MODEL_LIMIT"); assert.equal(r.value.error.retryable,true); }
   finally { await h.close(); }

@@ -13,13 +13,15 @@ import { generatePrepared, answerPrepared } from "./prepared-agent.js";
 export { companySource } from "./context.js";
 
 export interface AgentPort {
-  analyze(input: Json, requestId: string): Promise<Envelope>;
-  answer(input: Json, requestId: string): Promise<Envelope>;
+  recover?(id:string,company:string,kind:"analysis"|"question"): Promise<Json>;
+  analyze(input: Json, requestId: string, signal?:AbortSignal): Promise<Envelope>;
+  answer(input: Json, requestId: string, signal?:AbortSignal): Promise<Envelope>;
 }
 export class HttpAgent implements AgentPort {
   constructor(private client: ContractClient) {}
-  analyze(input: Json, id: string) { return this.client.call("/v1/agent/analyze", "AnalysisResponse", id, input); }
-  answer(input: Json, id: string) { return this.client.call("/v1/agent/questions", "AnswerResponse", id, input); }
+  async recover(id:string,company:string,kind:"analysis"|"question") { return (await this.client.call(`/v1/agent/operations/${encodeURIComponent(id)}?company_id=${encodeURIComponent(company)}&kind=${kind}`,"AgentOperationDataResponse",id)).data; }
+  analyze(input: Json, id: string,signal?:AbortSignal) { return this.client.call("/v1/agent/analyze", "AnalysisResponse", id, input,{},undefined,signal); }
+  answer(input: Json, id: string,signal?:AbortSignal) { return this.client.call("/v1/agent/questions", "AnswerResponse", id, input,{},undefined,signal); }
 }
 export class MockAgent implements AgentPort {
   async answer(input: Json, requestId: string) {

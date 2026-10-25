@@ -52,7 +52,7 @@ export function budgetStatus(settings: BudgetSettings, db: Store, companyId?: st
     accounting: "Provider usage when present; full reservation retained for missing usage, crashes or transport failures" };
 }
 export function reserveLlmCall(settings: BudgetSettings, db: Store, payload: unknown, outputLimit: number,
-  metadata = context.getStore() ?? { purpose: "analysis" as const }, now = Date.now()): number | bigint {
+  metadata = context.getStore() ?? { purpose: "analysis" as const }, now = Date.now(), onReserve?: (id: number | bigint) => void): number | bigint {
   initialize(db);
   // A byte upper bound is deliberately conservative across provider tokenizers; include framing overhead.
   const reservedPrompt = Buffer.byteLength(JSON.stringify(payload), "utf8") + 512;
@@ -75,6 +75,7 @@ export function reserveLlmCall(settings: BudgetSettings, db: Store, payload: unk
     const timestamp = new Date(now).toISOString();
     db.run("INSERT INTO llm_budget_reservations VALUES(?,?,?,?,?,?,?,?,?,?)", id, metadata.companyId ?? null, metadata.purpose,
       reservedPrompt, outputLimit, reservedPrompt, outputLimit, "reserved", timestamp, timestamp);
+    onReserve?.(id);
     db.connection.exec("COMMIT"); return id;
   } catch (error) { db.connection.exec("ROLLBACK"); throw error; }
 }

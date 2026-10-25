@@ -1,0 +1,2741 @@
+TAP version 13
+# Subtest: signed expiring JWT identities reject forgery, wrong issuer/audience, expiry and missing grants
+ok 1 - signed expiring JWT identities reject forgery, wrong issuer/audience, expiry and missing grants
+  ---
+  duration_ms: 158.142743
+  type: 'test'
+  ...
+# Subtest: real HTTP tenant authorization rejects alternate encodings, trailing slashes, forged headers and legacy/admin routes
+ok 2 - real HTTP tenant authorization rejects alternate encodings, trailing slashes, forged headers and legacy/admin routes
+  ---
+  duration_ms: 212.13727
+  type: 'test'
+  ...
+# Subtest: private service token is enforced over HTTP; health contains no company data
+ok 3 - private service token is enforced over HTTP; health contains no company data
+  ---
+  duration_ms: 27.050298
+  type: 'test'
+  ...
+# Subtest: persistent bank index reflects insertion, changed text/date and deletion without restart
+ok 4 - persistent bank index reflects insertion, changed text/date and deletion without restart
+  ---
+  duration_ms: 11.148649
+  type: 'test'
+  ...
+# Subtest: shared index is reused and exact source excerpts remain unchanged
+ok 5 - shared index is reused and exact source excerpts remain unchanged
+  ---
+  duration_ms: 3.978402
+  type: 'test'
+  ...
+# Subtest: RAG query uses actual event text and confirmed product channels without private metadata
+ok 6 - RAG query uses actual event text and confirmed product channels without private metadata
+  ---
+  duration_ms: 1.214721
+  type: 'test'
+  ...
+# Subtest: Python microsecond timestamps respect millisecond publication cutoffs
+ok 7 - Python microsecond timestamps respect millisecond publication cutoffs
+  ---
+  duration_ms: 2.849176
+  type: 'test'
+  ...
+# Subtest: incremental index touches only changed documents and rolls back a broken update atomically
+ok 8 - incremental index touches only changed documents and rolls back a broken update atomically
+  ---
+  duration_ms: 3.709093
+  type: 'test'
+  ...
+# Subtest: schema errors contain safe JSON paths, expected types and bounded field issues
+ok 9 - schema errors contain safe JSON paths, expected types and bounded field issues
+  ---
+  duration_ms: 44.158901
+  type: 'test'
+  ...
+# Subtest: json_object: repair receives verified field errors and the persisted structural draft
+ok 10 - json_object: repair receives verified field errors and the persisted structural draft
+  ---
+  duration_ms: 255.333869
+  type: 'test'
+  ...
+# Subtest: json_schema: repair receives verified field errors and the persisted structural draft
+ok 11 - json_schema: repair receives verified field errors and the persisted structural draft
+  ---
+  duration_ms: 21.977222
+  type: 'test'
+  ...
+# Subtest: grounding refusals identify quotes, profile paths, references, conditions and required data precisely
+ok 12 - grounding refusals identify quotes, profile paths, references, conditions and required data precisely
+  ---
+  duration_ms: 4.458974
+  type: 'test'
+  ...
+# Subtest: repeated grounding failure stops at two calls with saved drafts and a safe final diagnostic
+ok 13 - repeated grounding failure stops at two calls with saved drafts and a safe final diagnostic
+  ---
+  duration_ms: 45.190106
+  type: 'test'
+  ...
+# Subtest: invalid JSON records no raw text and still uses only one repair
+ok 14 - invalid JSON records no raw text and still uses only one repair
+  ---
+  duration_ms: 38.609975
+  type: 'test'
+  ...
+# Subtest: transport failure during repair preserves previous diagnostics without any third call
+ok 15 - transport failure during repair preserves previous diagnostics without any third call
+  ---
+  duration_ms: 85.361428
+  type: 'test'
+  ...
+# Subtest: follow-up diagnostics use answer and claim_indexes paths rather than synthetic analysis fields
+ok 16 - follow-up diagnostics use answer and claim_indexes paths rather than synthetic analysis fields
+  ---
+  duration_ms: 76.194509
+  type: 'test'
+  ...
+# Subtest: snapshot failure is explicit and does not prevent bounded repair
+ok 17 - snapshot failure is explicit and does not prevent bounded repair
+  ---
+  duration_ms: 20.312271
+  type: 'test'
+  ...
+# Subtest: snapshots and local retention are bounded and contain no arbitrary strings or numbers
+ok 18 - snapshots and local retention are bounded and contain no arbitrary strings or numbers
+  ---
+  duration_ms: 123.392955
+  type: 'test'
+  ...
+# Subtest: safe diagnostics survive provider HTTP, contract client, error boundary and browser SDK
+ok 19 - safe diagnostics survive provider HTTP, contract client, error boundary and browser SDK
+  ---
+  duration_ms: 86.12486
+  type: 'test'
+  ...
+# Subtest: shared Node/ML fixture preserves sourced event: rate_hold
+ok 20 - shared Node/ML fixture preserves sourced event: rate_hold
+  ---
+  duration_ms: 12.543457
+  type: 'test'
+  ...
+# Subtest: shared Node/ML fixture preserves sourced event: transport_budget
+ok 21 - shared Node/ML fixture preserves sourced event: transport_budget
+  ---
+  duration_ms: 3.078167
+  type: 'test'
+  ...
+# Subtest: shared Node/ML fixture preserves sourced event: standards_development
+ok 22 - shared Node/ML fixture preserves sourced event: standards_development
+  ---
+  duration_ms: 0.405511
+  type: 'test'
+  ...
+# Subtest: a key-rate hold does not establish unchanged market or company financing terms
+ok 23 - a key-rate hold does not establish unchanged market or company financing terms
+  ---
+  duration_ms: 4.060714
+  type: 'test'
+  ...
+# Subtest: carrier and dentistry have distinct sector applicability without inventing contracts
+ok 24 - carrier and dentistry have distinct sector applicability without inventing contracts
+  ---
+  duration_ms: 3.688151
+  type: 'test'
+  ...
+# Subtest: standards development preserves its stage and never establishes mandatory application
+ok 25 - standards development preserves its stage and never establishes mandatory application
+  ---
+  duration_ms: 0.901477
+  type: 'test'
+  ...
+# Subtest: stages distinguish discussion, draft, adoption, future and reported entry into force
+ok 26 - stages distinguish discussion, draft, adoption, future and reported entry into force
+  ---
+  duration_ms: 6.678457
+  type: 'test'
+  ...
+# Subtest: analysis and follow-up receive the same hold/stage safeguards without editing repair
+ok 27 - analysis and follow-up receive the same hold/stage safeguards without editing repair
+  ---
+  duration_ms: 294.868374
+  type: 'test'
+  ...
+# Subtest: manual news is enriched before both direct ranking and analysis-context ML requests
+ok 28 - manual news is enriched before both direct ranking and analysis-context ML requests
+  ---
+  duration_ms: 198.283084
+  type: 'test'
+  ...
+# Subtest: frontend adapter preserves raw baseline scores without percentage or importance conversion
+ok 29 - frontend adapter preserves raw baseline scores without percentage or importance conversion
+  ---
+  duration_ms: 23.794718
+  type: 'test'
+  ...
+# Subtest: uncalibrated logistic and mock scores have distinct labels without probabilities
+ok 30 - uncalibrated logistic and mock scores have distinct labels without probabilities
+  ---
+  duration_ms: 1.494327
+  type: 'test'
+  ...
+# Subtest: unknown scales and invalid or missing scores do not fall back to a zero probability
+ok 31 - unknown scales and invalid or missing scores do not fall back to a zero probability
+  ---
+  duration_ms: 1.212028
+  type: 'test'
+  ...
+# Subtest: legacy feed keeps its existing explicitly scaled index
+ok 32 - legacy feed keeps its existing explicitly scaled index
+  ---
+  duration_ms: 1.869663
+  type: 'test'
+  ...
+# Subtest: deduplicated evidence remains exact: rate_borrower
+ok 33 - deduplicated evidence remains exact: rate_borrower
+  ---
+  duration_ms: 173.03857
+  type: 'test'
+  ...
+# Subtest: deduplicated evidence remains exact: rate_nonborrower
+ok 34 - deduplicated evidence remains exact: rate_nonborrower
+  ---
+  duration_ms: 17.417042
+  type: 'test'
+  ...
+# Subtest: deduplicated evidence remains exact: unrelated_region
+ok 35 - deduplicated evidence remains exact: unrelated_region
+  ---
+  duration_ms: 5.620377
+  type: 'test'
+  ...
+# Subtest: deduplicated evidence remains exact: incomplete_profile
+ok 36 - deduplicated evidence remains exact: incomplete_profile
+  ---
+  duration_ms: 4.372311
+  type: 'test'
+  ...
+# Subtest: deduplicated evidence remains exact: no_rag
+ok 37 - deduplicated evidence remains exact: no_rag
+  ---
+  duration_ms: 6.140029
+  type: 'test'
+  ...
+# Subtest: evaluation pipeline: rate_borrower
+ok 38 - evaluation pipeline: rate_borrower
+  ---
+  duration_ms: 275.244023
+  type: 'test'
+  ...
+# Subtest: evaluation pipeline: rate_nonborrower
+ok 39 - evaluation pipeline: rate_nonborrower
+  ---
+  duration_ms: 6.78855
+  type: 'test'
+  ...
+# Subtest: evaluation pipeline: unrelated_region
+ok 40 - evaluation pipeline: unrelated_region
+  ---
+  duration_ms: 6.313145
+  type: 'test'
+  ...
+# Subtest: evaluation pipeline: incomplete_profile
+ok 41 - evaluation pipeline: incomplete_profile
+  ---
+  duration_ms: 6.683785
+  type: 'test'
+  ...
+# Subtest: evaluation pipeline: no_rag
+ok 42 - evaluation pipeline: no_rag
+  ---
+  duration_ms: 7.324525
+  type: 'test'
+  ...
+# Subtest: one event keeps distinct business profiles, false/null and raw ML scale
+ok 43 - one event keeps distinct business profiles, false/null and raw ML scale
+  ---
+  duration_ms: 5.412239
+  type: 'test'
+  ...
+# Subtest: context rejects future, duplicate, oversized and cross-company evidence
+ok 44 - context rejects future, duplicate, oversized and cross-company evidence
+  ---
+  duration_ms: 4.811648
+  type: 'test'
+  ...
+# Subtest: grounding blocks invented facts/numbers, incorrect links, whole objects, unknown fields and absent conditions
+ok 45 - grounding blocks invented facts/numbers, incorrect links, whole objects, unknown fields and absent conditions
+  ---
+  duration_ms: 9.335038
+  type: 'test'
+  ...
+# Subtest: unknown fields require explicit missing data and limitations
+ok 46 - unknown fields require explicit missing data and limitations
+  ---
+  duration_ms: 2.406039
+  type: 'test'
+  ...
+# Subtest: a bank quote cannot be fabricated when no RAG was supplied
+ok 47 - a bank quote cannot be fabricated when no RAG was supplied
+  ---
+  duration_ms: 2.896216
+  type: 'test'
+  ...
+# Subtest: live generation sends full original context, repairs once and exposes deterministic notices
+ok 48 - live generation sends full original context, repairs once and exposes deterministic notices
+  ---
+  duration_ms: 65.821853
+  type: 'test'
+  ...
+# Subtest: live questions ground their claims in the saved company and source context
+ok 49 - live questions ground their claims in the saved company and source context
+  ---
+  duration_ms: 80.59042
+  type: 'test'
+  ...
+# Subtest: transport errors never cause a repair and never expose provider secrets
+ok 50 - transport errors never cause a repair and never expose provider secrets
+  ---
+  duration_ms: 86.01727
+  type: 'test'
+  ...
+# Subtest: invalid JSON is repaired only once; truncation, refusal and oversize have no repair
+ok 51 - invalid JSON is repaired only once; truncation, refusal and oversize have no repair
+  ---
+  duration_ms: 58.887176
+  type: 'test'
+  ...
+# Subtest: deadline aborts a waiting request; local quota blocks the next request
+ok 52 - deadline aborts a waiting request; local quota blocks the next request
+  ---
+  duration_ms: 34.996624
+  type: 'test'
+  ...
+# Subtest: UI discards late company/news responses and blocks unsafe source URLs
+ok 53 - UI discards late company/news responses and blocks unsafe source URLs
+  ---
+  duration_ms: 1.332207
+  type: 'test'
+  ...
+# Subtest: context fingerprints ignore JSON object key order while retaining business changes
+ok 54 - context fingerprints ignore JSON object key order while retaining business changes
+  ---
+  duration_ms: 8.288656
+  type: 'test'
+  ...
+# Subtest: blank generated sections cannot pass source checks with meaningless whitespace
+ok 55 - blank generated sections cannot pass source checks with meaningless whitespace
+  ---
+  duration_ms: 7.08521
+  type: 'test'
+  ...
+# Subtest: every citation of a factual quote must contain that quote
+ok 56 - every citation of a factual quote must contain that quote
+  ---
+  duration_ms: 2.260013
+  type: 'test'
+  ...
+# Subtest: company identifier digits and a reversed numeric sign are not financial support
+ok 57 - company identifier digits and a reversed numeric sign are not financial support
+  ---
+  duration_ms: 5.621374
+  type: 'test'
+  ...
+# Subtest: source links decode to the actual DOM id, including colon-delimited citation IDs
+ok 58 - source links decode to the actual DOM id, including colon-delimited citation IDs
+  ---
+  duration_ms: 0.536857
+  type: 'test'
+  ...
+# Subtest: v1 ingestion writes through the selected retrieval provider and preserves quarantine
+ok 59 - v1 ingestion writes through the selected retrieval provider and preserves quarantine
+  ---
+  duration_ms: 156.84302
+  type: 'test'
+  ...
+# Subtest: rank boundary checks extracted field evidence, not just schema shape
+ok 60 - rank boundary checks extracted field evidence, not just schema shape
+  ---
+  duration_ms: 43.208863
+  type: 'test'
+  ...
+# Subtest: v1 composes context, rank and evidence; remembers scoped questions
+ok 61 - v1 composes context, rank and evidence; remembers scoped questions
+  ---
+  duration_ms: 306.001375
+  type: 'test'
+  ...
+# Subtest: gateway forwards the saved full input and isolates history by analysis; callers cannot inject either
+ok 62 - gateway forwards the saved full input and isolates history by analysis; callers cannot inject either
+  ---
+  duration_ms: 29.422932
+  type: 'test'
+  ...
+# Subtest: agent can add evidence discovered by tools only when role 3 resolves the exact source
+ok 63 - agent can add evidence discovered by tools only when role 3 resolves the exact source
+  ---
+  duration_ms: 19.526947
+  type: 'test'
+  ...
+# Subtest: gateway rejects wrong company, modified evidence and dangling claims from agents
+ok 64 - gateway rejects wrong company, modified evidence and dangling claims from agents
+  ---
+  duration_ms: 35.074671
+  type: 'test'
+  ...
+# Subtest: JSON object key order from a remote agent does not change source identity
+ok 65 - JSON object key order from a remote agent does not change source identity
+  ---
+  duration_ms: 7.135474
+  type: 'test'
+  ...
+# Subtest: upstream schema drift and context mismatch fail at the boundary
+ok 66 - upstream schema drift and context mismatch fail at the boundary
+  ---
+  duration_ms: 9.607993
+  type: 'test'
+  ...
+# Subtest: HTTP clients classify provider failures without leaking response bodies
+ok 67 - HTTP clients classify provider failures without leaking response bodies
+  ---
+  duration_ms: 6.266916
+  type: 'test'
+  ...
+# Subtest: source dates, strict booleans, content types and origin checks are enforced
+ok 68 - source dates, strict booleans, content types and origin checks are enforced
+  ---
+  duration_ms: 41.569265
+  type: 'test'
+  ...
+# Subtest: analysis concurrency and session storage are bounded
+ok 69 - analysis concurrency and session storage are bounded
+  ---
+  duration_ms: 29.778224
+  type: 'test'
+  ...
+# Subtest: manual baseline keeps its own scale
+ok 70 - manual baseline keeps its own scale
+  ---
+  duration_ms: 4.546835
+  type: 'test'
+  ...
+# Subtest: OpenAPI 3.1 can be parsed and resolved without network references
+ok 71 - OpenAPI 3.1 can be parsed and resolved without network references
+  ---
+  duration_ms: 281.71611
+  type: 'test'
+  ...
+# Subtest: learning gateway forwards only supplied reviewer token and validates feedback
+ok 72 - learning gateway forwards only supplied reviewer token and validates feedback
+  ---
+  duration_ms: 25.918023
+  type: 'test'
+  ...
+# Subtest: preview has no agent calls; selected events and context hashes are enforced
+ok 73 - preview has no agent calls; selected events and context hashes are enforced
+  ---
+  duration_ms: 42.472675
+  type: 'test'
+  ...
+# Subtest: gateway repeats live grounding checks even if an agent claims the result is valid
+ok 74 - gateway repeats live grounding checks even if an agent claims the result is valid
+  ---
+  duration_ms: 163.759206
+  type: 'test'
+  ...
+# Subtest: analysis UI serves only static assets with CSP; sensitive files are unavailable
+ok 75 - analysis UI serves only static assets with CSP; sensitive files are unavailable
+  ---
+  duration_ms: 35.651214
+  type: 'test'
+  ...
+# Subtest: live follow-ups retain analysis date, role and grounded company/source context
+ok 76 - live follow-ups retain analysis date, role and grounded company/source context
+  ---
+  duration_ms: 52.037506
+  type: 'test'
+  ...
+# Subtest: model error types reach the UI without turning into generic validation failures
+ok 77 - model error types reach the UI without turning into generic validation failures
+  ---
+  duration_ms: 5.457174
+  type: 'test'
+  ...
+# Subtest: a pending analysis reserves its session slot before a second request can spend a call
+ok 78 - a pending analysis reserves its session slot before a second request can spend a call
+  ---
+  duration_ms: 19.888767
+  type: 'test'
+  ...
+# Subtest: preview applies the configured context limit before calling an agent
+ok 79 - preview applies the configured context limit before calling an agent
+  ---
+  duration_ms: 11.022708
+  type: 'test'
+  ...
+# Subtest: actual gateway filters company enumeration and binds saved analyses/questions to the authenticated owner
+ok 80 - actual gateway filters company enumeration and binds saved analyses/questions to the authenticated owner
+  ---
+  duration_ms: 42.455135
+  type: 'test'
+  ...
+# Subtest: authenticated gateway fails closed on demonstration and synthetic dependencies
+ok 81 - authenticated gateway fails closed on demonstration and synthetic dependencies
+  ---
+  duration_ms: 8.76582
+  type: 'test'
+  ...
+# Subtest: live API persists cards, scopes favorites/questions, and GET/reload never calls generation
+ok 82 - live API persists cards, scopes favorites/questions, and GET/reload never calls generation
+  ---
+  duration_ms: 435.559902
+  type: 'test'
+  ...
+# Subtest: complete official CBR evidence replaces an earlier teaser while first announcement and sources remain
+ok 83 - complete official CBR evidence replaces an earlier teaser while first announcement and sources remain
+  ---
+  duration_ms: 51.350355
+  type: 'test'
+  ...
+# Subtest: single-news worker lookup returns the exact cluster revision and keeps requested logical ID
+ok 84 - single-news worker lookup returns the exact cluster revision and keeps requested logical ID
+  ---
+  duration_ms: 5.716359
+  type: 'test'
+  ...
+# Subtest: a secondary article correction changes aggregate material revision, cosmetic changes do not
+ok 85 - a secondary article correction changes aggregate material revision, cosmetic changes do not
+  ---
+  duration_ms: 5.714487
+  type: 'test'
+  ...
+# Subtest: legacy articles without ingestion metadata retain their previous Event shape
+ok 86 - legacy articles without ingestion metadata retain their previous Event shape
+  ---
+  duration_ms: 0.369058
+  type: 'test'
+  ...
+# Subtest: publication-window filtering retains complete cluster evidence and never refreshes old story age
+ok 87 - publication-window filtering retains complete cluster evidence and never refreshes old story age
+  ---
+  duration_ms: 7.446927
+  type: 'test'
+  ...
+# Subtest: collector status distinguishes full articles, excerpts, discovery backlog and extraction failures
+ok 88 - collector status distinguishes full articles, excerpts, discovery backlog and extraction failures
+  ---
+  duration_ms: 12.363349
+  type: 'test'
+  ...
+# Subtest: a corrected future publication leaves quarantine only from observation time
+ok 89 - a corrected future publication leaves quarantine only from observation time
+  ---
+  duration_ms: 2.755458
+  type: 'test'
+  ...
+# Subtest: publisher canonical URL changes preserve article identity and immutable source history
+ok 90 - publisher canonical URL changes preserve article identity and immutable source history
+  ---
+  duration_ms: 1.55093
+  type: 'test'
+  ...
+# Subtest: equal-text excerpt to full-article upgrade becomes visible without a fake material change
+ok 91 - equal-text excerpt to full-article upgrade becomes visible without a fake material change
+  ---
+  duration_ms: 2.545376
+  type: 'test'
+  ...
+# Subtest: profile changes during generation prevent publication before the next scanner cycle
+ok 92 - profile changes during generation prevent publication before the next scanner cycle
+  ---
+  duration_ms: 251.525125
+  type: 'test'
+  ...
+# Subtest: a source correction before a question is noticed even when discovery has not run again
+ok 93 - a source correction before a question is noticed even when discovery has not run again
+  ---
+  duration_ms: 15.232686
+  type: 'test'
+  ...
+# Subtest: source changes during a question cannot publish an obsolete answer
+ok 94 - source changes during a question cannot publish an obsolete answer
+  ---
+  duration_ms: 47.527829
+  type: 'test'
+  ...
+# Subtest: profile changes during a question cannot publish an obsolete answer
+ok 95 - profile changes during a question cannot publish an obsolete answer
+  ---
+  duration_ms: 23.836639
+  type: 'test'
+  ...
+# Subtest: unchanged context allows one durable question answer without regenerating its card
+ok 96 - unchanged context allows one durable question answer without regenerating its card
+  ---
+  duration_ms: 18.368608
+  type: 'test'
+  ...
+# Subtest: profile semantic revision ignores database rebuild timestamps, global file digests and source row renumbering
+ok 97 - profile semantic revision ignores database rebuild timestamps, global file digests and source row renumbering
+  ---
+  duration_ms: 1.330183
+  type: 'test'
+  ...
+# Subtest: profile semantic revision still changes for a bank product, counterparty concentration or raw company fact
+ok 98 - profile semantic revision still changes for a bank product, counterparty concentration or raw company fact
+  ---
+  duration_ms: 1.918486
+  type: 'test'
+  ...
+# Subtest: runtime exposes the configured generation gate without calling any provider
+ok 99 - runtime exposes the configured generation gate without calling any provider
+  ---
+  duration_ms: 102.908567
+  type: 'test'
+  ...
+# Subtest: disabled generation gates analyze, analyze-event and questions before validation or providers
+ok 100 - disabled generation gates analyze, analyze-event and questions before validation or providers
+  ---
+  duration_ms: 89.686463
+  type: 'test'
+  ...
+# Subtest: enabled generation reaches ordinary request and session checks
+ok 101 - enabled generation reaches ordinary request and session checks
+  ---
+  duration_ms: 59.255061
+  type: 'test'
+  ...
+# Subtest: feed status is forwarded through the selected HTTP retrieval with its status and request ID
+ok 102 - feed status is forwarded through the selected HTTP retrieval with its status and request ID
+  ---
+  duration_ms: 23.268692
+  type: 'test'
+  ...
+# Subtest: feed status rejects a malformed in-process provider and reports unsupported providers
+ok 103 - feed status rejects a malformed in-process provider and reports unsupported providers
+  ---
+  duration_ms: 15.700771
+  type: 'test'
+  ...
+# Subtest: RSS refresh gets a batch deadline while ordinary retrieval keeps its shorter timeout
+ok 104 - RSS refresh gets a batch deadline while ordinary retrieval keeps its shorter timeout
+  ---
+  duration_ms: 58.822527
+  type: 'test'
+  ...
+# Subtest: generation disabled still permits ranking context and identifies selected article text as potentially incomplete
+ok 105 - generation disabled still permits ranking context and identifies selected article text as potentially incomplete
+  ---
+  duration_ms: 237.251405
+  type: 'test'
+  ...
+# Subtest: newsSeedMode none starts with no selected news and preserves collected news after reopening
+ok 106 - newsSeedMode none starts with no selected news and preserves collected news after reopening
+  ---
+  duration_ms: 21.303104
+  type: 'test'
+  ...
+# Subtest: no-key discovery validates SearchRequest pagination, queues work, and defers without consuming attempts across restart
+ok 107 - no-key discovery validates SearchRequest pagination, queues work, and defers without consuming attempts across restart
+  ---
+  duration_ms: 245.989021
+  type: 'test'
+  ...
+# Subtest: repeated scans are idempotent and daily company quota includes pending work across roles
+ok 108 - repeated scans are idempotent and daily company quota includes pending work across roles
+  ---
+  duration_ms: 13.292344
+  type: 'test'
+  ...
+# Subtest: an official nationwide event replaces unstarted lower-priority work without changing its ML score or exceeding the company quota
+ok 109 - an official nationwide event replaces unstarted lower-priority work without changing its ML score or exceeding the company quota
+  ---
+  duration_ms: 19.572938
+  type: 'test'
+  ...
+# Subtest: a completed or running analysis cannot be displaced to evade the daily cap
+ok 110 - a completed or running analysis cannot be displaced to evade the daily cap
+  ---
+  duration_ms: 226.855879
+  type: 'test'
+  ...
+# Subtest: validated cards survive restart and repeated feed/detail/favorite reads never generate
+ok 111 - validated cards survive restart and repeated feed/detail/favorite reads never generate
+  ---
+  duration_ms: 19.214356
+  type: 'test'
+  ...
+# Subtest: material corrections queue a new version despite daily cap and irrelevant corrections stale old cards
+ok 112 - material corrections queue a new version despite daily cap and irrelevant corrections stale old cards
+  ---
+  duration_ms: 35.525928
+  type: 'test'
+  ...
+# Subtest: an old head outside the candidate window is rechecked and invalidated when corrected or removed
+ok 113 - an old head outside the candidate window is rechecked and invalidated when corrected or removed
+  ---
+  duration_ms: 18.93378
+  type: 'test'
+  ...
+# Subtest: invalid generation never publishes a live card
+ok 114 - invalid generation never publishes a live card
+  ---
+  duration_ms: 10.869851
+  type: 'test'
+  ...
+# Subtest: mock generation never publishes a live card
+ok 115 - mock generation never publishes a live card
+  ---
+  duration_ms: 11.852699
+  type: 'test'
+  ...
+# Subtest: budget exhaustion defers to Moscow reset while new collection/discovery and status remain available
+ok 116 - budget exhaustion defers to Moscow reset while new collection/discovery and status remain available
+  ---
+  duration_ms: 14.930182
+  type: 'test'
+  ...
+# Subtest: worker rechecks relevance before spending and source revision before publication
+ok 117 - worker rechecks relevance before spending and source revision before publication
+  ---
+  duration_ms: 22.686006
+  type: 'test'
+  ...
+# Subtest: questions are scoped to saved company, preserve history, and become unavailable after correction
+ok 118 - questions are scoped to saved company, preserve history, and become unavailable after correction
+  ---
+  duration_ms: 38.138654
+  type: 'test'
+  ...
+# Subtest: expired primary pending jobs release quota, while historical cards remain valid and fresh corrections retain a window
+ok 119 - expired primary pending jobs release quota, while historical cards remain valid and fresh corrections retain a window
+  ---
+  duration_ms: 38.525947
+  type: 'test'
+  ...
+# Subtest: worker refuses an expired first analysis even before the next discovery pass
+ok 120 - worker refuses an expired first analysis even before the next discovery pass
+  ---
+  duration_ms: 6.953814
+  type: 'test'
+  ...
+# Subtest: publication-date corrections change analysis revision even if material text hash is unchanged
+ok 121 - publication-date corrections change analysis revision even if material text hash is unchanged
+  ---
+  duration_ms: 0.95767
+  type: 'test'
+  ...
+# Subtest: discovery queues a historical correction after a question worker already advanced the head, despite today's quota
+ok 122 - discovery queues a historical correction after a question worker already advanced the head, despite today's quota
+  ---
+  duration_ms: 43.538361
+  type: 'test'
+  ...
+# Subtest: local live gateway refuses rebinding Host for GET and same-origin POST before any company or model access
+ok 123 - local live gateway refuses rebinding Host for GET and same-origin POST before any company or model access
+  ---
+  duration_ms: 18.610941
+  type: 'test'
+  ...
+# Subtest: local live gateway accepts loopback names and legal ports, rejecting ambiguous or missing Host
+ok 124 - local live gateway accepts loopback names and legal ports, rejecting ambiguous or missing Host
+  ---
+  duration_ms: 27.181863
+  type: 'test'
+  ...
+# Subtest: Compose and existing non-live gateway configurations retain hostname routing
+ok 125 - Compose and existing non-live gateway configurations retain hostname routing
+  ---
+  duration_ms: 4.741953
+  type: 'test'
+  ...
+# Subtest: merged live HTTP policy denies cross-company routes and status excludes foreign errors/subscriptions
+ok 126 - merged live HTTP policy denies cross-company routes and status excludes foreign errors/subscriptions
+  ---
+  duration_ms: 119.625346
+  type: 'test'
+  ...
+# Subtest: a sourced policy rate cannot be laundered into a company loss, including sections and notes
+ok 127 - a sourced policy rate cannot be laundered into a company loss, including sections and notes
+  ---
+  duration_ms: 298.753819
+  type: 'test'
+  ...
+# Subtest: follow-up keeps exact quoted rate but blocks reusing it as an AI return
+ok 128 - follow-up keeps exact quoted rate but blocks reusing it as an AI return
+  ---
+  duration_ms: 21.03024
+  type: 'test'
+  ...
+# Subtest: recommendation conditions and missing inputs must be linked, not decorative references
+ok 129 - recommendation conditions and missing inputs must be linked, not decorative references
+  ---
+  duration_ms: 4.93607
+  type: 'test'
+  ...
+# Subtest: rate hold and known target mismatch restrict output; score alone does not establish applicability
+ok 130 - rate hold and known target mismatch restrict output; score alone does not establish applicability
+  ---
+  duration_ms: 5.988231
+  type: 'test'
+  ...
+# Subtest: an under-typed rate hold is grounded from its quoted evidence, not trusted as typed, before guardrails run
+ok 131 - an under-typed rate hold is grounded from its quoted evidence, not trusted as typed, before guardrails run
+  ---
+  duration_ms: 3.283269
+  type: 'test'
+  ...
+# Subtest: grounding a rate hold leaves non-rate events untouched (no over-classification)
+ok 132 - grounding a rate hold leaves non-rate events untouched (no over-classification)
+  ---
+  duration_ms: 2.245771
+  type: 'test'
+  ...
+# Subtest: a rate hold by an unspecified regulator is typed unchanged so no shock is invented, without attributing the CBR
+ok 133 - a rate hold by an unspecified regulator is typed unchanged so no shock is invented, without attributing the CBR
+  ---
+  duration_ms: 3.496506
+  type: 'test'
+  ...
+# Subtest: the unspecified-regulator hold stays conservative: directional moves and non-rate text are not reclassified
+ok 134 - the unspecified-regulator hold stays conservative: directional moves and non-rate text are not reclassified
+  ---
+  duration_ms: 2.3261
+  type: 'test'
+  ...
+# Subtest: unknown direction, forecast, disputed facts and absent product flags retain uncertainty
+ok 135 - unknown direction, forecast, disputed facts and absent product flags retain uncertainty
+  ---
+  duration_ms: 2.77101
+  type: 'test'
+  ...
+# Subtest: live follow-up revalidates original company, event, ranking, time, source registry and hash
+ok 136 - live follow-up revalidates original company, event, ranking, time, source registry and hash
+  ---
+  duration_ms: 61.656683
+  type: 'test'
+  ...
+# Subtest: busy publisher cannot remove a sparse publisher before personalization
+ok 137 - busy publisher cannot remove a sparse publisher before personalization
+  ---
+  duration_ms: 2.011574
+  type: 'test'
+  ...
+# Subtest: balanced candidates preserve global order, single-source behavior and bounded size
+ok 138 - balanced candidates preserve global order, single-source behavior and bounded size
+  ---
+  duration_ms: 0.415556
+  type: 'test'
+  ...
+# Subtest: real retrieval retains an older rate announcement after 100 newer reports, with metadata warnings
+ok 139 - real retrieval retains an older rate announcement after 100 newer reports, with metadata warnings
+  ---
+  duration_ms: 148.126957
+  type: 'test'
+  ...
+# Subtest: promoted official full text keeps its publisher slot even when a teaser announced the event first
+ok 140 - promoted official full text keeps its publisher slot even when a teaser announced the event first
+  ---
+  duration_ms: 0.365892
+  type: 'test'
+  ...
+# Subtest: v1 filters undated, invalid and future articles; merges only sources available as of cutoff
+ok 141 - v1 filters undated, invalid and future articles; merges only sources available as of cutoff
+  ---
+  duration_ms: 94.732958
+  type: 'test'
+  ...
+# Subtest: v1 reads historical article revisions without making a correction available in the past
+ok 142 - v1 reads historical article revisions without making a correction available in the past
+  ---
+  duration_ms: 4.974127
+  type: 'test'
+  ...
+# Subtest: pre-migration RFC dates project to ISO and ingest exposes quarantine instead of fabricated events
+ok 143 - pre-migration RFC dates project to ISO and ingest exposes quarantine instead of fabricated events
+  ---
+  duration_ms: 2.847012
+  type: 'test'
+  ...
+# Subtest: day-only publication dates become available at the conservative UTC day boundary
+ok 144 - day-only publication dates become available at the conservative UTC day boundary
+  ---
+  duration_ms: 2.66973
+  type: 'test'
+  ...
+# Subtest: RAG removes future and undated sources before the top-k cutoff and resolves canonical dates
+ok 145 - RAG removes future and undated sources before the top-k cutoff and resolves canonical dates
+  ---
+  duration_ms: 4.600513
+  type: 'test'
+  ...
+# Subtest: legacy feed keeps the eligible previous revision when a future correction is queued
+ok 146 - legacy feed keeps the eligible previous revision when a future correction is queued
+  ---
+  duration_ms: 3.052457
+  type: 'test'
+  ...
+# Subtest: research supports evidence publication fields consistently before top-k and during source resolution
+ok 147 - research supports evidence publication fields consistently before top-k and during source resolution
+  ---
+  duration_ms: 3.272774
+  type: 'test'
+  ...
+# Subtest: revision ties follow observation order and obsolete future versions never revive
+ok 148 - revision ties follow observation order and obsolete future versions never revive
+  ---
+  duration_ms: 4.554314
+  type: 'test'
+  ...
+# Subtest: json_object: U_34911, two reviewed numeric news, reconstructed failures and one bounded repair
+ok 149 - json_object: U_34911, two reviewed numeric news, reconstructed failures and one bounded repair
+  ---
+  duration_ms: 590.365899
+  type: 'test'
+  ...
+# Subtest: json_object: U_99262, two reviewed numeric news, reconstructed failures and one bounded repair
+ok 150 - json_object: U_99262, two reviewed numeric news, reconstructed failures and one bounded repair
+  ---
+  duration_ms: 226.217332
+  type: 'test'
+  ...
+# Subtest: json_schema: U_34911, two reviewed numeric news, reconstructed failures and one bounded repair
+ok 151 - json_schema: U_34911, two reviewed numeric news, reconstructed failures and one bounded repair
+  ---
+  duration_ms: 263.839051
+  type: 'test'
+  ...
+# Subtest: json_schema: U_99262, two reviewed numeric news, reconstructed failures and one bounded repair
+ok 152 - json_schema: U_99262, two reviewed numeric news, reconstructed failures and one bounded repair
+  ---
+  duration_ms: 285.489602
+  type: 'test'
+  ...
+# Subtest: date formats, OKVED decimals, signs and financial paraphrases retain the original guards
+ok 153 - date formats, OKVED decimals, signs and financial paraphrases retain the original guards
+  ---
+  duration_ms: 21.705837
+  type: 'test'
+  ...
+# Subtest: second failure keeps resolved and new violations in bounded history, without any third POST or secrets
+ok 154 - second failure keeps resolved and new violations in bounded history, without any third POST or secrets
+  ---
+  duration_ms: 67.45068
+  type: 'test'
+  ...
+# Subtest: guidance uses only allowed literal passages and never echoes credential-like source text
+ok 155 - guidance uses only allowed literal passages and never echoes credential-like source text
+  ---
+  duration_ms: 3.543418
+  type: 'test'
+  ...
+# Subtest: OIDC browser login verifies HTTPS discovery, PKCE, nonce, state, encrypted cookie and CSRF
+ok 156 - OIDC browser login verifies HTTPS discovery, PKCE, nonce, state, encrypted cookie and CSRF
+  ---
+  duration_ms: 712.480725
+  type: 'test'
+  ...
+# Subtest: grounding accepts the observed OKVED 49.42 false positive in a claim and section
+ok 157 - grounding accepts the observed OKVED 49.42 false positive in a claim and section
+  ---
+  duration_ms: 226.844814
+  type: 'test'
+  ...
+# Subtest: grounding accepts a full multi-part OKVED only through its selected code field
+ok 158 - grounding accepts a full multi-part OKVED only through its selected code field
+  ---
+  duration_ms: 4.503321
+  type: 'test'
+  ...
+# Subtest: code-looking numbers from an untyped field do not gain a financial exemption
+ok 159 - code-looking numbers from an untyped field do not gain a financial exemption
+  ---
+  duration_ms: 2.436155
+  type: 'test'
+  ...
+# Subtest: unverified OKVED and financial reuse of a code stay blocked
+ok 160 - unverified OKVED and financial reuse of a code stay blocked
+  ---
+  duration_ms: 3.779509
+  type: 'test'
+  ...
+# Subtest: only a complete labelled and verified classification code is exempt
+ok 161 - only a complete labelled and verified classification code is exempt
+  ---
+  duration_ms: 0.31714
+  type: 'test'
+  ...
+# Subtest: verified OKVED cannot hide money, percentages, rates or unsupported dates
+ok 162 - verified OKVED cannot hide money, percentages, rates or unsupported dates
+  ---
+  duration_ms: 3.70007
+  type: 'test'
+  ...
+# Subtest: Node accepts new payment aggregates, zero/missing source and old frozen profiles
+ok 163 - Node accepts new payment aggregates, zero/missing source and old frozen profiles
+  ---
+  duration_ms: 241.502508
+  type: 'test'
+  ...
+# Subtest: Node rejects the same corrupt aggregate vectors as Python
+ok 164 - Node rejects the same corrupt aggregate vectors as Python
+  ---
+  duration_ms: 5.610885
+  type: 'test'
+  ...
+# Subtest: prepared context and saved follow-up retain aggregates; removing the block changes snapshot identity
+ok 165 - prepared context and saved follow-up retain aggregates; removing the block changes snapshot identity
+  ---
+  duration_ms: 195.78698
+  type: 'test'
+  ...
+# Subtest: grounding permits observed coverage leaves without treating them as losses or provenance metadata
+ok 166 - grounding permits observed coverage leaves without treating them as losses or provenance metadata
+  ---
+  duration_ms: 5.462485
+  type: 'test'
+  ...
+# Subtest: legacy projection and mocked live transport carry the full new context without a network call
+ok 167 - legacy projection and mocked live transport carry the full new context without a network call
+  ---
+  duration_ms: 29.913697
+  type: 'test'
+  ...
+# Subtest: profile guidance retains false, null and a known zero without inventing contracts
+ok 168 - profile guidance retains false, null and a known zero without inventing contracts
+  ---
+  duration_ms: 168.029533
+  type: 'test'
+  ...
+# Subtest: false product mark cannot prove absence of debt, and true cannot prove a contract
+ok 169 - false product mark cannot prove absence of debt, and true cannot prove a contract
+  ---
+  duration_ms: 34.29644
+  type: 'test'
+  ...
+# Subtest: null loan flag cannot become either true or false
+ok 170 - null loan flag cannot become either true or false
+  ---
+  duration_ms: 5.119166
+  type: 'test'
+  ...
+# Subtest: FTS and countries do not establish trade direction or absence of currency payments
+ok 171 - FTS and countries do not establish trade direction or absence of currency payments
+  ---
+  duration_ms: 2.124782
+  type: 'test'
+  ...
+# Subtest: unknown payment metadata is not rubles, a year or zero; a known zero stays valid
+ok 172 - unknown payment metadata is not rubles, a year or zero; a known zero stays valid
+  ---
+  duration_ms: 0.772336
+  type: 'test'
+  ...
+# Subtest: profile interpretation guards apply to sections, claims, notes and questions
+ok 173 - profile interpretation guards apply to sections, claims, notes and questions
+  ---
+  duration_ms: 50.069964
+  type: 'test'
+  ...
+# Subtest: verbatim source quotes remain quotes instead of being reinterpreted as CSV flags
+ok 174 - verbatim source quotes remain quotes instead of being reinterpreted as CSV flags
+  ---
+  duration_ms: 2.543855
+  type: 'test'
+  ...
+# Subtest: json_object: a wrong flag interpretation is repaired with explicit instructions within two calls
+ok 175 - json_object: a wrong flag interpretation is repaired with explicit instructions within two calls
+  ---
+  duration_ms: 48.829143
+  type: 'test'
+  ...
+# Subtest: json_schema: a wrong flag interpretation is repaired with explicit instructions within two calls
+ok 176 - json_schema: a wrong flag interpretation is repaired with explicit instructions within two calls
+  ---
+  duration_ms: 30.4751
+  type: 'test'
+  ...
+# Subtest: explicit product marks cannot contradict known true and false snapshot values
+ok 177 - explicit product marks cannot contradict known true and false snapshot values
+  ---
+  duration_ms: 1.553896
+  type: 'test'
+  ...
+# Subtest: profile index advertises only validated business values, indexed statistics and their matching coverage
+ok 178 - profile index advertises only validated business values, indexed statistics and their matching coverage
+  ---
+  duration_ms: 37.213187
+  type: 'test'
+  ...
+# Subtest: arbitrary paths, whole objects, service fields, array properties and missing coverage still reject
+ok 179 - arbitrary paths, whole objects, service fields, array properties and missing coverage still reject
+  ---
+  duration_ms: 164.739421
+  type: 'test'
+  ...
+# Subtest: json_object: power-trader repairs to an existing statistic plus coverage within two calls
+ok 180 - json_object: power-trader repairs to an existing statistic plus coverage within two calls
+  ---
+  duration_ms: 89.507332
+  type: 'test'
+  ...
+# Subtest: json_object: metal-borrower copies one selected quote into text and quote; fabricated quote never passes
+ok 181 - json_object: metal-borrower copies one selected quote into text and quote; fabricated quote never passes
+  ---
+  duration_ms: 66.07979
+  type: 'test'
+  ...
+# Subtest: json_object: power-software repairs categorical absence and freshness-only claims without inventing effects
+ok 182 - json_object: power-software repairs categorical absence and freshness-only claims without inventing effects
+  ---
+  duration_ms: 43.753972
+  type: 'test'
+  ...
+# Subtest: json_schema: power-trader repairs to an existing statistic plus coverage within two calls
+ok 183 - json_schema: power-trader repairs to an existing statistic plus coverage within two calls
+  ---
+  duration_ms: 48.106871
+  type: 'test'
+  ...
+# Subtest: json_schema: metal-borrower copies one selected quote into text and quote; fabricated quote never passes
+ok 184 - json_schema: metal-borrower copies one selected quote into text and quote; fabricated quote never passes
+  ---
+  duration_ms: 72.598793
+  type: 'test'
+  ...
+# Subtest: json_schema: power-software repairs categorical absence and freshness-only claims without inventing effects
+ok 185 - json_schema: power-software repairs categorical absence and freshness-only claims without inventing effects
+  ---
+  duration_ms: 57.787686
+  type: 'test'
+  ...
+# Subtest: all nonzero ranking contributions count, including negative, tiny and cancelling rows
+ok 186 - all nonzero ranking contributions count, including negative, tiny and cancelling rows
+  ---
+  duration_ms: 1.741754
+  type: 'test'
+  ...
+# Subtest: negative control is cautious, has no invented effects and applies to AI sections and questions
+ok 187 - negative control is cautious, has no invented effects and applies to AI sections and questions
+  ---
+  duration_ms: 22.07135
+  type: 'test'
+  ...
+# Subtest: literal bank examples are copied too; age is disclosed without rejecting an otherwise as_of-eligible source
+ok 188 - literal bank examples are copied too; age is disclosed without rejecting an otherwise as_of-eligible source
+  ---
+  duration_ms: 15.2989
+  type: 'test'
+  ...
+# Subtest: prompt example keeps recommendation text and grounding separate and passes unchanged validators
+ok 189 - prompt example keeps recommendation text and grounding separate and passes unchanged validators
+  ---
+  duration_ms: 220.826333
+  type: 'test'
+  ...
+# Subtest: provider schemas accept reference drafts and reject recommendation objects and extra grounding fields
+ok 190 - provider schemas accept reference drafts and reject recommendation objects and extra grounding fields
+  ---
+  duration_ms: 59.562349
+  type: 'test'
+  ...
+# Subtest: response format configuration is explicit and rejects unsupported values
+ok 191 - response format configuration is explicit and rejects unsupported values
+  ---
+  duration_ms: 1.171068
+  type: 'test'
+  ...
+# Subtest: role 2 json_object repairs invalid recommendation shapes once using the same contract
+ok 192 - role 2 json_object repairs invalid recommendation shapes once using the same contract
+  ---
+  duration_ms: 177.886419
+  type: 'test'
+  ...
+# Subtest: role 2 json_schema repairs invalid recommendation shapes once using the same contract
+ok 193 - role 2 json_schema repairs invalid recommendation shapes once using the same contract
+  ---
+  duration_ms: 106.535203
+  type: 'test'
+  ...
+# Subtest: RAG starts with the strongest chunk of each matching document and fills spare places
+ok 194 - RAG starts with the strongest chunk of each matching document and fills spare places
+  ---
+  duration_ms: 13.51282
+  type: 'test'
+  ...
+# Subtest: request limits preserve the same ranking prefix, including extra context
+ok 195 - request limits preserve the same ranking prefix, including extra context
+  ---
+  duration_ms: 8.517118
+  type: 'test'
+  ...
+# Subtest: a single document retains two chunks per page and empty searches stay empty
+ok 196 - a single document retains two chunks per page and empty searches stay empty
+  ---
+  duration_ms: 3.422779
+  type: 'test'
+  ...
+# Subtest: diversity excludes unknown and future dates before selection and preserves resolvable citations
+ok 197 - diversity excludes unknown and future dates before selection and preserves resolvable citations
+  ---
+  duration_ms: 5.186426
+  type: 'test'
+  ...
+# Subtest: the highest scoring match remains first even when its document was inserted last
+ok 198 - the highest scoring match remains first even when its document was inserted last
+  ---
+  duration_ms: 2.090873
+  type: 'test'
+  ...
+# Subtest: chunk-window recall counts documents once and MRR is truncated at k
+ok 199 - chunk-window recall counts documents once and MRR is truncated at k
+  ---
+  duration_ms: 2.216348
+  type: 'test'
+  ...
+# Subtest: distinct-document projection preserves ordering and exposes chunk crowding
+ok 200 - distinct-document projection preserves ordering and exposes chunk crowding
+  ---
+  duration_ms: 0.399133
+  type: 'test'
+  ...
+# Subtest: unknown dates and future days remain blocked in ground truth; day boundary matches serving
+ok 201 - unknown dates and future days remain blocked in ground truth; day boundary matches serving
+  ---
+  duration_ms: 2.0288
+  type: 'test'
+  ...
+# Subtest: unanswerable queries are not scored as perfect or silently included in available-target averages
+ok 202 - unanswerable queries are not scored as perfect or silently included in available-target averages
+  ---
+  duration_ms: 0.336579
+  type: 'test'
+  ...
+# Subtest: evaluation rejects unknown labels, repeated IDs and ambiguous pages
+ok 203 - evaluation rejects unknown labels, repeated IDs and ambiguous pages
+  ---
+  duration_ms: 0.635283
+  type: 'test'
+  ...
+# Subtest: reference cannot omit hard queries, repeat documents, or cite excluded pages
+ok 204 - reference cannot omit hard queries, repeat documents, or cite excluded pages
+  ---
+  duration_ms: 0.420564
+  type: 'test'
+  ...
+# Subtest: latency quantiles validate samples and do not mutate the observations
+ok 205 - latency quantiles validate samples and do not mutate the observations
+  ---
+  duration_ms: 0.336139
+  type: 'test'
+  ...
+# Subtest: ageDays measures whole days, rejects a timezone-less as_of, and tolerates missing dates
+ok 206 - ageDays measures whole days, rejects a timezone-less as_of, and tolerates missing dates
+  ---
+  duration_ms: 2.033137
+  type: 'test'
+  ...
+# Subtest: freshnessSummary reports newest/oldest/median age and the stale share over a threshold
+ok 207 - freshnessSummary reports newest/oldest/median age and the stale share over a threshold
+  ---
+  duration_ms: 0.44489
+  type: 'test'
+  ...
+# Subtest: diversitySummary exposes single-document crowding (the 4-of-5 case)
+ok 208 - diversitySummary exposes single-document crowding (the 4-of-5 case)
+  ---
+  duration_ms: 0.274106
+  type: 'test'
+  ...
+# Subtest: fresherRelevantAvailable flags an un-surfaced fresher relevant document
+ok 209 - fresherRelevantAvailable flags an un-surfaced fresher relevant document
+  ---
+  duration_ms: 0.227037
+  type: 'test'
+  ...
+# Subtest: meanOf averages present numbers and ignores nulls
+ok 210 - meanOf averages present numbers and ignores nulls
+  ---
+  duration_ms: 0.160569
+  type: 'test'
+  ...
+# Subtest: bank corpus carries visually verified publication days without inventing a date for the gold issue
+ok 211 - bank corpus carries visually verified publication days without inventing a date for the gold issue
+  ---
+  duration_ms: 10.122109
+  type: 'test'
+  ...
+# Subtest: real OCR returns dated RAG excerpts, resolves exact citations, and excludes future/unknown documents
+ok 212 - real OCR returns dated RAG excerpts, resolves exact citations, and excludes future/unknown documents
+  ---
+  duration_ms: 167.704702
+  type: 'test'
+  ...
+# Subtest: reviewed primary news installs in an existing demo DB and never relabels demo or overwrites a later revision
+ok 213 - reviewed primary news installs in an existing demo DB and never relabels demo or overwrites a later revision
+  ---
+  duration_ms: 133.338939
+  type: 'test'
+  ...
+# Subtest: corrupted reviewed source text/date or synthetic flags fail validation before import
+ok 214 - corrupted reviewed source text/date or synthetic flags fail validation before import
+  ---
+  duration_ms: 56.85713
+  type: 'test'
+  ...
+# Subtest: reviewed real news passes gateway context/rank/analysis with exact bank quotes and no external LLM
+ok 215 - reviewed real news passes gateway context/rank/analysis with exact bank quotes and no external LLM
+  ---
+  duration_ms: 631.574876
+  type: 'test'
+  ...
+# Subtest: production retrieval excludes synthetic seeds before limit and cannot resolve their source IDs
+ok 216 - production retrieval excludes synthetic seeds before limit and cannot resolve their source IDs
+  ---
+  duration_ms: 72.800442
+  type: 'test'
+  ...
+# Subtest: question prompt contains one output contract and reasoning settings cannot replace response_format
+ok 217 - question prompt contains one output contract and reasoning settings cannot replace response_format
+  ---
+  duration_ms: 3.657557
+  type: 'test'
+  ...
+# Subtest: json_object: reviewed real news, dated bank OCR, rate-hold guard, repair and questions work together
+ok 218 - json_object: reviewed real news, dated bank OCR, rate-hold guard, repair and questions work together
+  ---
+  duration_ms: 779.260799
+  type: 'test'
+  ...
+# Subtest: json_schema: reviewed real news, dated bank OCR, rate-hold guard, repair and questions work together
+ok 219 - json_schema: reviewed real news, dated bank OCR, rate-hold guard, repair and questions work together
+  ---
+  duration_ms: 353.045898
+  type: 'test'
+  ...
+# Subtest: unknown numeric property names are hidden and transport failures keep their own safe explanation
+ok 220 - unknown numeric property names are hidden and transport failures keep their own safe explanation
+  ---
+  duration_ms: 0.589945
+  type: 'test'
+  ...
+# Subtest: product v1 adapter preserves diagnostic ID, field errors and snapshot failure for the UI
+ok 221 - product v1 adapter preserves diagnostic ID, field errors and snapshot failure for the UI
+  ---
+  duration_ms: 2.071383
+  type: 'test'
+  ...
+# Subtest: tuning harness includes diagnostics and enforces --max-calls even when a reply needs repair
+ok 222 - tuning harness includes diagnostics and enforces --max-calls even when a reply needs repair
+  ---
+  duration_ms: 855.99755
+  type: 'test'
+  ...
+# Subtest: observed reversed absence wording is rejected, including separate qualifications
+ok 223 - observed reversed absence wording is rejected, including separate qualifications
+  ---
+  duration_ms: 305.377867
+  type: 'test'
+  ...
+# Subtest: debt and currency absence cannot be inferred by reversing the word order
+ok 224 - debt and currency absence cannot be inferred by reversing the word order
+  ---
+  duration_ms: 2.271711
+  type: 'test'
+  ...
+# Subtest: new question facts need matching referenced claims AND precise product/payment fields
+ok 225 - new question facts need matching referenced claims AND precise product/payment fields
+  ---
+  duration_ms: 28.368383
+  type: 'test'
+  ...
+# Subtest: correct paths cannot launder wrong product values or nonexistent observed payments
+ok 226 - correct paths cannot launder wrong product values or nonexistent observed payments
+  ---
+  duration_ms: 26.842399
+  type: 'test'
+  ...
+# Subtest: zero observed amount differs from absent transactions and unknown amounts
+ok 227 - zero observed amount differs from absent transactions and unknown amounts
+  ---
+  duration_ms: 6.363041
+  type: 'test'
+  ...
+# Subtest: questions, warnings and literal evidence do not become asserted product facts
+ok 228 - questions, warnings and literal evidence do not become asserted product facts
+  ---
+  duration_ms: 9.544763
+  type: 'test'
+  ...
+# Subtest: json_object: source repair supplies both anchors, retains history and stops after two calls
+ok 229 - json_object: source repair supplies both anchors, retains history and stops after two calls
+  ---
+  duration_ms: 120.260564
+  type: 'test'
+  ...
+# Subtest: json_schema: source repair supplies both anchors, retains history and stops after two calls
+ok 230 - json_schema: source repair supplies both anchors, retains history and stops after two calls
+  ---
+  duration_ms: 51.046372
+  type: 'test'
+  ...
+# Subtest: coverage diagnostics keep only contract paths and survive sanitization
+ok 231 - coverage diagnostics keep only contract paths and survive sanitization
+  ---
+  duration_ms: 2.583484
+  type: 'test'
+  ...
+# Subtest: json_object, leasing=false: quote empty arrays get an exact deletion repair and never a third call
+ok 232 - json_object, leasing=false: quote empty arrays get an exact deletion repair and never a third call
+  ---
+  duration_ms: 295.810085
+  type: 'test'
+  ...
+# Subtest: json_object, leasing=true: quote empty arrays get an exact deletion repair and never a third call
+ok 233 - json_object, leasing=true: quote empty arrays get an exact deletion repair and never a third call
+  ---
+  duration_ms: 33.762898
+  type: 'test'
+  ...
+# Subtest: json_schema, leasing=false: quote empty arrays get an exact deletion repair and never a third call
+ok 234 - json_schema, leasing=false: quote empty arrays get an exact deletion repair and never a third call
+  ---
+  duration_ms: 42.7483
+  type: 'test'
+  ...
+# Subtest: json_schema, leasing=true: quote empty arrays get an exact deletion repair and never a third call
+ok 235 - json_schema, leasing=true: quote empty arrays get an exact deletion repair and never a third call
+  ---
+  duration_ms: 44.916983
+  type: 'test'
+  ...
+# Subtest: repair distinguishes required AI paths from optional quote arrays and wrong source kinds
+ok 236 - repair distinguishes required AI paths from optional quote arrays and wrong source kinds
+  ---
+  duration_ms: 3.03219
+  type: 'test'
+  ...
+# Subtest: verbatim report phrases cannot assert obligations or absence of foreign trade in AI prose
+ok 237 - verbatim report phrases cannot assert obligations or absence of foreign trade in AI prose
+  ---
+  duration_ms: 59.855314
+  type: 'test'
+  ...
+# Subtest: a claim cannot hide product/trade facts behind industry paths or a correct short question answer
+ok 238 - a claim cannot hide product/trade facts behind industry paths or a correct short question answer
+  ---
+  duration_ms: 10.110723
+  type: 'test'
+  ...
+# Subtest: each claim needs its own payment direction and coverage; another claim cannot supply them
+ok 239 - each claim needs its own payment direction and coverage; another claim cannot supply them
+  ---
+  duration_ms: 1.610719
+  type: 'test'
+  ...
+# Subtest: known mismatch accepts precise code comparison while broad absence stays rejected
+ok 240 - known mismatch accepts precise code comparison while broad absence stays rejected
+  ---
+  duration_ms: 10.544636
+  type: 'test'
+  ...
+# Subtest: new profile-path rule survives public diagnostics and no source types are relaxed
+ok 241 - new profile-path rule survives public diagnostics and no source types are relaxed
+  ---
+  duration_ms: 10.688781
+  type: 'test'
+  ...
+# Subtest: distribution facts require their own direction statistic and matching coverage
+ok 242 - distribution facts require their own direction statistic and matching coverage
+  ---
+  duration_ms: 2.31763
+  type: 'test'
+  ...
+# Subtest: null product marks stay unknown, while correctly qualified snapshot facts remain allowed
+ok 243 - null product marks stay unknown, while correctly qualified snapshot facts remain allowed
+  ---
+  duration_ms: 5.043854
+  type: 'test'
+  ...
+# Subtest: dated bank quote stays exact and historical, future/undated sources are still blocked
+ok 244 - dated bank quote stays exact and historical, future/undated sources are still blocked
+  ---
+  duration_ms: 6.701032
+  type: 'test'
+  ...
+# Subtest: original carrier analysis and question cannot hide product/trade assertions in claims
+ok 245 - original carrier analysis and question cannot hide product/trade assertions in claims
+  ---
+  duration_ms: 1.243135
+  type: 'test'
+  ...
+# Subtest: original leasing inference is rejected while the original qualified follow-up remains allowed
+ok 246 - original leasing inference is rejected while the original qualified follow-up remains allowed
+  ---
+  duration_ms: 0.675312
+  type: 'test'
+  ...
+# Subtest: original rate-hold quotes expose the optional-array mistake and receive deletion guidance
+ok 247 - original rate-hold quotes expose the optional-array mistake and receive deletion guidance
+  ---
+  duration_ms: 4.365288
+  type: 'test'
+  ...
+# Subtest: original dentist prose rejects broad absence and accepts the instructed narrow comparison
+ok 248 - original dentist prose rejects broad absence and accepts the instructed narrow comparison
+  ---
+  duration_ms: 2.155748
+  type: 'test'
+  ...
+# Subtest: strict provider schema and local budget cap generated claims
+ok 249 - strict provider schema and local budget cap generated claims
+  ---
+  duration_ms: 6.762143
+  type: 'test'
+  ...
+# Subtest: an overgrown draft gets one compact rebuild, not a copy of its list
+ok 250 - an overgrown draft gets one compact rebuild, not a copy of its list
+  ---
+  duration_ms: 249.498186
+  type: 'test'
+  ...
+# Subtest: truncation is reported without advising only a larger token limit and is never repaired blindly
+ok 251 - truncation is reported without advising only a larger token limit and is never repaired blindly
+  ---
+  duration_ms: 20.357107
+  type: 'test'
+  ...
+# Subtest: numeric repair names every section that depends on the same claim
+ok 252 - numeric repair names every section that depends on the same claim
+  ---
+  duration_ms: 1.600695
+  type: 'test'
+  ...
+# Subtest: the server wording for each industry relation passes its own guard and fails the others
+ok 253 - the server wording for each industry relation passes its own guard and fails the others
+  ---
+  duration_ms: 4.472672
+  type: 'test'
+  ...
+# Subtest: noun forms of industry mismatch follow the prepared relation; open questions stay allowed
+ok 254 - noun forms of industry mismatch follow the prepared relation; open questions stay allowed
+  ---
+  duration_ms: 3.07312
+  type: 'test'
+  ...
+# Subtest: an industry match does not let AI text assign budget funding or contracts to the company
+ok 255 - an industry match does not let AI text assign budget funding or contracts to the company
+  ---
+  duration_ms: 2.622281
+  type: 'test'
+  ...
+# Subtest: unknown payment currency and period need their own path and an actual unknown value
+ok 256 - unknown payment currency and period need their own path and an actual unknown value
+  ---
+  duration_ms: 4.941983
+  type: 'test'
+  ...
+# Subtest: REPORT7 collective product absence respects each null/false/true flag
+ok 257 - REPORT7 collective product absence respects each null/false/true flag
+  ---
+  duration_ms: 57.626913
+  type: 'test'
+  ...
+# Subtest: REPORT7 null cannot become absence inside conditions and question claims
+ok 258 - REPORT7 null cannot become absence inside conditions and question claims
+  ---
+  duration_ms: 258.050688
+  type: 'test'
+  ...
+# Subtest: REPORT7 product exposure paraphrase is rejected but potential and negated channels remain allowed
+ok 259 - REPORT7 product exposure paraphrase is rejected but potential and negated channels remain allowed
+  ---
+  duration_ms: 7.020768
+  type: 'test'
+  ...
+# Subtest: industry statements require actual match/mismatch; unknown macro event cannot borrow mismatch wording
+ok 260 - industry statements require actual match/mismatch; unknown macro event cannot borrow mismatch wording
+  ---
+  duration_ms: 3.590377
+  type: 'test'
+  ...
+# Subtest: REPORT7 unsupported mismatch is checked in limitations, conditions and answers
+ok 261 - REPORT7 unsupported mismatch is checked in limitations, conditions and answers
+  ---
+  duration_ms: 7.928664
+  type: 'test'
+  ...
+# Subtest: REPORT7 unknown trade fields require their own paths and actual unknown values
+ok 262 - REPORT7 unknown trade fields require their own paths and actual unknown values
+  ---
+  duration_ms: 1.742486
+  type: 'test'
+  ...
+# Subtest: unknown trade grounding applies in analysis and every returned question claim
+ok 263 - unknown trade grounding applies in analysis and every returned question claim
+  ---
+  duration_ms: 12.154996
+  type: 'test'
+  ...
+# Subtest: strict schema: typed arrays require an ai claim and cap bank claims; REPORT9's 1 fact + 7 bank is rejected
+ok 264 - strict schema: typed arrays require an ai claim and cap bank claims; REPORT9's 1 fact + 7 bank is rejected
+  ---
+  duration_ms: 69.567976
+  type: 'test'
+  ...
+# Subtest: strict join: typed arrays become the canonical list in fact, bank, ai order; anything else is left to the contract
+ok 265 - strict join: typed arrays become the canonical list in fact, bank, ai order; anything else is left to the contract
+  ---
+  duration_ms: 223.315312
+  type: 'test'
+  ...
+# Subtest: strict end to end: the provider sees typed arrays and the layout note; a typed reply is accepted
+ok 266 - strict end to end: the provider sees typed arrays and the layout note; a typed reply is accepted
+  ---
+  duration_ms: 28.849137
+  type: 'test'
+  ...
+# Subtest: truncation diagnosis names REPORT9's structural loop and the «не содержит информации» enumeration
+ok 267 - truncation diagnosis names REPORT9's structural loop and the «не содержит информации» enumeration
+  ---
+  duration_ms: 1.318447
+  type: 'test'
+  ...
+# Subtest: budget: near-copies and «не содержит информации» lists get one compact rebuild; distinct product claims do not
+ok 268 - budget: near-copies and «не содержит информации» lists get one compact rebuild; distinct product claims do not
+  ---
+  duration_ms: 1.734243
+  type: 'test'
+  ...
+# Subtest: REPORT9 rate-up-borrower: an ai claim without a profile basis is deleted, and the exact industry wording is always given
+ok 269 - REPORT9 rate-up-borrower: an ai claim without a profile basis is deleted, and the exact industry wording is always given
+  ---
+  duration_ms: 0.992312
+  type: 'test'
+  ...
+# Subtest: prompt v14 forbids «не содержит информации» lists and repeated fields
+ok 270 - prompt v14 forbids «не содержит информации» lists and repeated fields
+  ---
+  duration_ms: 0.12161
+  type: 'test'
+  ...
+# Subtest: REPORT9 run C: strict profile_paths need a real segment, so twenty «/» no longer fit the provider schema
+ok 271 - REPORT9 run C: strict profile_paths need a real segment, so twenty «/» no longer fit the provider schema
+  ---
+  duration_ms: 39.228407
+  type: 'test'
+  ...
+# Subtest: REPORT9 run C power-software: «не оказывает прямого воздействия на деятельность компании» is proven absence; the scoped form is allowed
+ok 272 - REPORT9 run C power-software: «не оказывает прямого воздействия на деятельность компании» is proven absence; the scoped form is allowed
+  ---
+  duration_ms: 1.871727
+  type: 'test'
+  ...
+# Subtest: REPORT8 null control: null described as «отсутствие отметки» is rejected in conditions and limitations
+ok 273 - REPORT8 null control: null described as «отсутствие отметки» is rejected in conditions and limitations
+  ---
+  duration_ms: 83.160054
+  type: 'test'
+  ...
+# Subtest: REPORT8 null control: the whole saved answer shape is rejected through validateGrounding
+ok 274 - REPORT8 null control: the whole saved answer shape is rejected through validateGrounding
+  ---
+  duration_ms: 230.175737
+  type: 'test'
+  ...
+# Subtest: REPORT8 metal-borrower: a product mark read as usage is rejected; the mark itself is allowed
+ok 275 - REPORT8 metal-borrower: a product mark read as usage is rejected; the mark itself is allowed
+  ---
+  duration_ms: 3.660201
+  type: 'test'
+  ...
+# Subtest: REPORT8 rate-up-borrower-no-rag: «действующих кредитов» and «параметры действующих договоров» presume contracts
+ok 276 - REPORT8 rate-up-borrower-no-rag: «действующих кредитов» and «параметры действующих договоров» presume contracts
+  ---
+  duration_ms: 3.449568
+  type: 'test'
+  ...
+# Subtest: REPORT8 trade-foreign: an FTS mark is not activity, and «отметка о внешней торговле» needs /foreign_trade/has_fts
+ok 277 - REPORT8 trade-foreign: an FTS mark is not activity, and «отметка о внешней торговле» needs /foreign_trade/has_fts
+  ---
+  duration_ms: 2.774627
+  type: 'test'
+  ...
+# Subtest: REPORT8 rate-hold-no-financing: a copied prompt rule is rejected; a concrete channel is allowed
+ok 278 - REPORT8 rate-hold-no-financing: a copied prompt rule is rejected; a concrete channel is allowed
+  ---
+  duration_ms: 1.548207
+  type: 'test'
+  ...
+# Subtest: REPORT8 rate-up-borrower: Unused claim repair names the indexes, the renumbering and the industry-only claim
+ok 279 - REPORT8 rate-up-borrower: Unused claim repair names the indexes, the renumbering and the industry-only claim
+  ---
+  duration_ms: 7.135968
+  type: 'test'
+  ...
+# Subtest: REPORT8 rate-hold-leasing call-05: «Too few items» for claims asks for a fact and an ai claim, not one claim
+ok 280 - REPORT8 rate-hold-leasing call-05: «Too few items» for claims asks for a fact and an ai claim, not one claim
+  ---
+  duration_ms: 0.372873
+  type: 'test'
+  ...
+# Subtest: loop protection: grounded generation is capped below LLM_MAX_OUTPUT_TOKENS, and the cap cannot be overridden
+ok 281 - loop protection: grounded generation is capped below LLM_MAX_OUTPUT_TOKENS, and the cap cannot be overridden
+  ---
+  duration_ms: 79.351107
+  type: 'test'
+  ...
+# Subtest: strict route: LLM_STRICT_EXTRA_BODY_JSON is sent only with json_schema, LLM_EXTRA_BODY_JSON with both
+ok 282 - strict route: LLM_STRICT_EXTRA_BODY_JSON is sent only with json_schema, LLM_EXTRA_BODY_JSON with both
+  ---
+  duration_ms: 55.197172
+  type: 'test'
+  ...
+# Subtest: strict schema: optional claim text/quote maxLength is provider-only and off by default
+ok 283 - strict schema: optional claim text/quote maxLength is provider-only and off by default
+  ---
+  duration_ms: 1.533796
+  type: 'test'
+  ...
+# Subtest: bank budget: guidance offers one verbatim passage per bank source; ≤3 bank claims must still be verbatim
+ok 284 - bank budget: guidance offers one verbatim passage per bank source; ≤3 bank claims must still be verbatim
+  ---
+  duration_ms: 7.154025
+  type: 'test'
+  ...
+# Subtest: positive bank case: the dated 11 September forecast of the 23 October meeting can ground a historical bank claim
+ok 285 - positive bank case: the dated 11 September forecast of the 23 October meeting can ground a historical bank claim
+  ---
+  duration_ms: 10.780716
+  type: 'test'
+  ...
+# Subtest: an empty provider reply with finish_reason=stop is a provider error, never a draft or a repair
+ok 286 - an empty provider reply with finish_reason=stop is a provider error, never a draft or a repair
+  ---
+  duration_ms: 268.307392
+  type: 'test'
+  ...
+# Subtest: a truncated loop names the repetition; ordinary growth keeps the generic cause
+ok 287 - a truncated loop names the repetition; ordinary growth keeps the generic cause
+  ---
+  duration_ms: 1.201813
+  type: 'test'
+  ...
+# Subtest: a complete draft with a repeated claim gets one compact rebuild
+ok 288 - a complete draft with a repeated claim gets one compact rebuild
+  ---
+  duration_ms: 5.463537
+  type: 'test'
+  ...
+# Subtest: prompt v12+ asks for the industry wording once instead of in every claim
+ok 289 - prompt v12+ asks for the industry wording once instead of in every claim
+  ---
+  duration_ms: 0.743753
+  type: 'test'
+  ...
+# Subtest: transport-carrier: the copied mismatch rule stays rejected under relation=match
+ok 290 - transport-carrier: the copied mismatch rule stays rejected under relation=match
+  ---
+  duration_ms: 29.608603
+  type: 'test'
+  ...
+# Subtest: trade-foreign: unknown direction and currency need their own paths, and the repair names them
+ok 291 - trade-foreign: unknown direction and currency need their own paths, and the repair names them
+  ---
+  duration_ms: 3.754441
+  type: 'test'
+  ...
+# Subtest: transport-carrier: a distribution leaf without coverage gets the exact coverage paths as a hint
+ok 292 - transport-carrier: a distribution leaf without coverage gets the exact coverage paths as a hint
+  ---
+  duration_ms: 0.62007
+  type: 'test'
+  ...
+# Subtest: transport-dentist: an inferred OKVED range in why_relevant stays an unsupported section number
+ok 293 - transport-dentist: an inferred OKVED range in why_relevant stays an unsupported section number
+  ---
+  duration_ms: 39.141529
+  type: 'test'
+  ...
+# Subtest: D4: requested data period is accepted without authorizing financial predictions or extra assertions
+ok 294 - D4: requested data period is accepted without authorizing financial predictions or extra assertions
+  ---
+  duration_ms: 247.102072
+  type: 'test'
+  ...
+# Subtest: D5: numeric retrieval metadata does not invalidate a grounded answer at its publication boundary
+ok 295 - D5: numeric retrieval metadata does not invalidate a grounded answer at its publication boundary
+  ---
+  duration_ms: 33.806262
+  type: 'test'
+  ...
+# Subtest: D6: a near-limit accepted context permits a first question; tampered evidence and unbounded history remain rejected
+ok 296 - D6: a near-limit accepted context permits a first question; tampered evidence and unbounded history remain rejected
+  ---
+  duration_ms: 150.020351
+  type: 'test'
+  ...
+# Subtest: product scope true/false/ и 
+ok 297 - product scope true/false/ и 
+  ---
+  duration_ms: 41.505987
+  type: 'test'
+  ...
+# Subtest: product scope true/false/, 
+ok 298 - product scope true/false/, 
+  ---
+  duration_ms: 1.525303
+  type: 'test'
+  ...
+# Subtest: product scope true/false/, а 
+ok 299 - product scope true/false/, а 
+  ---
+  duration_ms: 19.772103
+  type: 'test'
+  ...
+# Subtest: product scope true/false/. 
+ok 300 - product scope true/false/. 
+  ---
+  duration_ms: 1.189335
+  type: 'test'
+  ...
+# Subtest: product scope true/false/; 
+ok 301 - product scope true/false/; 
+  ---
+  duration_ms: 2.229889
+  type: 'test'
+  ...
+# Subtest: product scope false/true/ и 
+ok 302 - product scope false/true/ и 
+  ---
+  duration_ms: 1.296163
+  type: 'test'
+  ...
+# Subtest: product scope false/true/, 
+ok 303 - product scope false/true/, 
+  ---
+  duration_ms: 1.100313
+  type: 'test'
+  ...
+# Subtest: product scope false/true/, а 
+ok 304 - product scope false/true/, а 
+  ---
+  duration_ms: 1.605242
+  type: 'test'
+  ...
+# Subtest: product scope false/true/. 
+ok 305 - product scope false/true/. 
+  ---
+  duration_ms: 3.380126
+  type: 'test'
+  ...
+# Subtest: product scope false/true/; 
+ok 306 - product scope false/true/; 
+  ---
+  duration_ms: 1.298256
+  type: 'test'
+  ...
+# Subtest: product scope true/true/ и 
+ok 307 - product scope true/true/ и 
+  ---
+  duration_ms: 0.87613
+  type: 'test'
+  ...
+# Subtest: product scope true/true/, 
+ok 308 - product scope true/true/, 
+  ---
+  duration_ms: 0.960485
+  type: 'test'
+  ...
+# Subtest: product scope true/true/, а 
+ok 309 - product scope true/true/, а 
+  ---
+  duration_ms: 5.633889
+  type: 'test'
+  ...
+# Subtest: product scope true/true/. 
+ok 310 - product scope true/true/. 
+  ---
+  duration_ms: 0.924883
+  type: 'test'
+  ...
+# Subtest: product scope true/true/; 
+ok 311 - product scope true/true/; 
+  ---
+  duration_ms: 0.962988
+  type: 'test'
+  ...
+# Subtest: product scope false/false/ и 
+ok 312 - product scope false/false/ и 
+  ---
+  duration_ms: 0.946043
+  type: 'test'
+  ...
+# Subtest: product scope false/false/, 
+ok 313 - product scope false/false/, 
+  ---
+  duration_ms: 4.991507
+  type: 'test'
+  ...
+# Subtest: product scope false/false/, а 
+ok 314 - product scope false/false/, а 
+  ---
+  duration_ms: 0.870391
+  type: 'test'
+  ...
+# Subtest: product scope false/false/. 
+ok 315 - product scope false/false/. 
+  ---
+  duration_ms: 0.985733
+  type: 'test'
+  ...
+# Subtest: product scope false/false/; 
+ok 316 - product scope false/false/; 
+  ---
+  duration_ms: 0.879415
+  type: 'test'
+  ...
+# Subtest: shared predicates and null flags retain per-product checks
+ok 317 - shared predicates and null flags retain per-product checks
+  ---
+  duration_ms: 5.21623
+  type: 'test'
+  ...
+# Subtest: payment direction scope , 
+ok 318 - payment direction scope , 
+  ---
+  duration_ms: 5.067199
+  type: 'test'
+  ...
+# Subtest: payment direction scope  и 
+ok 319 - payment direction scope  и 
+  ---
+  duration_ms: 2.378639
+  type: 'test'
+  ...
+# Subtest: payment direction scope . 
+ok 320 - payment direction scope . 
+  ---
+  duration_ms: 1.844437
+  type: 'test'
+  ...
+# Subtest: payment direction scope ; 
+ok 321 - payment direction scope ; 
+  ---
+  duration_ms: 4.673865
+  type: 'test'
+  ...
+# Subtest: different quoted years, amounts, polarities and entities are not duplicates
+ok 322 - different quoted years, amounts, polarities and entities are not duplicates
+  ---
+  duration_ms: 1.599132
+  type: 'test'
+  ...
+# Subtest: requested horizon passes analysis and question grounding; financial assertions still fail
+ok 323 - requested horizon passes analysis and question grounding; financial assertions still fail
+  ---
+  duration_ms: 251.636446
+  type: 'test'
+  ...
+# Subtest: numbered service notice survives gateway checks and the follow-up without masking model numbers
+ok 324 - numbered service notice survives gateway checks and the follow-up without masking model numbers
+  ---
+  duration_ms: 128.608525
+  type: 'test'
+  ...
+# Subtest: large accepted analysis can be questioned; actual oversized history and changed evidence fail
+ok 325 - large accepted analysis can be questioned; actual oversized history and changed evidence fail
+  ---
+  duration_ms: 1887.564008
+  type: 'test'
+  ...
+# Subtest: prepared generation accepts scoped marks without repair and rejects contradictions true/false
+ok 326 - prepared generation accepts scoped marks without repair and rejects contradictions true/false
+  ---
+  duration_ms: 26.836714
+  type: 'test'
+  ...
+# Subtest: prepared generation accepts scoped marks without repair and rejects contradictions false/true
+ok 327 - prepared generation accepts scoped marks without repair and rejects contradictions false/true
+  ---
+  duration_ms: 21.582501
+  type: 'test'
+  ...
+# Subtest: duplicate guard preserves changed signs, currencies and ordered meaning
+ok 328 - duplicate guard preserves changed signs, currencies and ordered meaning
+  ---
+  duration_ms: 0.320745
+  type: 'test'
+  ...
+# Subtest: noun marks and reversed predicate order stay scoped to their products
+ok 329 - noun marks and reversed predicate order stay scoped to their products
+  ---
+  duration_ms: 0.862119
+  type: 'test'
+  ...
+# Subtest: question guidance is included in the byte budget and oversize spends no provider call
+ok 330 - question guidance is included in the byte budget and oversize spends no provider call
+  ---
+  duration_ms: 17.671611
+  type: 'test'
+  ...
+# Subtest: independent cross-product matrix preserves polarity with full names and snapshot prefixes
+ok 331 - independent cross-product matrix preserves polarity with full names and snapshot prefixes
+  ---
+  duration_ms: 159.658017
+  type: 'test'
+  ...
+# Subtest: payment presence uses есть and remains local through snapshot prefixes
+ok 332 - payment presence uses есть and remains local through snapshot prefixes
+  ---
+  duration_ms: 1.150136
+  type: 'test'
+  ...
+# Subtest: numeric data requests accept past and future horizons without licensing financial assertions
+ok 333 - numeric data requests accept past and future horizons without licensing financial assertions
+  ---
+  duration_ms: 5.289755
+  type: 'test'
+  ...
+# Subtest: D1: each coordinated product keeps its own positive or negative mark
+ok 334 - D1: each coordinated product keeps its own positive or negative mark
+  ---
+  duration_ms: 293.987932
+  type: 'test'
+  ...
+# Subtest: shared product predicates and lists remain shared; a neighbouring predicate does not leak
+ok 335 - shared product predicates and lists remain shared; a neighbouring predicate does not leak
+  ---
+  duration_ms: 0.957802
+  type: 'test'
+  ...
+# Subtest: D2: separate incoming and outgoing predicates bind to their own snapshot fields
+ok 336 - D2: separate incoming and outgoing predicates bind to their own snapshot fields
+  ---
+  duration_ms: 20.95677
+  type: 'test'
+  ...
+# Subtest: follow-up needs a supporting claim for the same direction and same local predicate
+ok 337 - follow-up needs a supporting claim for the same direction and same local predicate
+  ---
+  duration_ms: 1.016829
+  type: 'test'
+  ...
+# Subtest: local predicate binding preserves conditional scope and adversative boundaries
+ok 338 - local predicate binding preserves conditional scope and adversative boundaries
+  ---
+  duration_ms: 0.813156
+  type: 'test'
+  ...
+# Subtest: D3: similar facts with a changed year, value, negation or entity are distinct
+ok 339 - D3: similar facts with a changed year, value, negation or entity are distinct
+  ---
+  duration_ms: 1.302112
+  type: 'test'
+  ...
+# Subtest: exact, punctuation and discourse-only near repetitions still trigger compact rebuild
+ok 340 - exact, punctuation and discourse-only near repetitions still trigger compact rebuild
+  ---
+  duration_ms: 0.632018
+  type: 'test'
+  ...
+# Subtest: D1–D3 pass prepared generation on the first attempt without a repair
+ok 341 - D1–D3 pass prepared generation on the first attempt without a repair
+  ---
+  duration_ms: 58.4879
+  type: 'test'
+  ...
+# Subtest: legacy cache invalidates after profile, news metadata or bank corpus changes
+ok 342 - legacy cache invalidates after profile, news metadata or bank corpus changes
+  ---
+  duration_ms: 18.783962
+  type: 'test'
+  ...
+# Subtest: legacy live context includes ranking and time; future/undated bank chunks and unrelated/future news are excluded
+ok 343 - legacy live context includes ranking and time; future/undated bank chunks and unrelated/future news are excluded
+  ---
+  duration_ms: 15.539999
+  type: 'test'
+  ...
+# Subtest: legacy facts must quote every cited source and shared numeric tokens do not establish company loss
+ok 344 - legacy facts must quote every cited source and shared numeric tokens do not establish company loss
+  ---
+  duration_ms: 3.412854
+  type: 'test'
+  ...
+# Subtest: legacy follow-up rejects a mismatched saved identity and invented financial amounts
+ok 345 - legacy follow-up rejects a mismatched saved identity and invented financial amounts
+  ---
+  duration_ms: 13.069964
+  type: 'test'
+  ...
+# Subtest: Node.js prototype: data, API and agent contracts
+    # Subtest: imports data, profiles, payment directions and related companies
+    ok 1 - imports data, profiles, payment directions and related companies
+      ---
+      duration_ms: 123.133111
+      type: 'test'
+      ...
+    # Subtest: personalizes the feed and filters synthetic news
+    ok 2 - personalizes the feed and filters synthetic news
+      ---
+      duration_ms: 33.463804
+      type: 'test'
+      ...
+    # Subtest: adds and deduplicates a new event without code changes
+    ok 3 - adds and deduplicates a new event without code changes
+      ---
+      duration_ms: 58.200699
+      type: 'test'
+      ...
+    # Subtest: completes async demo, validates sources, caches, scopes and answers questions
+    ok 4 - completes async demo, validates sources, caches, scopes and answers questions
+      ---
+      duration_ms: 67.954496
+      type: 'test'
+      ...
+    # Subtest: rejects fake bank quotes, malformed claims and fabricated source ids
+    ok 5 - rejects fake bank quotes, malformed claims and fabricated source ids
+      ---
+      duration_ms: 20.056951
+      type: 'test'
+      ...
+    # Subtest: performs live tools and one repair with sanitized protocol messages
+    ok 6 - performs live tools and one repair with sanitized protocol messages
+      ---
+      duration_ms: 21.816231
+      type: 'test'
+      ...
+    # Subtest: fails closed for invalid model results and requires a live key
+    ok 7 - fails closed for invalid model results and requires a live key
+      ---
+      duration_ms: 16.413359
+      type: 'test'
+      ...
+    # Subtest: sends the real gateway contract and stores usage with no network in demo tests
+    ok 8 - sends the real gateway contract and stores usage with no network in demo tests
+      ---
+      duration_ms: 14.055997
+      type: 'test'
+      ...
+    # Subtest: applies the reasoning budget and extra body fields without overriding model/messages/stream
+    ok 9 - applies the reasoning budget and extra body fields without overriding model/messages/stream
+      ---
+      duration_ms: 10.632977
+      type: 'test'
+      ...
+    # Subtest: loads and validates reasoning/extra-body settings from the environment
+    ok 10 - loads and validates reasoning/extra-body settings from the environment
+      ---
+      duration_ms: 22.850495
+      type: 'test'
+      ...
+    # Subtest: reserves local limits before parallel requests and counts failed attempts
+    ok 11 - reserves local limits before parallel requests and counts failed attempts
+      ---
+      duration_ms: 12.056669
+      type: 'test'
+      ...
+    # Subtest: never relays provider error bodies
+    ok 12 - never relays provider error bodies
+      ---
+      duration_ms: 9.915042
+      type: 'test'
+      ...
+    # Subtest: protects static server files, same origin and JSON body limits
+    ok 13 - protects static server files, same origin and JSON body limits
+      ---
+      duration_ms: 55.860907
+      type: 'test'
+      ...
+    # Subtest: imports RSS and Atom and rejects entity declarations, redirects and oversize feeds
+    ok 14 - imports RSS and Atom and rejects entity declarations, redirects and oversize feeds
+      ---
+      duration_ms: 31.470977
+      type: 'test'
+      ...
+    # Subtest: retains chats and cached analyses across restart and fails interrupted jobs
+    ok 15 - retains chats and cached analyses across restart and fails interrupted jobs
+      ---
+      duration_ms: 45.164565
+      type: 'test'
+      ...
+    # Subtest: rolls back failed imports and permits a successful retry
+    ok 16 - rolls back failed imports and permits a successful retry
+      ---
+      duration_ms: 15.67584
+      type: 'test'
+      ...
+    # Subtest: bounds accepted jobs to ten and concurrently executes at most two analyses
+    ok 17 - bounds accepted jobs to ten and concurrently executes at most two analyses
+      ---
+      duration_ms: 50.807964
+      type: 'test'
+      ...
+    # Subtest: reports output truncation explicitly, records usage and avoids a blind repair
+    ok 18 - reports output truncation explicitly, records usage and avoids a blind repair
+      ---
+      duration_ms: 9.865168
+      type: 'test'
+      ...
+    # Subtest: identifies a company-only fact by claim number without accepting a false news citation
+    ok 19 - identifies a company-only fact by claim number without accepting a false news citation
+      ---
+      duration_ms: 19.284905
+      type: 'test'
+      ...
+    # Subtest: distinguishes timeout, network and malformed JSON without leaking provider details
+    ok 20 - distinguishes timeout, network and malformed JSON without leaking provider details
+      ---
+      duration_ms: 15.560574
+      type: 'test'
+      ...
+    1..20
+ok 346 - Node.js prototype: data, API and agent contracts
+  ---
+  duration_ms: 658.218464
+  type: 'suite'
+  ...
+# Subtest: official CBR key-rate hold is useful for an unfinanced company even below the score threshold
+ok 347 - official CBR key-rate hold is useful for an unfinanced company even below the score threshold
+  ---
+  duration_ms: 20.402633
+  type: 'test'
+  ...
+# Subtest: a press announcement embedded as a secondary cluster source retains universal CBR evidence
+ok 348 - a press announcement embedded as a secondary cluster source retains universal CBR evidence
+  ---
+  duration_ms: 6.754833
+  type: 'test'
+  ...
+# Subtest: a fake official hostname and generic rate mentions do not become universal news
+ok 349 - a fake official hostname and generic rate mentions do not become universal news
+  ---
+  duration_ms: 8.721181
+  type: 'test'
+  ...
+# Subtest: real regression: analyst stock forecast cannot borrow relevance from an incidental historical rate decision
+ok 350 - real regression: analyst stock forecast cannot borrow relevance from an incidental historical rate decision
+  ---
+  duration_ms: 0.835229
+  type: 'test'
+  ...
+# Subtest: a confirmed rate mentioned deep in another article is background, not a fresh financial event
+ok 351 - a confirmed rate mentioned deep in another article is background, not a fresh financial event
+  ---
+  duration_ms: 1.024791
+  type: 'test'
+  ...
+# Subtest: real regression: personal political rhetoric cannot borrow counterparty exposure from an old fuel deal
+ok 352 - real regression: personal political rhetoric cannot borrow counterparty exposure from an old fuel deal
+  ---
+  duration_ms: 1.467117
+  type: 'test'
+  ...
+# Subtest: political decisions, quoted economic reports and concrete economic changes alongside rhetoric remain eligible
+ok 353 - political decisions, quoted economic reports and concrete economic changes alongside rhetoric remain eligible
+  ---
+  duration_ms: 2.46022
+  type: 'test'
+  ...
+# Subtest: real regression: a multi-topic weekly digest needs separate events, while one weekly grain observation remains usable
+ok 354 - real regression: a multi-topic weekly digest needs separate events, while one weekly grain observation remains usable
+  ---
+  duration_ms: 4.067365
+  type: 'test'
+  ...
+# Subtest: a budget proposal does not inherit confirmed business exposure from incidental history
+ok 355 - a budget proposal does not inherit confirmed business exposure from incidental history
+  ---
+  duration_ms: 1.026783
+  type: 'test'
+  ...
+# Subtest: real regression: geopolitical expectations cannot borrow confirmed historical trade relevance
+ok 356 - real regression: geopolitical expectations cannot borrow confirmed historical trade relevance
+  ---
+  duration_ms: 1.393537
+  type: 'test'
+  ...
+# Subtest: real regression: personal asset declarations and award ceremonies are not energy-sector changes
+ok 357 - real regression: personal asset declarations and award ceremonies are not energy-sector changes
+  ---
+  duration_ms: 0.836331
+  type: 'test'
+  ...
+# Subtest: full-text completeness gates partial feeds, while meaningful full inline RSS content is usable
+ok 358 - full-text completeness gates partial feeds, while meaningful full inline RSS content is usable
+  ---
+  duration_ms: 0.481845
+  type: 'test'
+  ...
+# Subtest: freshness or a high model score alone cannot establish relevance; fabricated feature sources are ignored
+ok 359 - freshness or a high model score alone cannot establish relevance; fabricated feature sources are ignored
+  ---
+  duration_ms: 1.356753
+  type: 'test'
+  ...
+# Subtest: known contrary profile facts win over feature values and properly sourced counterparty exposure is conditional
+ok 360 - known contrary profile facts win over feature values and properly sourced counterparty exposure is conditional
+  ---
+  duration_ms: 0.465571
+  type: 'test'
+  ...
+# Subtest: subscriptions, queued jobs, validated cards and context survive a database reopen
+ok 361 - subscriptions, queued jobs, validated cards and context survive a database reopen
+  ---
+  duration_ms: 13.850021
+  type: 'test'
+  ...
+# Subtest: expired leases recover after crash and fence every stale worker mutation
+ok 362 - expired leases recover after crash and fence every stale worker mutation
+  ---
+  duration_ms: 3.718878
+  type: 'test'
+  ...
+# Subtest: idempotent enqueue cannot resurrect an old revision; updates retain an explicitly stale old card
+ok 363 - idempotent enqueue cannot resurrect an old revision; updates retain an explicitly stale old card
+  ---
+  duration_ms: 6.665871
+  type: 'test'
+  ...
+# Subtest: a superseding revision aborts old in-flight publication and irrelevant revisions invalidate without new generation
+ok 364 - a superseding revision aborts old in-flight publication and irrelevant revisions invalidate without new generation
+  ---
+  duration_ms: 3.910082
+  type: 'test'
+  ...
+# Subtest: questions are idempotent, prioritized, serialized per analysis and preserve full response history
+ok 365 - questions are idempotent, prioritized, serialized per analysis and preserve full response history
+  ---
+  duration_ms: 7.071143
+  type: 'test'
+  ...
+# Subtest: a material revision supersedes outstanding questions as well as analysis jobs
+ok 366 - a material revision supersedes outstanding questions as well as analysis jobs
+  ---
+  duration_ms: 4.691672
+  type: 'test'
+  ...
+# Subtest: feed keysets exclude newly published items across pages and favorites are scoped and survive revisions
+ok 367 - feed keysets exclude newly published items across pages and favorites are scoped and survive revisions
+  ---
+  duration_ms: 22.926519
+  type: 'test'
+  ...
+# Subtest: publication rejects wrong company, wrong news and mocked generation without saving a card
+ok 368 - publication rejects wrong company, wrong news and mocked generation without saving a card
+  ---
+  duration_ms: 3.898374
+  type: 'test'
+  ...
+# Subtest: deferred generation retains its attempt budget and resumes after a restart
+ok 369 - deferred generation retains its attempt budget and resumes after a restart
+  ---
+  duration_ms: 7.638013
+  type: 'test'
+  ...
+# Subtest: transient failures retry with backoff while permanent and exhausted jobs stop
+ok 370 - transient failures retry with backoff while permanent and exhausted jobs stop
+  ---
+  duration_ms: 11.910713
+  type: 'test'
+  ...
+# Subtest: worker bounds parallelism and disabled polling never runs generation
+ok 371 - worker bounds parallelism and disabled polling never runs generation
+  ---
+  duration_ms: 46.180964
+  type: 'test'
+  ...
+# Subtest: two workers cannot claim the same job and heartbeat extends a long-running lease
+ok 372 - two workers cannot claim the same job and heartbeat extends a long-running lease
+  ---
+  duration_ms: 183.291148
+  type: 'test'
+  ...
+# Subtest: worker stop aborts the handler and leaves recoverable work without publishing
+ok 373 - worker stop aborts the handler and leaves recoverable work without publishing
+  ---
+  duration_ms: 17.762096
+  type: 'test'
+  ...
+# Subtest: queued question retries retain conversation order instead of answering a later question first
+ok 374 - queued question retries retain conversation order instead of answering a later question first
+  ---
+  duration_ms: 10.539268
+  type: 'test'
+  ...
+# Subtest: a corrected article returning from A to B to A reuses the matching saved card without generation
+ok 375 - a corrected article returning from A to B to A reuses the matching saved card without generation
+  ---
+  duration_ms: 15.00885
+  type: 'test'
+  ...
+# Subtest: head changes during pagination cannot repeat another version of the same article on later pages
+ok 376 - head changes during pagination cannot repeat another version of the same article on later pages
+  ---
+  duration_ms: 14.560465
+  type: 'test'
+  ...
+# Subtest: an explicit return to a previously canceled revision resumes that task while fencing the old attempt
+ok 377 - an explicit return to a previously canceled revision resumes that task while fencing the old attempt
+  ---
+  duration_ms: 7.79755
+  type: 'test'
+  ...
+# Subtest: important news replaces only the lowest unstarted analysis reservation, preserving protected work and history
+ok 378 - important news replaces only the lowest unstarted analysis reservation, preserving protected work and history
+  ---
+  duration_ms: 17.398436
+  type: 'test'
+  ...
+# Subtest: equal or lower priority cannot replace pending work and protected priorities cannot be preempted
+ok 379 - equal or lower priority cannot replace pending work and protected priorities cannot be preempted
+  ---
+  duration_ms: 2.599387
+  type: 'test'
+  ...
+# Subtest: a preempted revision resumes with its new priority and the same idempotent job
+ok 380 - a preempted revision resumes with its new priority and the same idempotent job
+  ---
+  duration_ms: 2.224591
+  type: 'test'
+  ...
+# Subtest: live UI reload and periodic refresh only read saved results and never generate or subscribe
+ok 381 - live UI reload and periodic refresh only read saved results and never generate or subscribe
+  ---
+  duration_ms: 49.921203
+  type: 'test'
+  ...
+# Subtest: untrusted news is text-only, dangerous source URLs are omitted and new cards wait for explicit display
+ok 382 - untrusted news is text-only, dangerous source URLs are omitted and new cards wait for explicit display
+  ---
+  duration_ms: 10.122409
+  type: 'test'
+  ...
+# Subtest: favorite and question are explicit mutations with company binding and an idempotency key
+ok 383 - favorite and question are explicit mutations with company binding and an idempotency key
+  ---
+  duration_ms: 8.549836
+  type: 'test'
+  ...
+# Subtest: shared durable reservations limit concurrent connections and preserve question calls after reopening
+ok 384 - shared durable reservations limit concurrent connections and preserve question calls after reopening
+  ---
+  duration_ms: 12.924537
+  type: 'test'
+  ...
+# Subtest: token reserve survives missing usage and network failures, while actual usage is reconciled
+ok 385 - token reserve survives missing usage and network failures, while actual usage is reconciled
+  ---
+  duration_ms: 10.185052
+  type: 'test'
+  ...
+# Subtest: questions consuming their reserved share do not leave an unusable remainder
+ok 386 - questions consuming their reserved share do not leave an unusable remainder
+  ---
+  duration_ms: 4.869786
+  type: 'test'
+  ...
+# Subtest: company quotas are independent and keep room for questions
+ok 387 - company quotas are independent and keep room for questions
+  ---
+  duration_ms: 3.715112
+  type: 'test'
+  ...
+# Subtest: missing key does not reserve a paid call; provider-reported total includes hidden completion tokens
+ok 388 - missing key does not reserve a paid call; provider-reported total includes hidden completion tokens
+  ---
+  duration_ms: 1.412806
+  type: 'test'
+  ...
+# Subtest: independent processes cannot race beyond a shared daily call cap
+ok 389 - independent processes cannot race beyond a shared daily call cap
+  ---
+  duration_ms: 426.767751
+  type: 'test'
+  ...
+# Subtest: RSS uses normalized full inline content, publication time and stable versions
+ok 390 - RSS uses normalized full inline content, publication time and stable versions
+  ---
+  duration_ms: 34.631737
+  type: 'test'
+  ...
+# Subtest: Atom external content is not fetched and excerpt/date limitations remain explicit
+ok 391 - Atom external content is not fetched and excerpt/date limitations remain explicit
+  ---
+  duration_ms: 2.708589
+  type: 'test'
+  ...
+# Subtest: normalization handles XHTML, entities and nonprinting bytes without rendering HTML
+ok 392 - normalization handles XHTML, entities and nonprinting bytes without rendering HTML
+  ---
+  duration_ms: 0.213146
+  type: 'test'
+  ...
+# Subtest: invalid XML, unsafe redirects, oversized feeds and nonfeed HTML remain rejected
+ok 393 - invalid XML, unsafe redirects, oversized feeds and nonfeed HTML remain rejected
+  ---
+  duration_ms: 15.31191
+  type: 'test'
+  ...
+# Subtest: a high-volume feed does not silently discard everything beyond thirty entries
+ok 394 - a high-volume feed does not silently discard everything beyond thirty entries
+  ---
+  duration_ms: 92.201179
+  type: 'test'
+  ...
+# Subtest: a feed containing only unusable articles is reported as failed instead of a successful collection
+ok 395 - a feed containing only unusable articles is reported as failed instead of a successful collection
+  ---
+  duration_ms: 8.012449
+  type: 'test'
+  ...
+# Subtest: failed feed is isolated; durable backoff survives restart and clears on successful retry
+ok 396 - failed feed is isolated; durable backoff survives restart and clears on successful retry
+  ---
+  duration_ms: 8.203822
+  type: 'test'
+  ...
+# Subtest: parallel refresh calls share work and a separate database connection cannot duplicate it
+ok 397 - parallel refresh calls share work and a separate database connection cannot duplicate it
+  ---
+  duration_ms: 5.468214
+  type: 'test'
+  ...
+# Subtest: expired process lease is recovered after restart without manual cleanup
+ok 398 - expired process lease is recovered after restart without manual cleanup
+  ---
+  duration_ms: 4.510222
+  type: 'test'
+  ...
+# Subtest: start collects immediately and on schedule; repeated start does not create another loop
+ok 399 - start collects immediately and on schedule; repeated start does not create another loop
+  ---
+  duration_ms: 1004.118822
+  type: 'test'
+  ...
+# Subtest: stop aborts active HTTP, releases its lease and allows a fresh instance to recover
+ok 400 - stop aborts active HTTP, releases its lease and allows a fresh instance to recover
+  ---
+  duration_ms: 3.240717
+  type: 'test'
+  ...
+# Subtest: disabled collection performs no automatic network requests but allows explicit refresh
+ok 401 - disabled collection performs no automatic network requests but allows explicit refresh
+  ---
+  duration_ms: 1.893789
+  type: 'test'
+  ...
+# Subtest: publication normalization preserves timezone and rejects ambiguous or impossible dates
+ok 402 - publication normalization preserves timezone and rejects ambiguous or impossible dates
+  ---
+  duration_ms: 2.303337
+  type: 'test'
+  ...
+# Subtest: rate decisions have exact evidence, distinguish holds from changes, and preserve curated metadata
+ok 403 - rate decisions have exact evidence, distinguish holds from changes, and preserve curated metadata
+  ---
+  duration_ms: 29.333185
+  type: 'test'
+  ...
+# Subtest: negation, forecasts and mentioning a rate alone do not become announced changes
+ok 404 - negation, forecasts and mentioning a rate alone do not become announced changes
+  ---
+  duration_ms: 4.050651
+  type: 'test'
+  ...
+# Subtest: explicit trade target, OKVED and effective date are extracted with source evidence
+ok 405 - explicit trade target, OKVED and effective date are extracted with source evidence
+  ---
+  duration_ms: 0.652358
+  type: 'test'
+  ...
+# Subtest: same decision clusters sources while preserving first publication; distinct decisions remain separate
+ok 406 - same decision clusters sources while preserving first publication; distinct decisions remain separate
+  ---
+  duration_ms: 15.882697
+  type: 'test'
+  ...
+# Subtest: tax and commodity subjects distinguish thematic inference from explicit legal scope
+ok 407 - tax and commodity subjects distinguish thematic inference from explicit legal scope
+  ---
+  duration_ms: 4.938297
+  type: 'test'
+  ...
+# Subtest: canonical URLs deduplicate articles and preserve publication separately from revisions
+ok 408 - canonical URLs deduplicate articles and preserve publication separately from revisions
+  ---
+  duration_ms: 3.939035
+  type: 'test'
+  ...
+# Subtest: undated articles are quarantined and Atom updated never replaces published
+ok 409 - undated articles are quarantined and Atom updated never replaces published
+  ---
+  duration_ms: 45.822301
+  type: 'test'
+  ...
+# Subtest: denied decisions and excluded OKVED scopes cannot become positive applicability
+ok 410 - denied decisions and excluded OKVED scopes cannot become positive applicability
+  ---
+  duration_ms: 1.373058
+  type: 'test'
+  ...
+# Subtest: a central bank cannot inherit another actor's action or a deposit-rate delta
+ok 411 - a central bank cannot inherit another actor's action or a deposit-rate delta
+  ---
+  duration_ms: 2.734747
+  type: 'test'
+  ...
+# Subtest: a historical recap of multiple decisions is not flattened into a fabricated single decision
+ok 412 - a historical recap of multiple decisions is not flattened into a fabricated single decision
+  ---
+  duration_ms: 0.681381
+  type: 'test'
+  ...
+# Subtest: equivalent rate formatting deduplicates while real and synthetic sources stay separate
+ok 413 - equivalent rate formatting deduplicates while real and synthetic sources stay separate
+  ---
+  duration_ms: 0.674831
+  type: 'test'
+  ...
+# Subtest: repeated polling preserves date-only precision and the original raw timestamp
+ok 414 - repeated polling preserves date-only precision and the original raw timestamp
+  ---
+  duration_ms: 1.345426
+  type: 'test'
+  ...
+# Subtest: nonnumeric overflow and contradictory unchanged magnitudes fail safely
+ok 415 - nonnumeric overflow and contradictory unchanged magnitudes fail safely
+  ---
+  duration_ms: 0.43835
+  type: 'test'
+  ...
+# Subtest: macro policy-rate releases are not narrowed by collateral fuel and tax paragraphs
+ok 416 - macro policy-rate releases are not narrowed by collateral fuel and tax paragraphs
+  ---
+  duration_ms: 0.414586
+  type: 'test'
+  ...
+# Subtest: combined reports cannot attach another measure's legal scope or start date to a key-rate decision
+ok 417 - combined reports cannot attach another measure's legal scope or start date to a key-rate decision
+  ---
+  duration_ms: 0.755201
+  type: 'test'
+  ...
+# Subtest: specific business subjects are inferred only as themes and ceremonial headlines abstain
+ok 418 - specific business subjects are inferred only as themes and ceremonial headlines abstain
+  ---
+  duration_ms: 0.540082
+  type: 'test'
+  ...
+# Subtest: plural commencement dates and compound power-station nouns retain explicit source facts
+ok 419 - plural commencement dates and compound power-station nouns retain explicit source facts
+  ---
+  duration_ms: 3.352284
+  type: 'test'
+  ...
+# Subtest: source HTTP rejects private URLs, credentials, nonstandard ports and escaped private addresses
+ok 420 - source HTTP rejects private URLs, credentials, nonstandard ports and escaped private addresses
+  ---
+  duration_ms: 8.870452
+  type: 'test'
+  ...
+# Subtest: redirects stay within trusted source hosts and cannot reach the metadata service
+ok 421 - redirects stay within trusted source hosts and cannot reach the metadata service
+  ---
+  duration_ms: 3.923302
+  type: 'test'
+  ...
+# Subtest: HTTP bounds bytes and follows a bounded same-host redirect
+ok 422 - HTTP bounds bytes and follows a bounded same-host redirect
+  ---
+  duration_ms: 3.985584
+  type: 'test'
+  ...
+# Subtest: robots matching honors longest rule, specific agent and query patterns
+ok 423 - robots matching honors longest rule, specific agent and query patterns
+  ---
+  duration_ms: 1.175304
+  type: 'test'
+  ...
+# Subtest: full text obeys robots and does not fetch a prohibited article
+ok 424 - full text obeys robots and does not fetch a prohibited article
+  ---
+  duration_ms: 1.911006
+  type: 'test'
+  ...
+# Subtest: HTML extractor uses article evidence, excludes hidden/menu content and preserves original link/date
+ok 425 - HTML extractor uses article evidence, excludes hidden/menu content and preserves original link/date
+  ---
+  duration_ms: 12.086054
+  type: 'test'
+  ...
+# Subtest: JSON-LD article body is accepted; paid articles and cross-domain canonicals are rejected
+ok 426 - JSON-LD article body is accepted; paid articles and cross-domain canonicals are rejected
+  ---
+  duration_ms: 7.41276
+  type: 'test'
+  ...
+# Subtest: HTML listing extracts official date and ignores unrelated/unsafe links
+ok 427 - HTML listing extracts official date and ignores unrelated/unsafe links
+  ---
+  duration_ms: 1.848863
+  type: 'test'
+  ...
+# Subtest: JSON API supports nested fields and tabular columns without inventing dates
+ok 428 - JSON API supports nested fields and tabular columns without inventing dates
+  ---
+  duration_ms: 0.829451
+  type: 'test'
+  ...
+# Subtest: RSS decodes link entities before canonicalization and does not treat Atom updated as publication
+ok 429 - RSS decodes link entities before canonicalization and does not treat Atom updated as publication
+  ---
+  duration_ms: 7.326892
+  type: 'test'
+  ...
+# Subtest: full article ingestion persists complete evidence, retries corrections and deduplicates stable polls
+ok 430 - full article ingestion persists complete evidence, retries corrections and deduplicates stable polls
+  ---
+  duration_ms: 13.556485
+  type: 'test'
+  ...
+# Subtest: failed full-text refresh keeps prior complete evidence and exact citation version
+ok 431 - failed full-text refresh keeps prior complete evidence and exact citation version
+  ---
+  duration_ms: 8.95709
+  type: 'test'
+  ...
+# Subtest: failed extraction remains explicitly excerpt and article refresh cap progresses across polls
+ok 432 - failed extraction remains explicitly excerpt and article refresh cap progresses across polls
+  ---
+  duration_ms: 15.151502
+  type: 'test'
+  ...
+# Subtest: material hashes ignore cosmetic spaces but retain changed numbers and full text beyond analysis cap
+ok 433 - material hashes ignore cosmetic spaces but retain changed numbers and full text beyond analysis cap
+  ---
+  duration_ms: 12.695633
+  type: 'test'
+  ...
+# Subtest: configured feeds are not silently truncated to five
+ok 434 - configured feeds are not silently truncated to five
+  ---
+  duration_ms: 0.765045
+  type: 'test'
+  ...
+# Subtest: unfetched short teasers survive restart and leaving the RSS window
+ok 435 - unfetched short teasers survive restart and leaving the RSS window
+  ---
+  duration_ms: 8.642203
+  type: 'test'
+  ...
+1..435
+# tests 454
+# suites 1
+# pass 454
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8430.096674

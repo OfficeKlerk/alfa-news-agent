@@ -1,0 +1,210 @@
+[
+  {
+    "status": "modified",
+    "path": "README.md",
+    "sha256": "7a49aed99ba6bc3368efe23924427d5a356e7fdde32d87e222d1a0ea25141fd7",
+    "previous_sha256": "5398d1316b4e7061fde823080b0eb4703f97708c63a7a20f220bf97fc27e9acc"
+  },
+  {
+    "status": "added",
+    "path": "TASK3_CONTEXT.md",
+    "sha256": "3b36f7fb6816d3e3d0f9d6877dd4f2c0d75dc2e0056d4705b7b58d0b9de4bb45"
+  },
+  {
+    "status": "modified",
+    "path": "contracts/v1/openapi.json",
+    "sha256": "f026d95a66bd5460b745df21f3ceddb7b037e05529c81c3d47a4ca1ba7a34af6",
+    "previous_sha256": "12d965af9d12ce3cac499abbce420ddafa701c5b939923419c87e25564ebc7e2"
+  },
+  {
+    "status": "modified",
+    "path": "contracts/v1/schema.json",
+    "sha256": "3fc4846bb0e8165ade9a1b260893a01b9e28ff7311154f327cad64ca6323335b",
+    "previous_sha256": "459d3576ba46e4d07652d84110fee0e594afe7c3801dbe3b02854ff39e5b8027"
+  },
+  {
+    "status": "modified",
+    "path": "deploy/MERGED_RELEASE.md",
+    "sha256": "fb6b1db6a160153b0504294874cf77c3e3d3e75f248b10c9dc9464726f09a8e7",
+    "previous_sha256": "2714daf0b269ee22eaa24491b3c530acd2df62f265e16acaca3e810dd769755d"
+  },
+  {
+    "status": "modified",
+    "path": "deploy/NEXT_TASKS_3_PEOPLE.md",
+    "sha256": "3f13752f02aa2e9a63a184dbc4e4e3634b3930187bc8c800ae187ca5197ebb27",
+    "previous_sha256": "8ba45a3c66254d97b672c31f9373d420210e69903db708817577e5e1079b9766"
+  },
+  {
+    "status": "modified",
+    "path": "docs/INDEX.md",
+    "sha256": "ce058e14e86a50ae39d5e577d3b990c6099ee2e814759e97eebe379653912f40",
+    "previous_sha256": "8465f7d04f407940a24a1ad008886edb57dd9a0e6631004a74cfa5f1e3aef3ff"
+  },
+  {
+    "status": "added",
+    "path": "docs/integration/DURABLE_EXECUTION.md",
+    "sha256": "dbb03512cb6e7434559e9ffa177e60ec3642ec7c3b097857fff6a292512ed176"
+  },
+  {
+    "status": "modified",
+    "path": "docs/integration/PRODUCTION_ACCESS.md",
+    "sha256": "da1878626547ac7e308a223189b3575b0c97dbb8c49e2a1e746e549ca49cc4d0",
+    "previous_sha256": "69fad8eccf28b350f1039095bf5f25829a33d774d79feaf50dbe09d4670f55e9"
+  },
+  {
+    "status": "added",
+    "path": "docs/reports/TASK2_DELIVERY_20261025.md",
+    "sha256": "1a38514efd11d2858fe9511d22f44923a94fab853122e12ac53e37fe9d254f3c"
+  },
+  {
+    "status": "added",
+    "path": "docs/reports/TASK2_RECHECK_20261025.md",
+    "sha256": "5fe9bb64536c70f6f3f83bf02a9b0369ae6280bf46f3c7e0d81920061a31f1d9"
+  },
+  {
+    "status": "modified",
+    "path": "integration/live_ui/app.js",
+    "sha256": "5e83e5b21268bf17a31d8cd0696e17bd1b2b6fa8c9c0a76bb579fdd493fb0689",
+    "previous_sha256": "23866714d07a4abffab6daa995761e784fee2ddc02811e6aac045ac45974e3e8"
+  },
+  {
+    "status": "added",
+    "path": "scripts/accept_task3.py",
+    "sha256": "09a245402432a322278d9d98545711c8f193eaaf675889bdb54b63d3fe90d196"
+  },
+  {
+    "status": "modified",
+    "path": "scripts/build_contracts.py",
+    "sha256": "4f7f690d929cf11ebadab22bc5b85691a77077fbe287fa4d9da0e33e8e7b71fc",
+    "previous_sha256": "de403095752494079a9a86c187348cd99a911fc5e4602ba450fc7cd927030a31"
+  },
+  {
+    "status": "modified",
+    "path": "server/integration/agent.ts",
+    "sha256": "8a2f7245d77be605738b33dbd84bdd8494e507263e7909883787ccc6022b39c5",
+    "previous_sha256": "03d58328ce30f44c4d1b8b0a8dd74e4d2e99e13b61aa51b9013fb4207a1262a2"
+  },
+  {
+    "status": "modified",
+    "path": "server/integration/analysis-engine.ts",
+    "sha256": "ecacc9eeabcfe20516be922f5d29554ea4f716497f8d03d7fedb61befe428dfe",
+    "previous_sha256": "134840feed51994250c88fb126a3e2fb5f459b3626d75cad1f147d179460bbb5"
+  },
+  {
+    "status": "modified",
+    "path": "server/integration/client.ts",
+    "sha256": "1dfc30e93ffa2f8172773e3dbceb19ac01641495d5b657a8e737c1e8c44bfbb1",
+    "previous_sha256": "8adc14919e0811817c151a305f6dc01fb22833317014065d22f2991a9d03136b"
+  },
+  {
+    "status": "added",
+    "path": "server/integration/execution-config.ts",
+    "sha256": "6781cc08aaa5c0c2e0f197dcd8331ca869572917f998ba9c7c94d213d9a45b60"
+  },
+  {
+    "status": "modified",
+    "path": "server/integration/gateway.ts",
+    "sha256": "e6d11d5daa98b10c0c63b348950ce18c60f1f1b1967422804d6f05e0a136df45",
+    "previous_sha256": "dcbebd120a92d5c143f6c3be582b77c94c1700a9bbbe203aadbc0860b8bf986b"
+  },
+  {
+    "status": "modified",
+    "path": "server/integration/index.ts",
+    "sha256": "07abc195d55b3029e2d2ab91907f1f2123704aec4a61045dde9a514626cb5947",
+    "previous_sha256": "9541eee7d2361dabc48909e33eb90ae17a8b4d6a42aa3013c90005e95fe2c1d2"
+  },
+  {
+    "status": "modified",
+    "path": "server/integration/live-service.ts",
+    "sha256": "f6e71df39b1f44b3801b783483f4cb1287022237e2b8d6dfd97bb695848710fd",
+    "previous_sha256": "12c15ac8819911890768bf492a225be0daf1592bf75ec53147a496670d4bad38"
+  },
+  {
+    "status": "modified",
+    "path": "server/integration/live-store.ts",
+    "sha256": "1339f1a1c390f50ece40a7e250e8e4b325713620de68212206f4d85fc6ddeaa3",
+    "previous_sha256": "c15d56ef8a4eef9ae37c560d24b057e3b7527417714ba33056bd3ef67a2e5d67"
+  },
+  {
+    "status": "modified",
+    "path": "server/integration/live-worker.ts",
+    "sha256": "eaa1dc70f37bff7730fa37dbcfd6ef9a83c9870f672bb5bec5752548a4760ffd",
+    "previous_sha256": "a110c0eb1f04b180c54cef100e70583a8cde15a701e35fd8341f4a78ca5a4a4f"
+  },
+  {
+    "status": "modified",
+    "path": "server/integration/provider-server.ts",
+    "sha256": "7d57ee3dfd98699ed2c1e95a17be36de3e0ddf99df849c10ec48eafcf317aa4c",
+    "previous_sha256": "b8ea2d340349a6532f4fad2d0750e5a7fed7c0a472af5e75a190ce12bc1c59ca"
+  },
+  {
+    "status": "modified",
+    "path": "server/integration/tests/integration.test.ts",
+    "sha256": "f884c234309454796d901d90ad81988cf8424ed7f01b1f4c67f971030d48fa5e",
+    "previous_sha256": "dc5e367e0393eb713610679b00a1d75bfeb5e8b09500c6e9dff9d372d4bc2565"
+  },
+  {
+    "status": "modified",
+    "path": "server/integration/tests/live-runtime.test.ts",
+    "sha256": "8a1034889e98e34f386a8d1483c1b56f4e120850978ad82c281dafa9d0053497",
+    "previous_sha256": "c3c2a3d5674268fef7019a8f666a71c14c382a1b841b46e2813ea129df5ad011"
+  },
+  {
+    "status": "added",
+    "path": "server/integration/tests/support/execution-fixture.ts",
+    "sha256": "5f20f7a0f30b9f3125a1ff1db5e117abc03d9c10b789c000153a85ebd042e2c5"
+  },
+  {
+    "status": "added",
+    "path": "server/integration/tests/task2-execution.test.ts",
+    "sha256": "5b89c680c9a7be4a0c579df55545acb69fb2cfa3cb38c7b6e64347e2421dc13c"
+  },
+  {
+    "status": "added",
+    "path": "server/integration/tests/task2-http-recovery.test.ts",
+    "sha256": "882f9610066e53fd896a1d2819a681a91b920978a86bd771359273f9b821ab14"
+  },
+  {
+    "status": "added",
+    "path": "server/integration/tests/task2-maintenance.test.ts",
+    "sha256": "4b26ce5195d6ce82a6854ef15a4526d32461806af662f84d8eaba35c4d1c5b17"
+  },
+  {
+    "status": "added",
+    "path": "server/integration/tests/task2-personal.test.ts",
+    "sha256": "e6232635d43bb4e58248c4130bf4340a8be4da7506876358a09c3bc13d66c5bc"
+  },
+  {
+    "status": "added",
+    "path": "server/integration/tests/task2-worker-recovery.test.ts",
+    "sha256": "082f1157bd2e51cbf22d88de04592db5da3f56a809e0bade6f2904185999ce59"
+  },
+  {
+    "status": "modified",
+    "path": "server/llm-budget.ts",
+    "sha256": "328cc4a0529bfa4515db9b205c4e8f7c8f59cb3f517d442812c0115200104fdb",
+    "previous_sha256": "a679553bf99456d7d8d8c83ab4baafe15f4d609b8d56c0789de5bc6390e0e052"
+  },
+  {
+    "status": "modified",
+    "path": "server/llm.ts",
+    "sha256": "d655c6a2f16958469c920f61cd791bf61aa6c9049564418a7508866e92edd296",
+    "previous_sha256": "4a62ecbccb9cc3b07570349c54483fd84a6e2c8d759e95f4ce9f8b4ad875cca6"
+  },
+  {
+    "status": "added",
+    "path": "server/model-execution.ts",
+    "sha256": "ddbbd716a1d64e801e7a4f24d52372e24b5cf905d427ab3d88764fdb4f600005"
+  },
+  {
+    "status": "modified",
+    "path": "server/tests/live-ui.test.ts",
+    "sha256": "dd4c1c26421276de79b69970d23b4b1be1e5aa0a77ab69bef4392d5f9f0d672f",
+    "previous_sha256": "41c5ebbe90e2b275906a499d11935a3bd5702ef7a76bdf6a58f52fb1de431e48"
+  },
+  {
+    "status": "added",
+    "path": "server/tools/reconcile-model.ts",
+    "sha256": "84ab49ac045b389f8357e9ef8748ce5de8ea1e68d9380008514f981b919c1f08"
+  }
+]

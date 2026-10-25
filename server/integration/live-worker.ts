@@ -6,6 +6,7 @@ export class DeferredJobError extends Error {
 }
 export { DeferredJobError as DeferJob };
 export class PermanentJobError extends Error {}
+export class UnknownJobError extends Error {}
 export type LiveJobHandler = (job: LiveJob, signal: AbortSignal) => Promise<JobResult>;
 export type LiveWorkerOptions = {
   concurrency?: number; leaseMs?: number; pollMs?: number; enabled?: () => boolean;
@@ -57,11 +58,12 @@ export class LiveWorker {
     heartbeat.unref();
     try {
       const result = await this.handler(job, controller.signal);
-      if (controller.signal.aborted) this.store.fail(job, "worker_interrupted", { retryable: true });
+      if (controller.signal.aborted) {if(this.store.getJob(job.id)?.payload.execution)this.store.uncertain(job,"worker_interrupted_after_dispatch");else this.store.fail(job,"worker_interrupted",{retryable:true});}
       else this.store.complete(job, result);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      if (error instanceof DeferredJobError) this.store.defer(job, message, error.retryAt);
+      if (error instanceof UnknownJobError) this.store.uncertain(job,message);
+      else if (error instanceof DeferredJobError) this.store.defer(job, message, error.retryAt);
       else this.store.fail(job, message, { retryable: !(error instanceof PermanentJobError) });
     } finally { clearInterval(heartbeat); }
   }

@@ -50,11 +50,11 @@ export function createAnalysisEngine(options: {secured?:boolean;ml:ContractClien
       if(options.secured && input.is_mock) throw new ApiFault(422,"VALIDATION_ERROR","Production requires real inputs");
       return { inputs, input, context: prepareContext(input, options.maxContextBytes), event, research };
   };
-  const generate = async(body:Json,id:string, prepared?:Awaited<ReturnType<typeof assemble>>) => {
+  const generate = async(body:Json,id:string, prepared?:Awaited<ReturnType<typeof assemble>>,signal?:AbortSignal) => {
       const { input, inputs, context, event, research } = prepared ?? await assemble(body, id);
       if (body.expected_context_sha256 && body.expected_context_sha256 !== context.sha256)
         throw new ApiFault(409, "CONFLICT", "Context changed; review a new preview before generating");
-      const answer = await options.agent.analyze(structuredClone(input), id);
+      const answer = await options.agent.analyze(structuredClone(input), id,signal);
       validateAnalysis(answer.data);
       binding(answer.data.company_id === body.company_id && answer.data.news_id === event.news_id, "Agent changed company or news");
       if (answer.data.mode === "live") validateGrounding(analysisDraft(answer.data), context, true);
@@ -78,11 +78,11 @@ export function createAnalysisEngine(options: {secured?:boolean;ml:ContractClien
       validate("AnalysisResponse", result, true);
       return {response:result,context};
   };
-  const answer = async(saved:{response:Envelope;context:ReturnType<typeof prepareContext>;history:Json[]}, question:string,id:string) => {
+  const answer = async(saved:{response:Envelope;context:ReturnType<typeof prepareContext>;history:Json[]}, question:string,id:string,signal?:AbortSignal) => {
     const s=saved, analysisId=s.response.data.id, companyId=s.response.data.company_id;
     const result=await options.agent.answer(structuredClone({company_id:companyId,question,analysis:s.response.data,
       history:s.history.slice(-10).map(h=>({question:h.question,answer:h.answer})),as_of:s.context.input.as_of,
-      audience_role:s.context.input.audience_role,prepared_input:s.context.input}),id);
+      audience_role:s.context.input.audience_role,prepared_input:s.context.input}),id,signal);
     validate("AnswerResponse",result,true);
     const ids=new Set(s.response.data.sources.map((source:Json)=>source.id));
     binding(result.data.analysis_id===analysisId && result.data.company_id===companyId && result.data.source_ids.every((sid:string)=>ids.has(sid)),"Answer changed context or sources");
@@ -93,5 +93,6 @@ export function createAnalysisEngine(options: {secured?:boolean;ml:ContractClien
     }
     return combined([s.response,result],result.data,id);
   };
-  return {assemble,generate,answer};
+  const recover = async(id:string,company:string,kind:"analysis"|"question") => options.agent.recover ? options.agent.recover(id,company,kind) : {state:"unsupported"};
+  return {assemble,generate,answer,recover};
 }

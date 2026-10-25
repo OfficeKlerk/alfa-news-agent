@@ -1,0 +1,30 @@
+# Render.com blueprint — один Node-контейнер (продуктовый UI на /api).
+# Бесплатный способ поднять живой прототип из корневого Dockerfile.
+# Render читает этот файл при "New +→ Blueprint". Полная /v1-интеграция (gateway+ml+mocks)
+# — через compose.yaml на хосте с Docker; на free single-service это не разворачивается.
+services:
+  - type: web
+    name: alfa-insight
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: "8000"
+      - key: LLM_MODE
+        value: demo            # demo = без вызова LLM и без ключа; переключить на live осознанно
+      - key: LLM_BASE_URL
+        value: https://changellenge.up.railway.app/v1
+      - key: LLM_MODEL
+        value: qwen/qwen3.6-35b-a3b
+      - key: MAX_DAILY_LLM_CALLS
+        value: "100"
+      - key: LLM_TIMEOUT_SECONDS
+        value: "120"
+      - key: LLM_API_KEY
+        sync: false            # секрет: задаётся в UI Render, НЕ в репозитории (только для live)
+    # Первый старт импортирует CSV в SQLite (var/) — может занять время; данные в образе.
+    # Для персистентности SQLite на платных планах добавить disk; на free состояние эфемерно.

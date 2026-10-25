@@ -1,0 +1,29 @@
+{
+  "scale": "0=нерелевантно,1=слабо,2=заметно,3=высоко",
+  "companies": {
+    "U_34911": {
+      "rate-hold-2026-09": 2,
+      "rub-weakens": 3,
+      "grain-export-duty": 3,
+      "power-tariff-reform": 0,
+      "road-program": 0,
+      "counterparty-trouble": 1
+    },
+    "U_99262": {
+      "rate-hold-2026-09": 3,
+      "rub-weakens": 0,
+      "grain-export-duty": 0,
+      "power-tariff-reform": 1,
+      "road-program": 3,
+      "counterparty-trouble": 3
+    },
+    "U_4909": {
+      "rate-hold-2026-09": 0,
+      "rub-weakens": 0,
+      "grain-export-duty": 0,
+      "power-tariff-reform": 3,
+      "road-program": 0,
+      "counterparty-trouble": 1
+    }
+  }
+}

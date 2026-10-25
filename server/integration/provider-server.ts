@@ -1,3 +1,5 @@
+import { executionConfiguration } from './execution-config.js';
+import { DurableAgent } from "../model-execution.js";
 import { internalAccess } from "./internal-access.js";
 /** Standalone adapters for role 2 or 3; each process owns its own SQLite file. */
 import express from "express";
@@ -18,7 +20,7 @@ if (kind !== "agent" && kind !== "retrieval") throw new Error("SERVICE_KIND must
 if (process.env.AUTH_MODE !== "development" && kind === "agent" && settings.mode !== "live") throw new Error("Private production agent requires live mode");
 const runtime = await createApplication({ ...settings, newsEnabled: settings.newsEnabled && kind === "retrieval" });
 const app = express(); boundary(app); app.use(internalAccess({...process.env, LLM_MODE:settings.mode}));
-const retrieval = new LegacyRetrieval(runtime.db, runtime.retrieval, settings, runtime.collector, process.env.AUTH_MODE === "development"), agent = new LegacyAgent(settings);
+const retrieval = new LegacyRetrieval(runtime.db, runtime.retrieval, settings, runtime.collector, process.env.AUTH_MODE === "development"), agent = settings.mode === "live" ? new DurableAgent(runtime.db,new LegacyAgent(settings),executionConfiguration(settings)) : new LegacyAgent(settings);
 app.get("/v1/health", (_req, res) => send(res, "HealthDataResponse", envelope({ status: "ok", service: kind }, res.locals.requestId, settings.mode === "demo" ? "demo" : "live")));
 if (kind === "retrieval") {
   app.get("/v1/feeds/status", async (_req, res) => send(res, "FeedStatusDataResponse", await retrieval.status(res.locals.requestId)));
@@ -36,12 +38,23 @@ if (kind === "retrieval") {
     send(res, "BudgetStatusDataResponse", envelope(budgetStatus(settings, runtime.db, companyId as string | undefined),
       res.locals.requestId, settings.mode === "demo" ? "demo" : "live"));
   });
+  app.get("/v1/agent/operations/:id",async(req,res)=>{
+    const company=req.query.company_id,kind=req.query.kind;
+    if(typeof company!=="string"||!company||!["analysis","question"].includes(String(kind)))throw new ApiFault(422,"VALIDATION_ERROR","Company and operation kind required");
+    if(!(agent instanceof DurableAgent))throw new ApiFault(503,"DEPENDENCY_UNAVAILABLE","Durable generation is not active");
+    send(res,"AgentOperationDataResponse",envelope(await agent.recover(req.params.id,company,kind as "analysis"|"question"),res.locals.requestId,"live"));
+  });
   app.use((_req, _res, next) => {
     if (settings.analysisEnabled === false) return next(new ApiFault(503, "DEPENDENCY_UNAVAILABLE", "Генерация выключена. Настройте ключ LLM и запустите с --with-llm; сбор и ранжирование уже доступны."));
     next();
   });
-  app.post("/v1/agent/analyze", async (req, res) => { checkBody(req, "AgentRequest"); send(res, "AnalysisResponse", await agent.analyze(req.body, res.locals.requestId)); });
-  app.post("/v1/agent/questions", async (req, res) => { checkBody(req, "AgentQuestionRequest"); send(res, "AnswerResponse", await agent.answer(req.body, res.locals.requestId)); });
+  const requestSignal=(res:express.Response)=>{
+    const controller=new AbortController();
+    res.once("close",()=>{if(!res.writableEnded)controller.abort();});
+    return controller.signal;
+  };
+  app.post("/v1/agent/analyze", async (req, res) => { checkBody(req,"AgentRequest"); send(res,"AnalysisResponse",await agent.analyze(req.body,res.locals.requestId,requestSignal(res))); });
+  app.post("/v1/agent/questions", async (req, res) => { checkBody(req,"AgentQuestionRequest"); send(res,"AnswerResponse",await agent.answer(req.body,res.locals.requestId,requestSignal(res))); });
 }
 app.use((_req, _res, next) => next(new ApiFault(404, "NOT_FOUND", "Route not found")));
 app.use(errorBoundary);

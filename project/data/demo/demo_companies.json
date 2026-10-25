@@ -1,0 +1,190 @@
+{
+  "generated": "2026-10-23",
+  "revenue_unit": "rub",
+  "source": "company_context pipeline (rub rebuild)",
+  "note": "IDs выбраны из 115 крупных (выручка>15 млрд ₽). Сигналы — выход news_analysis/company_context, не ручная разметка.",
+  "companies": [
+    {
+      "company_id": "U_34911",
+      "archetype": "Экспортёр (агро)",
+      "why_chosen": "Оптовый экспорт зерна в Алжир/Индию/ОАЭ с кредитом — лента про курс рубля, экспортные пошлины, урожай, логистику.",
+      "revenue_rub": 53868155228,
+      "is_large_business": true,
+      "okved": "Торговля оптовая зерном, необработанным табаком, семенами и кормами для сельскохозяйственных животных",
+      "sector": "Торговля",
+      "region": "Ростовская область",
+      "city": "г. Ростов-На-Дону",
+      "bank_products": [
+        "rko",
+        "loan"
+      ],
+      "foreign_trade_countries": [
+        "АЛЖИР",
+        "ИНДИЯ",
+        "ОАЭ"
+      ],
+      "group_members_total": 1,
+      "top_counterparties": [
+        {
+          "id": "U_4754",
+          "direction": "out",
+          "share": 0.144
+        },
+        {
+          "id": "U_153112",
+          "direction": "out",
+          "share": 0.137
+        },
+        {
+          "id": "U_17010",
+          "direction": "out",
+          "share": 0.107
+        }
+      ],
+      "relevance_signals": [
+        {
+          "topic": "ключевая ставка и финансирование",
+          "weight": 0.9
+        },
+        {
+          "topic": "внешняя торговля и валютные условия",
+          "weight": 0.8
+        },
+        {
+          "topic": "торговые условия: АЛЖИР",
+          "weight": 0.8
+        },
+        {
+          "topic": "торговые условия: ИНДИЯ",
+          "weight": 0.8
+        },
+        {
+          "topic": "торговые условия: ОАЭ",
+          "weight": 0.8
+        },
+        {
+          "topic": "отраслевые события",
+          "weight": 0.75
+        },
+        {
+          "topic": "региональные события",
+          "weight": 0.6
+        }
+      ],
+      "data_quality_warnings": [
+        "source_dataset_has_quality_issues; see dataset_audit"
+      ]
+    },
+    {
+      "company_id": "U_99262",
+      "archetype": "Строительство/дороги",
+      "why_chosen": "Дорожное строительство с кредитом и лизингом, без ВЭД — лента про ключевую ставку, госзаказ, стройматериалы, регион.",
+      "revenue_rub": 19251906775,
+      "is_large_business": true,
+      "okved": "Строительство автомобильных дорог и автомагистралей",
+      "sector": "Строительство",
+      "region": "Тюменская область",
+      "city": "г. Сургут",
+      "bank_products": [
+        "rko",
+        "loan",
+        "leasing",
+        "payroll"
+      ],
+      "foreign_trade_countries": [],
+      "group_members_total": 1,
+      "top_counterparties": [
+        {
+          "id": "U_95238",
+          "direction": "out",
+          "share": 0.378
+        },
+        {
+          "id": "U_107546",
+          "direction": "out",
+          "share": 0.13
+        },
+        {
+          "id": "U_78797",
+          "direction": "out",
+          "share": 0.116
+        }
+      ],
+      "relevance_signals": [
+        {
+          "topic": "ключевая ставка и финансирование",
+          "weight": 0.9
+        },
+        {
+          "topic": "события контрагента: U_95238",
+          "weight": 0.85
+        },
+        {
+          "topic": "события контрагента: U_95238",
+          "weight": 0.85
+        },
+        {
+          "topic": "отраслевые события",
+          "weight": 0.75
+        },
+        {
+          "topic": "региональные события",
+          "weight": 0.6
+        }
+      ],
+      "data_quality_warnings": [
+        "source_dataset_has_quality_issues; see dataset_audit"
+      ]
+    },
+    {
+      "company_id": "U_4909",
+      "archetype": "Энергетика (ТЭС)",
+      "why_chosen": "Генерация электроэнергии без кредита и без ВЭД, большая группа — лента про отрасль/тарифы и связанные компании, НЕ про ставку.",
+      "revenue_rub": 31046755094,
+      "is_large_business": true,
+      "okved": "Производство электроэнергии тепловыми электростанциями, в том числе деятельность по обеспечению работоспособности электростанций",
+      "sector": "Энергетика",
+      "region": "Москва",
+      "city": "г. Москва",
+      "bank_products": [
+        "payroll"
+      ],
+      "foreign_trade_countries": [],
+      "group_members_total": 369,
+      "top_counterparties": [
+        {
+          "id": "U_11683",
+          "direction": "out",
+          "share": 0.192
+        },
+        {
+          "id": "U_83053",
+          "direction": "out",
+          "share": 0.187
+        },
+        {
+          "id": "U_18209",
+          "direction": "out",
+          "share": 0.18
+        }
+      ],
+      "relevance_signals": [
+        {
+          "topic": "отраслевые события",
+          "weight": 0.75
+        },
+        {
+          "topic": "события связанных компаний",
+          "weight": 0.7
+        },
+        {
+          "topic": "региональные события",
+          "weight": 0.6
+        }
+      ],
+      "data_quality_warnings": [
+        "source_dataset_has_quality_issues; see dataset_audit"
+      ]
+    }
+  ]
+}

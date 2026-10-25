@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мониторинг качества — Alfa Insight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --alfa:#EF3124; --ink:#14181f; --muted:#667085; --line:#e6e8ec;
+    --bg:#f4f5f7; --card:#ffffff; --track:#eceef1;
+    --good:#15803d; --good-bg:#e9f6ee; --warn:#b45309;
+    --bar:#EF3124; --radius:14px;
+  }
+  :root:not([data-theme="light"]) { }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#e8eaed; --muted:#9aa3af; --line:#2a2f37; --bg:#0f1216; --card:#171b21;
+      --track:#242a32; --good:#4ade80; --good-bg:#10261a; --warn:#fbbf24;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#e8eaed; --muted:#9aa3af; --line:#2a2f37; --bg:#0f1216; --card:#171b21;
+    --track:#242a32; --good:#4ade80; --good-bg:#10261a; --warn:#fbbf24;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}
+  .wrap{max-width:960px;margin:0 auto;padding:20px 16px 48px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .logo{width:28px;height:28px;border-radius:7px;background:var(--alfa);display:grid;place-items:center;color:#fff;font-weight:800;font-family:Georgia,serif}
+  h1{font-size:18px;margin:0;font-weight:700}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 18px 38px}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:26px 0 10px}
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:720px){.tiles{grid-template-columns:repeat(2,1fr)}}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .tile .k{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .tile .v{font-size:28px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+  .tile .v small{font-size:14px;color:var(--muted);font-weight:500}
+  .tile .note{font-size:12px;color:var(--muted);margin-top:2px}
+  .tile.ok{border-color:var(--good)}
+  .tile.ok .v{color:var(--good)}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--good-bg);color:var(--good)}
+  .panels{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:720px){.panels{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .panel h3{margin:0 0 2px;font-size:15px}
+  .panel .cap{color:var(--muted);font-size:12px;margin:0 0 12px}
+  .row{display:grid;grid-template-columns:52px 1fr 52px;align-items:center;gap:10px;margin:9px 0}
+  .row .lbl{font-size:13px;color:var(--muted);text-align:right}
+  .row .val{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+  .track{display:block;height:12px;background:var(--track);border-radius:6px;overflow:hidden}
+  .fill{display:block;height:100%;border-radius:6px;background:var(--bar)}
+  .fill.good{background:var(--good)}
+  .legend-note{font-size:12px;color:var(--muted);margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
+  .foot{color:var(--muted);font-size:12px;margin-top:22px;border-top:1px solid var(--line);padding-top:12px}
+  .foot code{background:var(--track);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><div class="logo">A</div><h1>Мониторинг качества · Alfa Insight</h1></header>
+  <p class="sub">Метрики персонализации, RAG, бюджета и надёжности. Источник — артефакты оценки (<code>data/demo/…</code>). Критерий успеха ТЗ №12.</p>
+
+  <h2>Ключевые метрики</h2>
+  <div class="tiles" id="tiles"></div>
+
+  <h2>Качество по k</h2>
+  <div class="panels">
+    <div class="panel">
+      <h3>Ранжирование новостей</h3>
+      <p class="cap">nDCG@k — правильность порядка (0..1). Baseline news_analysis.</p>
+      <div id="rank-bars"></div>
+      <div class="legend-note">precision@3 = 0.89 · набор: 3 компании × 6 новостей (разметка черновая).</div>
+    </div>
+    <div class="panel">
+      <h3>RAG-ретрив по корпусу банка</h3>
+      <p class="cap">hit@k — нужный документ попал в топ-k. Baseline BM25.</p>
+      <div id="rag-bars"></div>
+      <div class="legend-note">recall@3 = 0.84 · MRR = 0.72 · 28 запросов / 9 документов. Цель вектора — поднять hit@1.</div>
+    </div>
+  </div>
+
+  <h2>Бюджет LLM (лимит 500 ₽/день)</h2>
+  <div class="panel">
+    <h3>Расход в рублях по дням <span class="pill" id="budget-pill">в пределах лимита</span></h3>
+    <p class="cap">Оценка из usage-лога и тарифа. ⚠️ тариф — плейсхолдер, уточнить у организаторов.</p>
+    <div id="budget-bars"></div>
+    <div class="legend-note" id="budget-note"></div>
+  </div>
+
+  <h2>Обоснованность выводов LLM (grounding)</h2>
+  <div class="panel">
+    <h3>Каждый вывод привязан к источнику <span class="pill">механизм активен</span></h3>
+    <p class="cap">Жёсткая проверка генерации (PR #8, <code>server/integration/grounding.js</code>) — не доверяем модели на слово.</p>
+    <ul style="margin:6px 0 0;padding-left:20px;font-size:14px;line-height:1.7;color:var(--ink)">
+      <li><b>Факт</b> — дословная цитата (≥8 символов) из выбранного источника новости.</li>
+      <li><b>Позиция банка</b> — дословная цитата из датированного фрагмента аналитики; нет материала → не выдумывается.</li>
+      <li><b>Вывод AI</b> — только с условиями и ссылкой на конкретный признак профиля (не «весь профиль»).</li>
+      <li>Числа в выводах должны присутствовать в источниках; при нарушении — 1 повтор, затем ошибка.</li>
+    </ul>
+    <div class="legend-note">Метрика на поток: доля анализов, прошедших валидацию grounding, и доля ответов ревью со `score=2`. Абсолютный % считается при live-прогонах (расходует бюджет) — сейчас отслеживается событийно в логах.</div>
+  </div>
+
+  <p class="foot">
+    Статусы: ✅ есть · 🟡 план — см. <code>docs/MONITORING.md</code>. Данные синтетические (demo).
+    Обновление метрик: <code>scripts/evaluate_ranking.py</code>, <code>scripts/evaluate_retrieval.py</code>, <code>scripts/estimate_budget.py</code>.
+  </p>
+</div>
+
+<script>
+// Реальные числа из прогона артефактов оценки (data/demo/*). Пересчёт — скриптами выше.
+const DATA = {
+  ranking: { "nDCG@1":0.889, "nDCG@3":0.972, "nDCG@5":0.953 },
+  rag:     { "hit@1":0.536, "hit@3":0.929, "hit@5":0.964 },
+  budget:  { limit:500, days:[{d:"22.10",rub:2.79},{d:"23.10",rub:2.62}], tokens:71432, calls:8 },
+};
+const pct = (x)=> (x*100).toFixed(0)+"%";
+const el = (h)=>{const t=document.createElement("template");t.innerHTML=h.trim();return t.content.firstChild;};
+
+// --- tiles ---
+const maxDay = Math.max(...DATA.budget.days.map(d=>d.rub));
+const budgetPctOfLimit = maxDay / DATA.budget.limit * 100;
+const tiles = [
+  {k:"Ранжирование nDCG@3", v:DATA.ranking["nDCG@3"].toFixed(2), note:"порядок новостей", ok:DATA.ranking["nDCG@3"]>=0.9},
+  {k:"RAG hit@3", v:DATA.rag["hit@3"].toFixed(2), note:"поиск по аналитике банка", ok:DATA.rag["hit@3"]>=0.9},
+  {k:"Бюджет / день", v:maxDay.toFixed(2)+" ₽", note:budgetPctOfLimit.toFixed(1)+"% от 500 ₽", ok:true},
+  {k:"Токены (demo)", v:(DATA.budget.tokens/1000).toFixed(1)+"<small>k</small>", note:DATA.budget.calls+" вызовов", ok:false},
+];
+document.getElementById("tiles").append(...tiles.map(t=>
+  el(`<div class="tile ${t.ok?'ok':''}"><div class="k">${t.k}</div><div class="v">${t.v}</div><div class="note">${t.note}</div></div>`)));
+
+// --- bar rows (single series -> no legend; value direct-labeled; title tooltip) ---
+function bars(container, obj, fmt=pct, good=false){
+  const host=document.getElementById(container);
+  for(const [lbl,v] of Object.entries(obj)){
+    host.append(el(
+      `<div class="row"><span class="lbl">${lbl}</span>`+
+      `<span class="track" title="${lbl}: ${fmt(v)}"><span class="fill ${good?'good':''}" style="width:${Math.max(2,v*100)}%"></span></span>`+
+      `<span class="val">${fmt(v)}</span></div>`));
+  }
+}
+bars("rank-bars", DATA.ranking);
+bars("rag-bars", DATA.rag);
+
+// --- budget bars (₽ vs limit) ---
+const bhost=document.getElementById("budget-bars");
+for(const day of DATA.budget.days){
+  const w = Math.max(0.6, day.rub/DATA.budget.limit*100); // scale to limit
+  bhost.append(el(
+    `<div class="row"><span class="lbl">${day.d}</span>`+
+    `<span class="track" title="${day.d}: ${day.rub} ₽ из 500"><span class="fill good" style="width:${w}%"></span></span>`+
+    `<span class="val">${day.rub} ₽</span></div>`));
+}
+document.getElementById("budget-note").textContent =
+  `Пик дня ≈ ${maxDay.toFixed(2)} ₽ (${budgetPctOfLimit.toFixed(1)}% лимита). Итого demo: ${DATA.budget.tokens.toLocaleString("ru-RU")} токенов за ${DATA.budget.calls} вызовов.`;
+document.getElementById("budget-pill").textContent = budgetPctOfLimit < 80 ? "в пределах лимита" : "близко к лимиту";
+</script>
+</body>
+</html>
