@@ -26,6 +26,10 @@ jobs:
           cache: pip
           cache-dependency-path: requirements.lock
       - run: npm ci
+        # Playwright is a dev tool for the local UI/gateway check only; CI never launches a
+        # browser, so skip the ~100MB browser download. Run it locally with `npx playwright install chromium`.
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
       - run: python -m pip install -r requirements-dev.txt -c requirements.lock
       - run: python scripts/build_contracts.py --check
       - run: npm run typecheck && npm test && npm run build
