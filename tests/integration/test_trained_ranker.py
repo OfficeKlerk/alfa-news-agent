@@ -30,7 +30,7 @@ def configure(monkeypatch, tmp_path, model_file=None):
 
 def test_api_uses_loaded_weights_and_keeps_ai_quality_warning(tmp_path, monkeypatch, model_file):
     configure(monkeypatch, tmp_path, model_file)
-    body = json.loads((ROOT / "contracts/v1/examples/rank-request.json").read_text())
+    body = json.loads((ROOT / "contracts/v1/examples/rank-request.json").read_text(encoding="utf-8"))
     with TestClient(create_app()) as client:
         response = client.post("/v1/rank", json=body)
         assert response.status_code == 200, response.text
@@ -45,7 +45,7 @@ def test_api_uses_loaded_weights_and_keeps_ai_quality_warning(tmp_path, monkeypa
 
 def test_no_artifact_keeps_existing_baseline(tmp_path, monkeypatch):
     configure(monkeypatch, tmp_path)
-    body = json.loads((ROOT / "contracts/v1/examples/rank-request.json").read_text())
+    body = json.loads((ROOT / "contracts/v1/examples/rank-request.json").read_text(encoding="utf-8"))
     with TestClient(create_app()) as client:
         items = client.post("/v1/rank", json=body).json()["data"]["items"]
         assert items and all(item["score_kind"] == "manual_feature_baseline" for item in items)
@@ -54,7 +54,7 @@ def test_no_artifact_keeps_existing_baseline(tmp_path, monkeypatch):
 def test_bundled_module_is_default_and_exports_v2_without_an_overlay(tmp_path, monkeypatch):
     configure(monkeypatch, tmp_path)
     monkeypatch.delenv("NEWS_MODULE_PATH", raising=False)
-    body = json.loads((ROOT / "contracts/v1/examples/rank-request.json").read_text())
+    body = json.loads((ROOT / "contracts/v1/examples/rank-request.json").read_text(encoding="utf-8"))
     with TestClient(create_app()) as client:
         response = client.post("/v1/rank", json=body)
         assert response.status_code == 200, response.text
@@ -80,7 +80,7 @@ def test_bad_artifact_stops_startup_instead_of_silent_fallback(tmp_path, monkeyp
     elif problem == "invalid_json":
         model_file.write_text("{")
     else:
-        artifact = json.loads(model_file.read_text())
+        artifact = json.loads(model_file.read_text(encoding="utf-8"))
         artifact["feature_version" if problem == "wrong_features" else "metadata"] = "incompatible"
         model_file.write_text(json.dumps(artifact))
     configure(monkeypatch, tmp_path, model_file)

@@ -16,7 +16,7 @@ from integration.contracts import ROOT
 def python_image(tmp_path):
     image = tmp_path / "image"
     image.mkdir()
-    for line in (ROOT / "docker/Dockerfile.python").read_text().splitlines():
+    for line in (ROOT / "docker/Dockerfile.python").read_text(encoding="utf-8").splitlines():
         if not line.startswith("COPY "):
             continue
         *sources, destination = shlex.split(line)[1:]

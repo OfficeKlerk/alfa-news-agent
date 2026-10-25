@@ -68,8 +68,8 @@ class WeeklyAuditExportTests(unittest.TestCase):
             runner.main()
 
     def test_public_artifact_has_all_30_distinct_cards_available_sources_and_explained_scores(self):
-        result = json.loads((ROOT / "data/weekly_audit_20261024/results.json").read_text())
-        before = json.loads((ROOT / "data/weekly_audit_20261024/results_before.json").read_text())
+        result = json.loads((ROOT / "data/weekly_audit_20261024/results.json").read_text(encoding="utf-8"))
+        before = json.loads((ROOT / "data/weekly_audit_20261024/results_before.json").read_text(encoding="utf-8"))
         self.assertEqual(result["article_count"], 10)
         self.assertEqual(result["content_sha256"], runner.digest({key: value for key, value in result.items() if key != "content_sha256"}))
         self.assertEqual({row["company_id"] for row in result["companies"]}, set(runner.COMPANIES))
@@ -122,7 +122,7 @@ class WeeklyAuditExportTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as name:
             folder = Path(name)
             self.run_fixture(folder)
-            previous = json.loads((folder / "results.json").read_text())
+            previous = json.loads((folder / "results.json").read_text(encoding="utf-8"))
             previous["as_of"] = "2026-10-24T11:00:00Z"
             previous["content_sha256"] = runner.digest({key: value for key, value in previous.items() if key != "content_sha256"})
             path = folder / "previous.json"
@@ -144,7 +144,11 @@ class WeeklyAuditExportTests(unittest.TestCase):
         private.mkdir(exist_ok=True)
         with tempfile.TemporaryDirectory(prefix="audit-export-guard-", dir=private) as inside, tempfile.TemporaryDirectory() as outside:
             link = Path(inside) / "escape"
-            os.symlink(outside, link, target_is_directory=True)
+            try:
+                os.symlink(outside, link, target_is_directory=True)
+            except (OSError, NotImplementedError) as error:
+                # Windows needs the symlink privilege (WinError 1314); skip rather than error.
+                self.skipTest(f"Symlink creation unavailable on this platform: {error}")
             public = ROOT / "data" / (Path(inside).name + ".json")
             for output in [public, link / "events.json"]:
                 with self.subTest(output=str(output)):

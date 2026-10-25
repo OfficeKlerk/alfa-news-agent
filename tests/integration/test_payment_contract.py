@@ -6,7 +6,7 @@ from jsonschema import ValidationError
 
 from integration.contracts import validate, ROOT
 
-CASES = json.loads((ROOT / "tests/fixtures/payment_contract_cases.json").read_text())
+CASES = json.loads((ROOT / "tests/fixtures/payment_contract_cases.json").read_text(encoding="utf-8"))
 
 
 class PaymentContractTests(unittest.TestCase):
@@ -38,7 +38,7 @@ class PaymentContractTests(unittest.TestCase):
         validate("Profile", profile)
 
     def test_frozen_shared_example_is_still_valid(self):
-        validate("ProfileResponse", json.loads((ROOT / "contracts/v1/examples/profile-response.json").read_text()))
+        validate("ProfileResponse", json.loads((ROOT / "contracts/v1/examples/profile-response.json").read_text(encoding="utf-8")))
 
 
 if __name__ == "__main__":

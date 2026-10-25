@@ -20,14 +20,14 @@ def client(tmp_path, monkeypatch):
 
 
 def rank_request():
-    return json.loads((EXAMPLES / "rank-request.json").read_text())
+    return json.loads((EXAMPLES / "rank-request.json").read_text(encoding="utf-8"))
 
 
 def test_shared_schema_and_examples():
     Draft202012Validator.check_schema(SCHEMA)
     for file, schema in [("profile-response.json", "ProfileResponse"), ("rank-request.json", "RankRequest"),
                          ("analyze-request.json", "AnalyzeRequest"), ("error.json", "Error")]:
-        validate(schema, json.loads((EXAMPLES / file).read_text()))
+        validate(schema, json.loads((EXAMPLES / file).read_text(encoding="utf-8")))
 
 
 def test_profile_does_not_invent_units_or_false_values(client):

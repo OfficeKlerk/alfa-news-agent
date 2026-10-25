@@ -159,7 +159,7 @@ def test_learning_http_auth_snapshot_and_strict_contract(tmp_path, monkeypatch):
         assert client.get('/learning').status_code == 200
         assert client.get('/v1/learning/status').status_code == 403
         assert client.get('/v1/learning/status', headers=headers).status_code == 200
-        request = json.loads((ROOT/'contracts/v1/examples/rank-request.json').read_text())
+        request = json.loads((ROOT/'contracts/v1/examples/rank-request.json').read_text(encoding="utf-8"))
         # Unmark only within this TEST fixture to exercise acceptance. Production data must be real.
         for event in request['events']:
             event['is_mock'] = False
