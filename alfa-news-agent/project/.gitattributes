@@ -1,3 +1,0 @@
-# Frozen datasets are verified by sha256 manifests over their exact committed bytes.
-# Keep them byte-for-byte on every platform (Windows core.autocrlf=true rewrote LF to CRLF).
-data/** -text

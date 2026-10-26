@@ -34,9 +34,9 @@ def clean_environment() -> dict[str, str]:
 
 
 def integrity() -> dict:
-    path = ROOT / 'delivery-task2/SOURCE_MANIFEST.json'
+    path = ROOT / 'config/source-manifest.json'
     if not path.is_file():
-        return {'status': 'BLOCKED', 'reason': 'SOURCE_MANIFEST.json missing; use the complete reviewed ZIP'}
+        return {'status': 'BLOCKED', 'reason': 'config/source-manifest.json missing; use the complete source ZIP'}
     try:
         files = json.loads(path.read_text(encoding='utf-8'))
         mismatches = []

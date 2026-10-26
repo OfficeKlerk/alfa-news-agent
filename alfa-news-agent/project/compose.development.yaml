@@ -1,8 +1,0 @@
-# Loopback ports for developers running a replacement service on the host.
-services:
-  ml:
-    ports:
-      - "127.0.0.1:8101:8101"
-  mocks:
-    ports:
-      - "127.0.0.1:8102:8102"

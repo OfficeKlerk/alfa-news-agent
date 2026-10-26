@@ -16,3 +16,13 @@ data/appendix_1
 data/appendix_2
 data/training_*
 
+# Keep one source tree; do not commit extracted deliveries or old release artifacts
+/alfa-news-agent/
+/project/
+/delivery-task2/
+/verification/
+/evidence/
+/changes.patch
+/MANIFEST.json
+/SHA256SUMS.txt
+*.zip
