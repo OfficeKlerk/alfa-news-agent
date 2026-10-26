@@ -71,11 +71,7 @@ export function profileFactRules(text: string, input: Json): string[] {
     // REPORT8 rate-up-borrower-no-rag: "параметры действующих договоров" presumes contracts that a mark does not show;
     // "действующий договор неизвестен" does not.
     const presumed = /(?:параметр|услови|обслуживани|ставк|срок|остат|тип|чувствительност)[а-яё]*\s+(?:[а-яё]+\s+)?(?:по\s+)?действующ[а-яё]*\s+(?:(?:кредитн|лизингов|долгов)[а-яё]*\s+)?(?:кредит|лизинг|договор|обязательств|займ|за[её]м)/iu.exec(clause);
-    // A modal data request has the same meaning as the already permitted imperative
-    // "Уточнить условия..."; it does not assert contract existence. Only this
-    // presupposition check is exempted; flag contradictions and usage assertions still run.
-    const contractRequest = presumed && /(?:нужно|необходимо|следует|требуется)\s+(?:уточнить|проверить|запросить|выяснить|получить)\s*$/iu.test(clause.slice(0, presumed.index));
-    if (presumed && !contractRequest && !/наличи|существ|есть\s+ли|при\s+условии/iu.test(clause.slice(0, presumed.index))
+    if (presumed && !/наличи|существ|есть\s+ли|при\s+условии/iu.test(clause.slice(0, presumed.index))
       && !/если\s+они\s+(?:есть|существуют|имеются)|при\s+их\s+наличии/iu.test(clause.slice(presumed.index)))
       issues.add("Product flags do not establish debt or contract terms");
     // REPORT8 trade-foreign: an FTS mark is not proven foreign-trade activity.

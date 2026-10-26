@@ -116,8 +116,8 @@ test("REPORT9 rate-up-borrower: an ai claim without a profile basis is deleted, 
   assert.equal(repairPlan([issue], d, false, {}).industry_wording, undefined, "no input, no wording");
 });
 
-test("public prompt retains the v14 absence-list and repeated-field safeguards", () => {
-  assert.equal(PROMPT_VERSION, "company-news-grounded-v14-public1");
+test("prompt v14 forbids «не содержит информации» lists and repeated fields", () => {
+  assert.equal(PROMPT_VERSION, "company-news-grounded-v14");
   assert.match(ANALYSIS_PROMPT, /Не перечисляй, о чём новость не сообщает/);
   assert.match(ANALYSIS_PROMPT, /Каждое поле ответа пиши ровно один раз/);
 });
