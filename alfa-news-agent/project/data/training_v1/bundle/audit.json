@@ -1,0 +1,447 @@
+{
+  "companies": 20,
+  "confidence_counts": {
+    "high": 229,
+    "low": 94,
+    "medium": 157
+  },
+  "constant_features": [
+    "fx_trade",
+    "direct_company_match",
+    "related_company_match",
+    "freshness",
+    "disputed",
+    "industry_unknown",
+    "financing_unknown",
+    "deposit_unknown",
+    "trade_unknown",
+    "graph_in_unknown",
+    "graph_out_unknown"
+  ],
+  "events": 24,
+  "financial_outcomes_available": false,
+  "historical_backtest_valid": false,
+  "human_gold_available": false,
+  "identical_feature_conflicts": [
+    {
+      "labels": [
+        0,
+        1,
+        2
+      ],
+      "pair_ids": [
+        "U_100927::cash_fx_20260306",
+        "U_100927::catering_vat_20260518",
+        "U_100927::cbr_rate_20260213",
+        "U_100927::cbr_rate_20260320",
+        "U_100927::cbr_rate_20260424",
+        "U_100927::cbr_rate_20260724",
+        "U_100927::cbr_rate_20260911",
+        "U_100927::china_visa_20260831",
+        "U_100927::eu_agri_tariffs_20250612",
+        "U_100927::eu_fertiliser_20260522",
+        "U_100927::fao_202512",
+        "U_100927::fao_202602",
+        "U_100927::fao_202603",
+        "U_100927::fao_202606",
+        "U_100927::fao_202609",
+        "U_100927::fuel_exports_20260730",
+        "U_100927::hotel_vat_20260112",
+        "U_100927::museum_spb_20260629",
+        "U_100927::nonresident_transfers_20260601",
+        "U_100927::steel_202603",
+        "U_100927::steel_202605",
+        "U_100927::vat_2026",
+        "U_125867::vat_2026",
+        "U_208757::vat_2026",
+        "U_258882::vat_2026",
+        "U_35074::vat_2026",
+        "U_35621::vat_2026",
+        "U_38382::vat_2026",
+        "U_46429::vat_2026",
+        "U_57057::vat_2026",
+        "U_61055::vat_2026",
+        "U_8089::vat_2026",
+        "U_85577::vat_2026",
+        "U_96727::vat_2026",
+        "U_97069::vat_2026",
+        "U_98584::vat_2026",
+        "U_9917::cash_fx_20260306",
+        "U_9917::catering_vat_20260518",
+        "U_9917::cbr_rate_20260213",
+        "U_9917::cbr_rate_20260320",
+        "U_9917::cbr_rate_20260424",
+        "U_9917::cbr_rate_20260724",
+        "U_9917::cbr_rate_20260911",
+        "U_9917::china_visa_20260831",
+        "U_9917::eu_fertiliser_20260522",
+        "U_9917::fuel_exports_20260730",
+        "U_9917::hotel_vat_20260112",
+        "U_9917::it_contributions_2026",
+        "U_9917::museum_spb_20260629",
+        "U_9917::nonresident_transfers_20260601",
+        "U_9917::steel_202603",
+        "U_9917::steel_202605",
+        "U_9917::vat_2026",
+        "U_9948::vat_2026",
+        "U_99618::vat_2026",
+        "U_9976::vat_2026",
+        "U_99929::vat_2026"
+      ]
+    },
+    {
+      "labels": [
+        2,
+        3
+      ],
+      "pair_ids": [
+        "U_208757::eu_agri_tariffs_20250612",
+        "U_208757::eu_fertiliser_20260522"
+      ]
+    },
+    {
+      "labels": [
+        0,
+        1
+      ],
+      "pair_ids": [
+        "U_258882::cash_fx_20260306",
+        "U_258882::catering_vat_20260518",
+        "U_258882::china_visa_20260831",
+        "U_258882::eu_agri_tariffs_20250612",
+        "U_258882::eu_fertiliser_20260522",
+        "U_258882::hotel_vat_20260112",
+        "U_258882::it_contributions_2026",
+        "U_258882::museum_moscow_20260625",
+        "U_258882::museum_spb_20260629",
+        "U_258882::nonresident_transfers_20260601"
+      ]
+    },
+    {
+      "labels": [
+        0,
+        1
+      ],
+      "pair_ids": [
+        "U_35621::cash_fx_20260306",
+        "U_35621::eu_agri_tariffs_20250612",
+        "U_35621::eu_fertiliser_20260522",
+        "U_35621::nonresident_transfers_20260601"
+      ]
+    },
+    {
+      "labels": [
+        0,
+        1
+      ],
+      "pair_ids": [
+        "U_61055::cash_fx_20260306",
+        "U_61055::catering_vat_20260518",
+        "U_61055::eu_agri_tariffs_20250612",
+        "U_61055::eu_fertiliser_20260522",
+        "U_61055::hotel_vat_20260112",
+        "U_61055::nonresident_transfers_20260601"
+      ]
+    },
+    {
+      "labels": [
+        0,
+        1
+      ],
+      "pair_ids": [
+        "U_8089::cash_fx_20260306",
+        "U_8089::eu_agri_tariffs_20250612",
+        "U_8089::eu_fertiliser_20260522",
+        "U_8089::nonresident_transfers_20260601"
+      ]
+    },
+    {
+      "labels": [
+        0,
+        1
+      ],
+      "pair_ids": [
+        "U_97069::cash_fx_20260306",
+        "U_97069::catering_vat_20260518",
+        "U_97069::eu_agri_tariffs_20250612",
+        "U_97069::eu_fertiliser_20260522",
+        "U_97069::hotel_vat_20260112",
+        "U_97069::nonresident_transfers_20260601"
+      ]
+    },
+    {
+      "labels": [
+        1,
+        2
+      ],
+      "pair_ids": [
+        "U_100927::it_contributions_2026",
+        "U_9917::eu_agri_tariffs_20250612",
+        "U_9917::fao_202512",
+        "U_9917::fao_202602",
+        "U_9917::fao_202603",
+        "U_9917::fao_202606",
+        "U_9917::fao_202609"
+      ]
+    },
+    {
+      "labels": [
+        0,
+        1
+      ],
+      "pair_ids": [
+        "U_99618::cash_fx_20260306",
+        "U_99618::eu_agri_tariffs_20250612",
+        "U_99618::eu_fertiliser_20260522",
+        "U_99618::nonresident_transfers_20260601"
+      ]
+    },
+    {
+      "labels": [
+        0,
+        1
+      ],
+      "pair_ids": [
+        "U_125867::fao_202512",
+        "U_125867::fao_202602",
+        "U_125867::fao_202603",
+        "U_125867::fao_202606",
+        "U_125867::fao_202609",
+        "U_125867::fuel_exports_20260730",
+        "U_125867::steel_202603",
+        "U_125867::steel_202605"
+      ]
+    },
+    {
+      "labels": [
+        0,
+        1
+      ],
+      "pair_ids": [
+        "U_57057::fao_202512",
+        "U_57057::fao_202602",
+        "U_57057::fao_202603",
+        "U_57057::fao_202606",
+        "U_57057::fao_202609",
+        "U_57057::fuel_exports_20260730"
+      ]
+    },
+    {
+      "labels": [
+        0,
+        3
+      ],
+      "pair_ids": [
+        "U_8089::fao_202512",
+        "U_8089::fao_202602",
+        "U_8089::fao_202603",
+        "U_8089::fao_202606",
+        "U_8089::fao_202609",
+        "U_8089::fuel_exports_20260730",
+        "U_8089::steel_202603",
+        "U_8089::steel_202605"
+      ]
+    },
+    {
+      "labels": [
+        1,
+        2
+      ],
+      "pair_ids": [
+        "U_208757::cbr_rate_20260213",
+        "U_208757::cbr_rate_20260320",
+        "U_208757::cbr_rate_20260424",
+        "U_208757::cbr_rate_20260724",
+        "U_208757::cbr_rate_20260911",
+        "U_46429::cbr_rate_20260213",
+        "U_46429::cbr_rate_20260320",
+        "U_46429::cbr_rate_20260424",
+        "U_46429::cbr_rate_20260724",
+        "U_46429::cbr_rate_20260911",
+        "U_85577::cbr_rate_20260213",
+        "U_85577::cbr_rate_20260320",
+        "U_85577::cbr_rate_20260424",
+        "U_85577::cbr_rate_20260724",
+        "U_85577::cbr_rate_20260911",
+        "U_96727::cbr_rate_20260213",
+        "U_96727::cbr_rate_20260320",
+        "U_96727::cbr_rate_20260424",
+        "U_96727::cbr_rate_20260724",
+        "U_96727::cbr_rate_20260911",
+        "U_97069::cbr_rate_20260213",
+        "U_97069::cbr_rate_20260320",
+        "U_97069::cbr_rate_20260424",
+        "U_97069::cbr_rate_20260724",
+        "U_97069::cbr_rate_20260911",
+        "U_98584::cbr_rate_20260213",
+        "U_98584::cbr_rate_20260320",
+        "U_98584::cbr_rate_20260424",
+        "U_98584::cbr_rate_20260724",
+        "U_98584::cbr_rate_20260911",
+        "U_9948::cbr_rate_20260213",
+        "U_9948::cbr_rate_20260320",
+        "U_9948::cbr_rate_20260424",
+        "U_9948::cbr_rate_20260724",
+        "U_9948::cbr_rate_20260911",
+        "U_9976::cbr_rate_20260213",
+        "U_9976::cbr_rate_20260320",
+        "U_9976::cbr_rate_20260424",
+        "U_9976::cbr_rate_20260724",
+        "U_9976::cbr_rate_20260911",
+        "U_99929::cbr_rate_20260213",
+        "U_99929::cbr_rate_20260320",
+        "U_99929::cbr_rate_20260424",
+        "U_99929::cbr_rate_20260724",
+        "U_99929::cbr_rate_20260911"
+      ]
+    },
+    {
+      "labels": [
+        0,
+        1
+      ],
+      "pair_ids": [
+        "U_125867::cash_fx_20260306",
+        "U_125867::nonresident_transfers_20260601"
+      ]
+    },
+    {
+      "labels": [
+        0,
+        1
+      ],
+      "pair_ids": [
+        "U_38382::cash_fx_20260306",
+        "U_38382::nonresident_transfers_20260601"
+      ]
+    },
+    {
+      "labels": [
+        0,
+        1
+      ],
+      "pair_ids": [
+        "U_46429::cash_fx_20260306",
+        "U_46429::eu_fertiliser_20260522",
+        "U_46429::museum_moscow_20260625",
+        "U_46429::nonresident_transfers_20260601"
+      ]
+    },
+    {
+      "labels": [
+        1,
+        2
+      ],
+      "pair_ids": [
+        "U_46429::fuel_exports_20260730",
+        "U_46429::steel_202603",
+        "U_46429::steel_202605"
+      ]
+    }
+  ],
+  "label_counts": {
+    "0": 229,
+    "1": 114,
+    "2": 135,
+    "3": 2
+  },
+  "origin_counts": {
+    "ai": 480
+  },
+  "publishers": {
+    "World Steel Association": 2,
+    "Банк России": 7,
+    "Государственный Эрмитаж": 2,
+    "Посольство КНР": 1,
+    "Правительство РФ": 1,
+    "Совет ЕС": 2,
+    "ФАО": 5,
+    "ФНС": 4
+  },
+  "rows": 480,
+  "sectors": {
+    "01": 2,
+    "10": 2,
+    "20": 2,
+    "24": 1,
+    "28": 1,
+    "41": 1,
+    "46": 2,
+    "47": 2,
+    "49": 1,
+    "55": 2,
+    "62": 2,
+    "68": 1,
+    "86": 1
+  },
+  "source_verification": {
+    "primary_page": 20,
+    "primary_search_extract": 4
+  },
+  "split_groups": 22,
+  "splits": {
+    "reserved_company_history": {
+      "companies": 4,
+      "events": 19,
+      "labels": {
+        "0": 42,
+        "1": 16,
+        "2": 18
+      },
+      "rows": 76
+    },
+    "test": {
+      "companies": 16,
+      "events": 5,
+      "labels": {
+        "0": 21,
+        "1": 25,
+        "2": 33,
+        "3": 1
+      },
+      "rows": 80
+    },
+    "train": {
+      "companies": 16,
+      "events": 15,
+      "labels": {
+        "0": 114,
+        "1": 56,
+        "2": 69,
+        "3": 1
+      },
+      "rows": 240
+    },
+    "unseen_company_test": {
+      "companies": 4,
+      "events": 5,
+      "labels": {
+        "0": 6,
+        "1": 6,
+        "2": 8
+      },
+      "rows": 20
+    },
+    "validation": {
+      "companies": 16,
+      "events": 4,
+      "labels": {
+        "0": 46,
+        "1": 11,
+        "2": 7
+      },
+      "rows": 64
+    }
+  },
+  "warnings": [
+    "AI annotations and AI evaluation are provisional; no independent quality measurement.",
+    "Small curated news set and purposively selected companies; not a representative sample.",
+    "Company and payment observation dates are unknown; historical point-in-time alignment is impossible.",
+    "Each item is scored at its publication timestamp to hold freshness constant. Queries are constructed relevance baskets, not historical feeds.",
+    "Repeated rate and food-price releases are correlated; pair count is not independent sample count.",
+    "Broad OKVED and country OR-matching can overstate graph relevance; a payment does not establish a supply chain.",
+    "AI subject annotations, numeric scenarios and suggested actions are not observed causal outcomes.",
+    "Company holdout excludes labels; graph may contain held-out companies (not graph-isolated generalization).",
+    "Constant features cannot be learned here; features_v1 omits fine product scope and actor eligibility."
+  ]
+}

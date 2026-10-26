@@ -1,0 +1,209 @@
+{
+  "schema_version": "event_interpretation_regressions_v1",
+  "origin": "synthetic_reconstruction_from_TEAM_TASKS5_not_original_failed_responses",
+  "note": "No original response/input JSON was supplied. Shared Node-to-Python event fixtures test extraction, ranking and context plumbing; they do not measure real LLM quality.",
+  "as_of": "2026-10-24T18:00:00Z",
+  "cases": [
+    {
+      "id": "rate_hold",
+      "article": {
+        "id": "synthetic-rate_hold",
+        "title": "Регулятор сохранил ключевую ставку.",
+        "text": "Условия кредитных и лизинговых договоров в сообщении не приведены.",
+        "url": "https://example.org/rate_hold",
+        "published": "2026-10-22T10:00:00Z",
+        "is_demo": true
+      },
+      "event": {
+        "news_id": "synthetic-rate_hold",
+        "event_id": "event:f7425a7050d39e216f6e5cbe",
+        "title": "Регулятор сохранил ключевую ставку.",
+        "text": "Условия кредитных и лизинговых договоров в сообщении не приведены.",
+        "event_type": "rate_change",
+        "published_at": "2026-10-22T10:00:00.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "news:synthetic-rate_hold",
+            "kind": "news",
+            "title": "Регулятор сохранил ключевую ставку.",
+            "url": "https://example.org/rate_hold",
+            "excerpt": "Регулятор сохранил ключевую ставку.\nУсловия кредитных и лизинговых договоров в сообщении не приведены.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-10-22T10:00:00.000Z",
+            "is_mock": true
+          }
+        ],
+        "is_mock": true,
+        "event_details": {
+          "direction": "unchanged",
+          "magnitude": null,
+          "magnitude_unit": "unknown",
+          "effective_at": null,
+          "decision_status": "unknown",
+          "target_roles": [],
+          "target_okved_codes": [],
+          "evidence": [
+            {
+              "field": "event_type",
+              "quote": "Регулятор сохранил ключевую ставку.",
+              "source_ids": [
+                "news:synthetic-rate_hold"
+              ]
+            },
+            {
+              "field": "direction",
+              "quote": "Регулятор сохранил ключевую ставку.",
+              "source_ids": [
+                "news:synthetic-rate_hold"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "transport_budget",
+      "article": {
+        "id": "synthetic-transport_budget",
+        "title": "Минтранс представил проект транспортного бюджета.",
+        "text": "Обсуждаются направления программы «Развитие транспортной системы». Участники конкретных контрактов не названы.",
+        "url": "https://example.org/transport_budget",
+        "published": "2026-10-22T10:00:00Z",
+        "is_demo": true
+      },
+      "event": {
+        "news_id": "synthetic-transport_budget",
+        "event_id": "event:99e4e813d8d97cabb03969cf",
+        "title": "Минтранс представил проект транспортного бюджета.",
+        "text": "Обсуждаются направления программы «Развитие транспортной системы». Участники конкретных контрактов не названы.",
+        "event_type": "other",
+        "published_at": "2026-10-22T10:00:00.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "news:synthetic-transport_budget",
+            "kind": "news",
+            "title": "Минтранс представил проект транспортного бюджета.",
+            "url": "https://example.org/transport_budget",
+            "excerpt": "Минтранс представил проект транспортного бюджета.\nОбсуждаются направления программы «Развитие транспортной системы». Участники конкретных контрактов не названы.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-10-22T10:00:00.000Z",
+            "is_mock": true
+          }
+        ],
+        "is_mock": true,
+        "event_details": {
+          "direction": "unknown",
+          "magnitude": null,
+          "magnitude_unit": "unknown",
+          "effective_at": null,
+          "decision_status": "unknown",
+          "target_roles": [],
+          "target_okved_codes": [],
+          "evidence": [
+            {
+              "field": "subject_okved_codes",
+              "quote": "Минтранс представил проект транспортного бюджета.",
+              "source_ids": [
+                "news:synthetic-transport_budget"
+              ]
+            },
+            {
+              "field": "subject_okved_codes",
+              "quote": "Обсуждаются направления программы «Развитие транспортной системы».",
+              "source_ids": [
+                "news:synthetic-transport_budget"
+              ]
+            }
+          ],
+          "subject_okved_codes": [
+            "49",
+            "50",
+            "51",
+            "52"
+          ],
+          "taxonomy_origin": "rule_inference",
+          "taxonomy_version": "business-subjects-v1"
+        }
+      }
+    },
+    {
+      "id": "standards_development",
+      "article": {
+        "id": "synthetic-standards_development",
+        "title": "Комитет по стандартизации «Электроэнергетика» приступил к разработке новых ГОСТов.",
+        "text": "Обсуждаются планы работы комитета.",
+        "url": "https://example.org/standards_development",
+        "published": "2026-10-22T10:00:00Z",
+        "is_demo": true
+      },
+      "event": {
+        "news_id": "synthetic-standards_development",
+        "event_id": "event:f94d13a4749f176ddc31890f",
+        "title": "Комитет по стандартизации «Электроэнергетика» приступил к разработке новых ГОСТов.",
+        "text": "Обсуждаются планы работы комитета.",
+        "event_type": "other",
+        "published_at": "2026-10-22T10:00:00.000Z",
+        "event_at": null,
+        "fact_status": "reported",
+        "okved_divisions": [],
+        "countries": [],
+        "regions": [],
+        "company_ids": [],
+        "entity_mapping_source": null,
+        "sources": [
+          {
+            "id": "news:synthetic-standards_development",
+            "kind": "news",
+            "title": "Комитет по стандартизации «Электроэнергетика» приступил к разработке новых ГОСТов.",
+            "url": "https://example.org/standards_development",
+            "excerpt": "Комитет по стандартизации «Электроэнергетика» приступил к разработке новых ГОСТов.\nОбсуждаются планы работы комитета.",
+            "document_id": null,
+            "page": null,
+            "published_at": "2026-10-22T10:00:00.000Z",
+            "is_mock": true
+          }
+        ],
+        "is_mock": true,
+        "event_details": {
+          "direction": "unknown",
+          "magnitude": null,
+          "magnitude_unit": "unknown",
+          "effective_at": null,
+          "decision_status": "unknown",
+          "target_roles": [],
+          "target_okved_codes": [],
+          "evidence": [
+            {
+              "field": "subject_okved_codes",
+              "quote": "Комитет по стандартизации «Электроэнергетика» приступил к разработке новых ГОСТов.",
+              "source_ids": [
+                "news:synthetic-standards_development"
+              ]
+            }
+          ],
+          "subject_okved_codes": [
+            "35"
+          ],
+          "taxonomy_origin": "rule_inference",
+          "taxonomy_version": "business-subjects-v1"
+        }
+      }
+    }
+  ]
+}

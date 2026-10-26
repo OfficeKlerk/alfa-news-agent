@@ -1,0 +1,24 @@
+{
+  "provenance": "Reconstructed from the user-reported diagnostic failures at master 4f33162 on 2026-10-24; original model response files were not supplied. These are not new live model measurements.",
+  "model": "qwen/qwen3.6-35b-a3b",
+  "reasoning_effort": "none",
+  "max_tokens": 6000,
+  "cases": [
+    {
+      "id": "date_not_in_headline_quote",
+      "summary": "23 октября 2026 года Банк России сохранил ключевую ставку на уровне 14,00% годовых.",
+      "expected_rules": ["Unsupported section number", "Section financial figures must be verbatim fact/bank quotes"]
+    },
+    {
+      "id": "rate_paraphrase_with_company_inference",
+      "summary": "Ключевая ставка осталась на уровне 14,00% годовых, поэтому компании необходимо проверить стоимость финансирования.",
+      "expected_rules": ["Section financial figures must be verbatim fact/bank quotes"]
+    },
+    {
+      "id": "date_and_independent_recommendation_errors",
+      "summary": "23 октября 2026 года регулятор сохранил ставку на уровне 14,00% годовых.",
+      "break_recommendation": true,
+      "expected_rules": ["Unsupported section number", "Section financial figures must be verbatim fact/bank quotes", "Recommendation condition and required data must match: condition must match its AI claim", "Recommendation condition and required data must match: required_data must match missing_data"]
+    }
+  ]
+}

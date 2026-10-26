@@ -1,0 +1,1021 @@
+[
+  {
+    "news_id": "eu_agri_tariffs_20250612",
+    "event_id": "eu_agri_tariffs_20250612",
+    "split_group_id": "eu_agri_tariffs_20250612",
+    "published_at": "2025-06-12T23:59:59Z",
+    "publication_date": "2025-06-12",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "ЕС принял новые пошлины на часть агропродукции и удобрений из РФ и Беларуси",
+    "event_type": "trade_restriction",
+    "okved_divisions": [
+      "01",
+      "10",
+      "20"
+    ],
+    "countries": [
+      "ЛИТВА",
+      "ИТАЛИЯ",
+      "ПОЛЬША",
+      "ЭСТОНИЯ"
+    ],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.consilium.europa.eu/en/press/press-releases/2025/06/12/trade-eu-adopts-new-tariffs-on-russian-and-belarusian-agricultural-goods-and-fertilisers/",
+        "excerpt": "Совет ЕС утвердил дополнительные пошлины на ранее не охваченные ими сельскохозяйственные товары и отдельные удобрения российского и белорусского происхождения.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "Совет ЕС",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "agri_fertiliser_trade",
+      "okved_prefixes": [
+        "01",
+        "10",
+        "20.15"
+      ],
+      "target_actor": "exporters_of_covered_origin_goods",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "it_contributions_2026",
+    "event_id": "it_contributions_2026",
+    "split_group_id": "tax_reform_425_2025",
+    "published_at": "2025-12-17T23:59:59Z",
+    "publication_date": "2025-12-17",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "ФНС сообщила об изменении взносов для аккредитованных ИТ-организаций",
+    "event_type": "other",
+    "okved_divisions": [
+      "62",
+      "63"
+    ],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.nalog.gov.ru/rn31/news/seminar/16590652/",
+        "excerpt": "Для аккредитованных ИТ-организаций тариф взносов в пределах предельной базы с 2026 года увеличивается до 15%; сверх базы сохраняется 7,6%.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "ФНС",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "it_payroll_tax",
+      "okved_prefixes": [
+        "62",
+        "63"
+      ],
+      "target_actor": "accredited_it_companies",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "vat_2026",
+    "event_id": "vat_2026",
+    "split_group_id": "tax_reform_425_2025",
+    "published_at": "2025-12-17T23:59:59Z",
+    "publication_date": "2025-12-17",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "ФНС разъяснила повышение основной ставки НДС в 2026 году",
+    "event_type": "other",
+    "okved_divisions": [],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.nalog.gov.ru/rn91/ifns/ifns7/info/16590442/",
+        "excerpt": "С 1 января 2026 года основная ставка НДС повышается с 20% до 22%; ставки 10%, 0%, а также специальные ставки 5% и 7% сохраняются.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "ФНС",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "vat_rate",
+      "okved_prefixes": [],
+      "target_actor": "taxpayers_subject_to_standard_vat",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "fao_202512",
+    "event_id": "fao_202512",
+    "split_group_id": "fao_202512",
+    "published_at": "2026-01-09T23:59:59Z",
+    "publication_date": "2026-01-09",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "ФАО: мировой продовольственный индекс снизился в декабре",
+    "event_type": "commodity_price_change",
+    "okved_divisions": [
+      "01",
+      "10",
+      "46",
+      "47"
+    ],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.fao.org/markets-and-trade/news-and-events/news-detail/fao-food-price-index-dips-in-december-despite-higher-world-cereal-quotations/en",
+        "excerpt": "Индекс продовольственных цен за декабрь 2025 года составил 124,3 пункта, снизившись на 0,6% за месяц. Молочная продукция подешевела, зерновые и сахар подорожали.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "ФАО",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "food_prices",
+      "okved_prefixes": [
+        "01.1",
+        "10",
+        "46.3",
+        "47.11"
+      ],
+      "target_actor": "food_value_chain",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "hotel_vat_20260112",
+    "event_id": "hotel_vat_20260112",
+    "split_group_id": "tax_reform_425_2025",
+    "published_at": "2026-01-12T23:59:59Z",
+    "publication_date": "2026-01-12",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "ФНС разъяснила нулевой НДС для гостиниц на УСН",
+    "event_type": "other",
+    "okved_divisions": [
+      "55"
+    ],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.nalog.gov.ru/rn03/news/activities_fts/16594326/",
+        "excerpt": "Для услуг размещения возможна ставка НДС 0% при выборе общих ставок по иным операциям и соблюдении условий. При специальных ставках 5% или 7% нулевая ставка не применяется.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "ФНС",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "hotel_vat",
+      "okved_prefixes": [
+        "55"
+      ],
+      "target_actor": "accommodation_with_qualifying_tax_regime",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "cbr_rate_20260213",
+    "event_id": "cbr_rate_20260213",
+    "split_group_id": "cbr_rate_20260213",
+    "published_at": "2026-02-13T23:59:59Z",
+    "publication_date": "2026-02-13",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "Решение Банка России по ключевой ставке: 15,50%",
+    "event_type": "rate_change",
+    "okved_divisions": [],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.cbr.ru/press/pr/?file=13022026_133000key.htm",
+        "excerpt": "Банк России снизил ключевую ставку на 50 базисных пунктов, до 15,50% годовых.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "Банк России",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "policy_rate",
+      "okved_prefixes": [],
+      "target_actor": "borrowers_depositors_and_new_financing",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "cash_fx_20260306",
+    "event_id": "cash_fx_20260306",
+    "split_group_id": "cash_fx_20260306",
+    "published_at": "2026-03-06T23:59:59Z",
+    "publication_date": "2026-03-06",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "ЦБ продлил ограничения на выдачу наличной иностранной валюты",
+    "event_type": "other",
+    "okved_divisions": [],
+    "countries": [
+      "США",
+      "ИТАЛИЯ",
+      "ЛИТВА",
+      "ПОЛЬША",
+      "ЭСТОНИЯ"
+    ],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.cbr.ru/press/event/?id=28360",
+        "excerpt": "Ограничения продлены до 9 сентября 2026 года. Для юридических лиц-резидентов выдача наличных долларов, евро, фунтов и иен допускается на командировочные расходы в пределах нормативов.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "Банк России",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "Это правила наличных операций, не изменение валютного курса и не общий запрет торговых расчётов. Страны — неполный список для выбранных профилей, не список санкций.",
+    "semantic_context": {
+      "topic": "cash_fx",
+      "okved_prefixes": [],
+      "target_actor": "cash_fx_account_holders_with_residency_conditions",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "fao_202602",
+    "event_id": "fao_202602",
+    "split_group_id": "fao_202602",
+    "published_at": "2026-03-06T23:59:59Z",
+    "publication_date": "2026-03-06",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "ФАО: продовольственный индекс вырос в феврале",
+    "event_type": "commodity_price_change",
+    "okved_divisions": [
+      "01",
+      "10",
+      "46",
+      "47"
+    ],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.fao.org/newsroom/detail/fao-food-price-index-rises-in-february-for-first-time-in-five-months/ru",
+        "excerpt": "Мировой продовольственный индекс составил 125,3 пункта, увеличившись на 0,9% за месяц. Рост зерновых и масел сочетался со снижением цен на сыр и сахар.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "ФАО",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "food_prices",
+      "okved_prefixes": [
+        "01.1",
+        "10",
+        "46.3",
+        "47.11"
+      ],
+      "target_actor": "food_value_chain",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "cbr_rate_20260320",
+    "event_id": "cbr_rate_20260320",
+    "split_group_id": "cbr_rate_20260320",
+    "published_at": "2026-03-20T23:59:59Z",
+    "publication_date": "2026-03-20",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "Решение Банка России по ключевой ставке: 15,00%",
+    "event_type": "rate_change",
+    "okved_divisions": [],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.cbr.ru/press/pr/?file=20032026_133000key.htm",
+        "excerpt": "Банк России снизил ключевую ставку на 50 базисных пунктов, до 15,00% годовых.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "Банк России",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "policy_rate",
+      "okved_prefixes": [],
+      "target_actor": "borrowers_depositors_and_new_financing",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "fao_202603",
+    "event_id": "fao_202603",
+    "split_group_id": "fao_202603",
+    "published_at": "2026-04-03T23:59:59Z",
+    "publication_date": "2026-04-03",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "ФАО: продовольствие подорожало на фоне роста энергетических издержек",
+    "event_type": "commodity_price_change",
+    "okved_divisions": [
+      "01",
+      "10",
+      "46",
+      "47"
+    ],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.fao.org/newsroom/detail/fao-food-price-index-rises-in-march-as-near-east-conflict-raises-energy-costs/ru",
+        "excerpt": "Мартовский индекс составил 128,5 пункта, прибавив 2,4% за месяц. Индекс зерновых вырос на 1,5%, мировые цены на пшеницу — на 4,3%.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "ФАО",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "food_prices",
+      "okved_prefixes": [
+        "01.1",
+        "10",
+        "46.3",
+        "47.11"
+      ],
+      "target_actor": "food_value_chain",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "steel_202603",
+    "event_id": "steel_202603",
+    "split_group_id": "steel_202603",
+    "published_at": "2026-04-23T23:59:59Z",
+    "publication_date": "2026-04-23",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "Worldsteel: мировая выплавка стали в марте сократилась",
+    "event_type": "other",
+    "okved_divisions": [
+      "24",
+      "25",
+      "28",
+      "41",
+      "46"
+    ],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://worldsteel.org/media/press-releases/2026/march-2026-crude-steel-production/",
+        "excerpt": "69 стран отчитались о выпуске 159,9 млн тонн стали в марте 2026 года, на 4,2% меньше год к году. Это показатель выпуска, а не изменение цен металла.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "World Steel Association",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "steel_output",
+      "okved_prefixes": [
+        "24",
+        "25",
+        "28",
+        "41",
+        "46.72",
+        "46.73"
+      ],
+      "target_actor": "steel_value_chain",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "cbr_rate_20260424",
+    "event_id": "cbr_rate_20260424",
+    "split_group_id": "cbr_rate_20260424",
+    "published_at": "2026-04-24T23:59:59Z",
+    "publication_date": "2026-04-24",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "Решение Банка России по ключевой ставке: 14,50%",
+    "event_type": "rate_change",
+    "okved_divisions": [],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.cbr.ru/press/pr/?file=24042026_133000key.htm",
+        "excerpt": "Банк России снизил ключевую ставку на 50 базисных пунктов, до 14,50% годовых.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "Банк России",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "policy_rate",
+      "okved_prefixes": [],
+      "target_actor": "borrowers_depositors_and_new_financing",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "catering_vat_20260518",
+    "event_id": "catering_vat_20260518",
+    "split_group_id": "catering_vat_20260518",
+    "published_at": "2026-05-18T23:59:59Z",
+    "publication_date": "2026-05-18",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "ФНС объяснила временное освобождение части общепита от НДС",
+    "event_type": "other",
+    "okved_divisions": [
+      "56"
+    ],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.nalog.gov.ru/rn52/news/activities_fts/16624647/",
+        "excerpt": "С апреля по декабрь 2026 года для определённых предприятий общепита, перешедших с УСН или ПСН на НДС, отменяется зарплатное условие льготы. Сохраняются условия по доходам и доле общепита.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "ФНС",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "catering_vat",
+      "okved_prefixes": [
+        "56"
+      ],
+      "target_actor": "qualifying_catering_businesses",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "eu_fertiliser_20260522",
+    "event_id": "eu_fertiliser_20260522",
+    "split_group_id": "eu_fertiliser_20260522",
+    "published_at": "2026-05-22T23:59:59Z",
+    "publication_date": "2026-05-22",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "ЕС приостановил часть пошлин на удобрения, исключив РФ и Беларусь",
+    "event_type": "trade_restriction",
+    "okved_divisions": [
+      "20"
+    ],
+    "countries": [
+      "ЛИТВА",
+      "ИТАЛИЯ",
+      "ПОЛЬША",
+      "ЭСТОНИЯ"
+    ],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/05/22/council-suspends-customs-tariffs-on-certain-fertilisers-for-one-year/",
+        "excerpt": "Совет ЕС решил на год приостановить пошлины на определённые азотные удобрения в пределах квоты. Продукция из России и Беларуси исключена из послабления.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "Совет ЕС",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "fertiliser_competition",
+      "okved_prefixes": [
+        "20.15"
+      ],
+      "target_actor": "non_russian_non_belarusian_goods_imported_into_eu",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "nonresident_transfers_20260601",
+    "event_id": "nonresident_transfers_20260601",
+    "split_group_id": "nonresident_transfers_20260601",
+    "published_at": "2026-06-01T23:59:59Z",
+    "publication_date": "2026-06-01",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "ЦБ сохранил ограничения на зарубежные переводы отдельных нерезидентов",
+    "event_type": "other",
+    "okved_divisions": [],
+    "countries": [
+      "США",
+      "ИТАЛИЯ",
+      "ЛИТВА",
+      "ПОЛЬША",
+      "ЭСТОНИЯ"
+    ],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.cbr.ru/press/event/?id=32586",
+        "excerpt": "На период 8 июня — 7 декабря 2026 года сохраняются ограничения для нерезидентов из недружественных стран. Для юрлиц под российским контролем и отдельных инвестиционных счетов предусмотрены исключения.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "Банк России",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "Нельзя переносить правила для нерезидентов на все российские компании с ФТС. Страны — подмножество для сопоставления, не полный юридический перечень.",
+    "semantic_context": {
+      "topic": "nonresident_transfers",
+      "okved_prefixes": [],
+      "target_actor": "specified_nonresidents_with_exceptions",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "steel_202605",
+    "event_id": "steel_202605",
+    "split_group_id": "steel_202605",
+    "published_at": "2026-06-23T23:59:59Z",
+    "publication_date": "2026-06-23",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "Worldsteel: выпуск стали в мае немного ниже прошлогоднего",
+    "event_type": "other",
+    "okved_divisions": [
+      "24",
+      "25",
+      "28",
+      "41",
+      "46"
+    ],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://worldsteel.org/media/press-releases/2026/may-2026-crude-steel-production/",
+        "excerpt": "70 стран произвели в мае 2026 года 157,9 млн тонн стали, на 0,3% меньше год к году. Выпуск России оценён в 5,6 млн тонн, снижение на 5,4%.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "World Steel Association",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "steel_output",
+      "okved_prefixes": [
+        "24",
+        "25",
+        "28",
+        "41",
+        "46.72",
+        "46.73"
+      ],
+      "target_actor": "steel_value_chain",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "museum_moscow_20260625",
+    "event_id": "museum_moscow_20260625",
+    "split_group_id": "museum_moscow_20260625",
+    "published_at": "2026-06-25T23:59:59Z",
+    "publication_date": "2026-06-25",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "В Москве открылась мультимедийная выставка Эрмитажа",
+    "event_type": "regional_event",
+    "okved_divisions": [
+      "90",
+      "91"
+    ],
+    "countries": [],
+    "regions": [
+      "Москва"
+    ],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://hermitagemuseum.org/news/news_185_26",
+        "excerpt": "24 июня 2026 года в Москве открылась мультимедийная выставка «Великолепный Эрмитаж». Сообщение опубликовано на следующий день.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "Государственный Эрмитаж",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_search_extract"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником. Прямое чтение страницы вернуло 502; факт и дата проверены по индексированной выдержке сайта музея.",
+    "semantic_context": {
+      "topic": "museum_exhibition",
+      "okved_prefixes": [
+        "90",
+        "91"
+      ],
+      "target_actor": "museum_visitors_and_possible_local_tourism",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "museum_spb_20260629",
+    "event_id": "museum_spb_20260629",
+    "split_group_id": "museum_spb_20260629",
+    "published_at": "2026-06-29T23:59:59Z",
+    "publication_date": "2026-06-29",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "Эрмитаж сообщил об открытии выставки о бароне Штиглице",
+    "event_type": "regional_event",
+    "okved_divisions": [
+      "90",
+      "91"
+    ],
+    "countries": [],
+    "regions": [
+      "Санкт-Петербург"
+    ],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://hermitagemuseum.org/news/news_193_26",
+        "excerpt": "26 июня 2026 года в Манеже Малого Эрмитажа открылась выставка о бароне Штиглице; сообщение музея датировано 29 июня.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "Государственный Эрмитаж",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_search_extract"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником. Прямое чтение страницы вернуло 502; факт и дата проверены по индексированной выдержке сайта музея.",
+    "semantic_context": {
+      "topic": "museum_exhibition",
+      "okved_prefixes": [
+        "90",
+        "91"
+      ],
+      "target_actor": "museum_visitors_and_possible_local_tourism",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "fao_202606",
+    "event_id": "fao_202606",
+    "split_group_id": "fao_202606",
+    "published_at": "2026-07-03T23:59:59Z",
+    "publication_date": "2026-07-03",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "ФАО: продовольственный индекс в июне немного снизился",
+    "event_type": "commodity_price_change",
+    "okved_divisions": [
+      "01",
+      "10",
+      "46",
+      "47"
+    ],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.fao.org/newsroom/detail/fao-food-price-index-edges-down-amid-diverging-commodity-price-movements/ru",
+        "excerpt": "Июньский индекс составил 130,3 пункта, на 0,3% ниже майского. Индекс зерновых снизился на 3,5%, растительных масел вырос на 3,8%.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "ФАО",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "food_prices",
+      "okved_prefixes": [
+        "01.1",
+        "10",
+        "46.3",
+        "47.11"
+      ],
+      "target_actor": "food_value_chain",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "cbr_rate_20260724",
+    "event_id": "cbr_rate_20260724",
+    "split_group_id": "cbr_rate_20260724",
+    "published_at": "2026-07-24T23:59:59Z",
+    "publication_date": "2026-07-24",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "Решение Банка России по ключевой ставке: 14,00%",
+    "event_type": "rate_change",
+    "okved_divisions": [],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.cbr.ru/press/pr/?file=24072026_133000key.htm",
+        "excerpt": "Банк России снизил ключевую ставку на 25 базисных пунктов, до 14,00% годовых.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "Банк России",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "policy_rate",
+      "okved_prefixes": [],
+      "target_actor": "borrowers_depositors_and_new_financing",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "fuel_exports_20260730",
+    "event_id": "fuel_exports_20260730",
+    "split_group_id": "fuel_exports_20260730",
+    "published_at": "2026-07-30T23:59:59Z",
+    "publication_date": "2026-07-30",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "Правительство ввело ограничения на экспорт отдельных видов топлива",
+    "event_type": "trade_restriction",
+    "okved_divisions": [
+      "19",
+      "46",
+      "49"
+    ],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://government.ru/news/59474/",
+        "excerpt": "Запрет на вывоз бензина, дизельного и судового топлива, газойлей действует с августа 2026 по январь 2027 года. С сентября предусмотрено исключение для производителей дизеля, судового топлива и газойлей; существуют и специальные исключения.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "Правительство РФ",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_search_extract"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "Прямой запрос страницы завершился таймаутом; использована индексированная выдержка первоисточника с датой и условиями. Перед применением проверить действующую редакцию.",
+    "semantic_context": {
+      "topic": "fuel_exports",
+      "okved_prefixes": [
+        "19.20",
+        "46.71"
+      ],
+      "target_actor": "covered_fuel_exporters_with_exceptions",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "china_visa_20260831",
+    "event_id": "china_visa_20260831",
+    "split_group_id": "china_visa_20260831",
+    "published_at": "2026-08-31T23:59:59Z",
+    "publication_date": "2026-08-31",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "Посольство КНР сообщило о продлении взаимного безвизового режима",
+    "event_type": "other",
+    "okved_divisions": [
+      "55",
+      "79"
+    ],
+    "countries": [
+      "КИТАЙ"
+    ],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://ru.china-embassy.gov.cn/rus/dshd/202608/t20260831_12013102.htm",
+        "excerpt": "В опубликованном интервью посол КНР сообщает о продлении взаимного безвизового режима до 31 декабря 2027 года. Сообщение касается поездок граждан, а не отмены товарных пошлин.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "Посольство КНР",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "travel_visas",
+      "okved_prefixes": [
+        "55",
+        "79"
+      ],
+      "target_actor": "qualifying_travellers_not_goods",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "cbr_rate_20260911",
+    "event_id": "cbr_rate_20260911",
+    "split_group_id": "cbr_rate_20260911",
+    "published_at": "2026-09-11T23:59:59Z",
+    "publication_date": "2026-09-11",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "Решение Банка России по ключевой ставке: 14,00%",
+    "event_type": "rate_change",
+    "okved_divisions": [],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.cbr.ru/press/pr/?file=11092026_133000key.htm",
+        "excerpt": "Банк России сохранил ключевую ставку на уровне 14,00% годовых.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "Банк России",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_search_extract"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником. Прямое чтение пресс-релиза вернуло 403; решение проверено по официальному списку https://cbr.ru/dkp/mp_dec/.",
+    "semantic_context": {
+      "topic": "policy_rate",
+      "okved_prefixes": [],
+      "target_actor": "borrowers_depositors_and_new_financing",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  },
+  {
+    "news_id": "fao_202609",
+    "event_id": "fao_202609",
+    "split_group_id": "fao_202609",
+    "published_at": "2026-10-02T23:59:59Z",
+    "publication_date": "2026-10-02",
+    "publication_precision": "day",
+    "timestamp_policy": "conservative_end_of_UTC_day_not_observed_publication_time",
+    "title": "ФАО: в сентябре выросли цены на зерновые и общий продовольственный индекс",
+    "event_type": "commodity_price_change",
+    "okved_divisions": [
+      "01",
+      "10",
+      "46",
+      "47"
+    ],
+    "countries": [],
+    "regions": [],
+    "company_ids": [],
+    "fact_status": "reported",
+    "sources": [
+      {
+        "url": "https://www.fao.org/newsroom/detail/fao-food-price-index-rises-in-september-amid-weather-concerns-and-transport-disruptions/ru",
+        "excerpt": "Сентябрьский индекс составил 136,0 пункта, на 1,5% выше августовского. Индекс зерновых вырос на 5,1%, цены на пшеницу — на 6,3%.",
+        "excerpt_kind": "ai_factual_paraphrase_not_quote",
+        "publisher": "ФАО",
+        "accessed_on": "2026-10-22",
+        "verification_method": "primary_page"
+      }
+    ],
+    "extraction_origin": "ai",
+    "extraction_review_status": "unreviewed",
+    "extraction_note": "ОКВЭД и каналы влияния сопоставлены AI, а не указаны источником.",
+    "semantic_context": {
+      "topic": "food_prices",
+      "okved_prefixes": [
+        "01.1",
+        "10",
+        "46.3",
+        "47.11"
+      ],
+      "target_actor": "food_value_chain",
+      "origin": "ai_inference",
+      "used_by_features_v1": false
+    }
+  }
+]

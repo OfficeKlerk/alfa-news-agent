@@ -1,0 +1,13 @@
+{
+  "_note": "Пример журнала использования LLM. Реальные числа взяты из docs/archive/NODE_MIGRATION.md (live-прогоны 22-23 окт). Каждая запись — один вызов модели через шлюз.",
+  "calls": [
+    {"timestamp": "2026-10-22T09:10:00Z", "model": "qwen/qwen3.6-35b-a3b", "input_tokens": 1408,  "output_tokens": 2523, "job": "050d2f40"},
+    {"timestamp": "2026-10-22T09:11:00Z", "model": "qwen/qwen3.6-35b-a3b", "input_tokens": 5927,  "output_tokens": 1212, "job": "050d2f40"},
+    {"timestamp": "2026-10-22T09:12:00Z", "model": "qwen/qwen3.6-35b-a3b", "input_tokens": 10563, "output_tokens": 2600, "job": "050d2f40"},
+    {"timestamp": "2026-10-22T09:13:00Z", "model": "qwen/qwen3.6-35b-a3b", "input_tokens": 10795, "output_tokens": 2600, "job": "050d2f40"},
+    {"timestamp": "2026-10-23T08:40:00Z", "model": "qwen/qwen3.6-35b-a3b", "input_tokens": 7800,  "output_tokens": 2600, "job": "fb1733ee"},
+    {"timestamp": "2026-10-23T08:41:00Z", "model": "qwen/qwen3.6-35b-a3b", "input_tokens": 8200,  "output_tokens": 2600, "job": "fb1733ee"},
+    {"timestamp": "2026-10-23T08:42:00Z", "model": "qwen/qwen3.6-35b-a3b", "input_tokens": 2800,  "output_tokens": 2730, "job": "fb1733ee"},
+    {"timestamp": "2026-10-23T09:05:00Z", "model": "qwen/qwen3.6-35b-a3b", "input_tokens": 5198,  "output_tokens": 1876, "job": "question-1"}
+  ]
+}

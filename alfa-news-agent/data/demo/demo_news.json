@@ -1,0 +1,189 @@
+{
+  "as_of": "2026-10-23T00:00:00Z",
+  "note": "Синтетические офлайн-новости для демо/тестов без расхода LLM-бюджета. Валидны по contracts/v1 Event.",
+  "events": [
+    {
+      "news_id": "rate-hold-2026-09",
+      "event_id": "rate-hold-2026-09-event",
+      "title": "ЦБ сохранил ключевую ставку на уровне 14%",
+      "text": "Совет директоров Банка России сохранил ключевую ставку 14%; риторика осталась жёсткой. Синтетическая демо-новость.",
+      "event_type": "rate_change",
+      "published_at": "2026-09-11T13:30:00Z",
+      "event_at": null,
+      "fact_status": "reported",
+      "okved_divisions": [],
+      "countries": [],
+      "regions": [],
+      "company_ids": [],
+      "entity_mapping_source": null,
+      "sources": [
+        {
+          "id": "news:rate-hold-2026-09",
+          "kind": "news",
+          "title": "ЦБ сохранил ключевую ставку на уровне 14%",
+          "url": "https://example.invalid/news/rate-hold-2026-09",
+          "excerpt": "Совет директоров Банка России сохранил ключевую ставку 14%; риторика осталась жёсткой. Синтетическая демо-новость.",
+          "document_id": null,
+          "page": null,
+          "published_at": "2026-09-11T13:30:00Z",
+          "is_mock": true
+        }
+      ],
+      "is_mock": true
+    },
+    {
+      "news_id": "rub-weakens",
+      "event_id": "rub-weakens-event",
+      "title": "Рубль ослаб к доллару и юаню",
+      "text": "Курс рубля снизился на фоне внешних факторов. Влияет на экспортёров и импортёров. Синтетическая демо-новость.",
+      "event_type": "fx_change",
+      "published_at": "2026-10-15T09:00:00Z",
+      "event_at": null,
+      "fact_status": "reported",
+      "okved_divisions": [],
+      "countries": [],
+      "regions": [],
+      "company_ids": [],
+      "entity_mapping_source": null,
+      "sources": [
+        {
+          "id": "news:rub-weakens",
+          "kind": "news",
+          "title": "Рубль ослаб к доллару и юаню",
+          "url": "https://example.invalid/news/rub-weakens",
+          "excerpt": "Курс рубля снизился на фоне внешних факторов. Влияет на экспортёров и импортёров. Синтетическая демо-новость.",
+          "document_id": null,
+          "page": null,
+          "published_at": "2026-10-15T09:00:00Z",
+          "is_mock": true
+        }
+      ],
+      "is_mock": true
+    },
+    {
+      "news_id": "grain-export-duty",
+      "event_id": "grain-export-duty-event",
+      "title": "Повышена экспортная пошлина на зерно",
+      "text": "Минсельхоз скорректировал экспортную пошлину на зерновые. Касается экспортёров зерна. Синтетическая демо-новость.",
+      "event_type": "trade_restriction",
+      "published_at": "2026-10-10T08:00:00Z",
+      "event_at": null,
+      "fact_status": "reported",
+      "okved_divisions": [
+        "46",
+        "01"
+      ],
+      "countries": [],
+      "regions": [],
+      "company_ids": [],
+      "entity_mapping_source": null,
+      "sources": [
+        {
+          "id": "news:grain-export-duty",
+          "kind": "news",
+          "title": "Повышена экспортная пошлина на зерно",
+          "url": "https://example.invalid/news/grain-export-duty",
+          "excerpt": "Минсельхоз скорректировал экспортную пошлину на зерновые. Касается экспортёров зерна. Синтетическая демо-новость.",
+          "document_id": null,
+          "page": null,
+          "published_at": "2026-10-10T08:00:00Z",
+          "is_mock": true
+        }
+      ],
+      "is_mock": true
+    },
+    {
+      "news_id": "power-tariff-reform",
+      "event_id": "power-tariff-reform-event",
+      "title": "Изменение регулирования оптового энергорынка и тарифов",
+      "text": "Обсуждается реформа тарифообразования на электроэнергию. Влияет на генерацию. Синтетическая демо-новость.",
+      "event_type": "commodity_price_change",
+      "published_at": "2026-10-12T10:00:00Z",
+      "event_at": null,
+      "fact_status": "reported",
+      "okved_divisions": [
+        "35"
+      ],
+      "countries": [],
+      "regions": [],
+      "company_ids": [],
+      "entity_mapping_source": null,
+      "sources": [
+        {
+          "id": "news:power-tariff-reform",
+          "kind": "news",
+          "title": "Изменение регулирования оптового энергорынка и тарифов",
+          "url": "https://example.invalid/news/power-tariff-reform",
+          "excerpt": "Обсуждается реформа тарифообразования на электроэнергию. Влияет на генерацию. Синтетическая демо-новость.",
+          "document_id": null,
+          "page": null,
+          "published_at": "2026-10-12T10:00:00Z",
+          "is_mock": true
+        }
+      ],
+      "is_mock": true
+    },
+    {
+      "news_id": "road-program",
+      "event_id": "road-program-event",
+      "title": "Расширение госпрограммы дорожного строительства, рост цен на битум",
+      "text": "Объявлено расширение финансирования дорог; отмечен рост цен на битум. Синтетическая демо-новость.",
+      "event_type": "other",
+      "published_at": "2026-10-08T07:00:00Z",
+      "event_at": null,
+      "fact_status": "reported",
+      "okved_divisions": [
+        "42"
+      ],
+      "countries": [],
+      "regions": [],
+      "company_ids": [],
+      "entity_mapping_source": null,
+      "sources": [
+        {
+          "id": "news:road-program",
+          "kind": "news",
+          "title": "Расширение госпрограммы дорожного строительства, рост цен на битум",
+          "url": "https://example.invalid/news/road-program",
+          "excerpt": "Объявлено расширение финансирования дорог; отмечен рост цен на битум. Синтетическая демо-новость.",
+          "document_id": null,
+          "page": null,
+          "published_at": "2026-10-08T07:00:00Z",
+          "is_mock": true
+        }
+      ],
+      "is_mock": true
+    },
+    {
+      "news_id": "counterparty-trouble",
+      "event_id": "counterparty-trouble-event",
+      "title": "У подрядчика U_95238 финансовые трудности",
+      "text": "Сообщается о задержках платежей у компании U_95238. Синтетическая демо-новость о контрагенте.",
+      "event_type": "company_event",
+      "published_at": "2026-10-18T12:00:00Z",
+      "event_at": null,
+      "fact_status": "reported",
+      "okved_divisions": [],
+      "countries": [],
+      "regions": [],
+      "company_ids": [
+        "U_95238"
+      ],
+      "entity_mapping_source": "demo-manual",
+      "sources": [
+        {
+          "id": "news:counterparty-trouble",
+          "kind": "news",
+          "title": "У подрядчика U_95238 финансовые трудности",
+          "url": "https://example.invalid/news/counterparty-trouble",
+          "excerpt": "Сообщается о задержках платежей у компании U_95238. Синтетическая демо-новость о контрагенте.",
+          "document_id": null,
+          "page": null,
+          "published_at": "2026-10-18T12:00:00Z",
+          "is_mock": true
+        }
+      ],
+      "is_mock": true
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+FROM python:3.12.10-slim-bookworm
+WORKDIR /app
+COPY requirements-integration.txt requirements.lock ./
+RUN pip install --no-cache-dir -r requirements-integration.txt -c requirements.lock
+COPY company_context/ company_context/
+COPY news_analysis/ news_analysis/
+COPY tests/fixtures/company_context/ tests/fixtures/company_context/
+COPY contracts/ contracts/
+COPY integration/ integration/
+RUN useradd --uid 10001 --create-home worker && mkdir -p var/integration && chown -R worker:worker var
+USER worker
+ENV CONTEXT_MODE=fixture RANK_MODE=mock PYTHONUNBUFFERED=1
+EXPOSE 8101
+CMD ["python", "-m", "uvicorn", "integration.app:app", "--host", "0.0.0.0", "--port", "8101"]

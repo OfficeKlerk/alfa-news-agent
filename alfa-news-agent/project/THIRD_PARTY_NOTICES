@@ -1,0 +1,33 @@
+Third-party components, data, services and simulated integrations
+
+Runtime: Node.js 24.x, including its bundled components under their respective licenses.
+SQLite bundled with Node.js: public domain; https://www.sqlite.org/copyright.html
+Docker base: official node:24.13.0-bookworm-slim image; Debian components have their own licenses.
+
+Runtime packages: Express (MIT), csv-parse (MIT), fast-xml-parser (MIT), Ajv (MIT), ajv-formats (MIT), jose (MIT), openid-client (MIT).
+Development packages: TypeScript (Apache-2.0), tsx (MIT), DefinitelyTyped declarations (MIT).
+Exact direct and transitive dependencies are recorded in package-lock.json.
+License texts are supplied with installed packages. Python 3.12 runs the real company-context and ranking service; its locked dependencies are listed in requirements*.txt and requirements.lock. FastAPI (MIT), Uvicorn (BSD-3-Clause), jsonschema (MIT).
+
+Data supplied by the hackathon organizers:
+df_Uid_data_hack.csv, df_Uid_payment_hack.csv, df_Fid_Uid_link_hack.csv.
+CSV inputs belong to their respective owners; verify data/README.md for the distinction between retained demo extracts and external organizer inputs. Dataset redistribution rights are not assumed.
+Source: https://drive.google.com/drive/folders/1Ep8wWoEHTg5Q8kwrLx2j_xFyxGUEVxFq
+
+Bank research: nine Alfa-Bank documents supplied with the case.
+research.json contains automatic OCR output, not an edited or endorsed bank publication.
+Copyright remains with the respective authors. Original PDFs are linked, not bundled locally.
+Source: https://drive.google.com/drive/folders/15xZTLF1lZ65p6o5xpNA_fRbxjoV-UlG1
+
+Historical OCR preparation used PyMuPDF 1.26.6 (AGPL-3.0 or commercial license),
+Tesseract OCR (Apache-2.0) and tessdata_fast Russian/English data (Apache-2.0).
+These tools and binaries are not bundled or required by the Node.js application.
+The old preprocessing utility is retained in the separate legacy backup.
+
+LLMs: only the six permitted IDs listed in server/config.ts. Models are called via the
+organizer gateway; no model weights are bundled. Live HTTP transport is implemented,
+and a first live test confirmed gateway access. After fixes, a live analysis with tools and follow-up Q&A passed on a synthetic scenario. Semantic correctness across real cases remains unverified.
+
+Offline simulated integrations: Alfa-Business UI shell, explicit development mode without authentication,
+six synthetic seed news items, template analysis and Q&A in demo mode.
+No internet-bank account, payment action or live banking API. Production supports a configured external OIDC identity provider; offline tests use an ephemeral HTTPS test authority, not real user accounts.
