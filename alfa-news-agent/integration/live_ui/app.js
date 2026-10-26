@@ -9,8 +9,9 @@ let persisted = {};
 try { persisted = JSON.parse(localStorage.getItem(STORAGE) || '{}'); } catch { /* Browsing remains available without storage. */ }
 let company = '', role = ['cfo', 'ceo', 'treasury'].includes(persisted.role) ? persisted.role : 'cfo';
 let favorites = Boolean(persisted.favorites), epoch = 0, companyOffset = 0, companyListEpoch = 0, polling = false, generationEnabled = false;
-let cursor = null, pendingPage = null, runtime = null, jobs = [], firstFeed = true, journalPage = 0, activityRead = false, activityAction = null, connectionFailed = false;
+let cursor = null, runtime = null, jobs = [], firstFeed = true, requestedCompany = '', feedTotal = null, feedRunning = null, feedRunningCount = null, journalPage = 0, activityRead = false, activityAction = null, connectionFailed = false;
 const cards = new Map(), elements = new Map(), detailsLoading = new Set(), draftRequests = new Map();
+const clientErrors = [];
 const expanded = new Set(Array.isArray(persisted.expanded) ? persisted.expanded : []);
 const date = value => Number.isFinite(new Date(value).getTime()) ? new Date(value).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Дата не указана';
 const count = value => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value)) ? new Intl.NumberFormat('ru-RU').format(Number(value)) : '—';
@@ -46,8 +47,10 @@ function readerAnchor() {
   return null;
 }
 function save() {
-  const value = { company, role, favorites, scroll: window.scrollY, anchor: readerAnchor(), pages: Math.max(1, Math.ceil(cards.size / 20)), expanded: [...expanded].slice(-100), drafts: {} };
-  for (const [id, element] of elements) { const text = element.querySelector('textarea')?.value; if (text) value.drafts[id] = { text, ...draftRequests.get(id) }; }
+  const value = { company, role, favorites, scroll: window.scrollY, anchor: readerAnchor(), pages: Math.max(1, Math.ceil(cards.size / 20)), expanded: [...expanded].slice(-100), drafts: { ...persisted.drafts } };
+  for (const [id, record] of draftRequests) if (record.text) value.drafts[id] = { ...record };
+  for (const [id, element] of elements) { const text = element.querySelector('textarea')?.value; if (text) value.drafts[id] = { ...draftRequests.get(id), text }; else if (!draftRequests.has(id)) delete value.drafts[id]; }
+  persisted.drafts = value.drafts;
   try { localStorage.setItem(STORAGE, JSON.stringify(value)); } catch { /* Storage may be unavailable; no server mutation is needed. */ }
 }
 function preserveReader(action) {
@@ -111,11 +114,58 @@ function analysisBody(analysis, cardId) {
   });
   return body;
 }
+
+// /live/feed is the publication boundary; these are display/scope guards, not LLM validation.
+function readyCard(card) {
+  return card?.company_id === company && card.audience_role === role && !card.stale && card.analysis && (!favorites || card.favorite === true)
+    && (card.status === undefined || ['succeeded', 'ready'].includes(card.status));
+}
+function removeCard(id) { save(); feedTotal = null; elements.get(id)?.remove(); elements.delete(id); cards.delete(id); }
+function scopedJobs() {
+  return jobs.filter(job => (!job.company_id || job.company_id === company) &&
+    (job.audience_role === role || (!job.audience_role && job.kind === 'question' && cards.has(job.analysis_id))));
+}
+function runningForView() { return feedRunning === null ? runningAnalyses().length > 0 : feedRunning; }
+function runningAnalyses() { return scopedJobs().filter(job => job.kind === 'analysis' && job.status === 'running'); }
+function updateCardCount() {
+  $('card-count').textContent = count(feedTotal ?? cards.size);
+  $('card-count-label').textContent = feedTotal === null && cursor ? 'Показано готовых выводов' : 'Готовые выводы · выбранная роль';
+}
+function recordError(title, error, cid = company, selectedRole = role) {
+  clientErrors.unshift({ title, company: cid, role: selectedRole, time: Date.now(), detail: friendlyError(error), code: error.code || (error.status ? 'HTTP ' + error.status : 'NETWORK') });
+  clientErrors.length = Math.min(clientErrors.length, 30); renderJobs();
+}
+function questionJob(id) {
+  const tracked = draftRequests.get(id);
+  if (tracked) return tracked.job_id ? jobs.find(job => job.id === tracked.job_id) : undefined;
+  return jobs.filter(job => job.kind === 'question' && job.analysis_id === id).sort((a,b) => (new Date(b.created_at).getTime() || 0) - (new Date(a.created_at).getTime() || 0))[0];
+}
+function questionState(id) {
+  const article = elements.get(id); if (!article) return;
+  const tracked = draftRequests.get(id), job = questionJob(id), state = job?.status || tracked?.status;
+  if (tracked && job) tracked.status = job.status;
+  const field = article.querySelector('textarea'), button = article.querySelector('.question-submit'), status = article.querySelector('[data-question-status]');
+  const pending = ['submitting', 'queued', 'running', 'deferred'].includes(state) || (state === 'succeeded' && Boolean(tracked));
+  const unresolved = ['unknown', 'submission_unknown'].includes(state);
+  field.readOnly = pending || unresolved;
+  button.disabled = pending || state === 'unknown';
+  button.textContent = state === 'submission_unknown' ? 'Проверить отправку' : state === 'failed' || state === 'superseded' ? 'Отправить повторно' : 'Задать вопрос';
+  status.dataset.pending = String(pending && state !== 'deferred');
+  if (state === 'submitting') status.textContent = 'Отправляем вопрос…';
+  else if (state === 'running') status.textContent = 'Готовим ответ…';
+  else if (state === 'queued') status.textContent = 'Вопрос принят. Ответ появится после завершения.';
+  else if (state === 'deferred') status.textContent = 'Ответ будет подготовлен позже. Вопрос сохранён.';
+  else if (state === 'succeeded') status.textContent = tracked ? 'Ответ готов. Обновляем диалог…' : 'Ответ сохранён.';
+  else if (unresolved) status.textContent = 'Отправка уточняется. Вопрос сохранён; новый запрос не создаётся.';
+  else if (['failed', 'superseded'].includes(state)) status.textContent = 'Ответ не подготовлен. Вопрос сохранён; подробности — в журнале.';
+  else status.textContent = '';
+}
+
 function cardControls(card, element) {
   const favorite = element.querySelector('.favorite'); favorite.textContent = card.favorite ? '★ В избранном' : '☆ В избранное'; favorite.setAttribute('aria-pressed', String(Boolean(card.favorite)));
   const badge = element.querySelector('.badge'); badge.textContent = card.stale ? 'Есть новая версия новости' : 'Результат проверен'; badge.classList.toggle('stale', Boolean(card.stale));
   element.querySelector('.stale-notice').hidden = !card.stale;
-  const button = element.querySelector('.question-section button[type=submit]'); if (button) button.disabled = Boolean(card.stale);
+  questionState(card.id);
 }
 function renderCard(card) {
   const article = node('article', undefined, 'card'); article.id = 'card-' + encodeURIComponent(card.id); article.dataset.analysisId = card.id;
@@ -124,7 +174,7 @@ function renderCard(card) {
   const favorite = node('button', '', 'favorite'); favorite.type = 'button';
   favorite.addEventListener('click', async () => {
     const cid = company, rev = epoch; favorite.disabled = true;
-    try { const value = unbox(await request(`/v1/live/analyses/${encodeURIComponent(card.id)}/favorite`, { company_id: cid, favorite: !cards.get(card.id)?.favorite })); if (rev !== epoch) return; const updated = { ...cards.get(card.id), favorite: value.favorite }; cards.set(card.id, updated); cardControls(updated, article); if (favorites && !updated.favorite) { article.remove(); elements.delete(card.id); cards.delete(card.id); renderEmpty(); } }
+    try { const value = unbox(await request(`/v1/live/analyses/${encodeURIComponent(card.id)}/favorite`, { company_id: cid, favorite: !cards.get(card.id)?.favorite })); if (rev !== epoch) return; const updated = { ...cards.get(card.id), favorite: value.favorite }; cards.set(card.id, updated); cardControls(updated, article); if (favorites && !updated.favorite) { removeCard(card.id); updateCardCount(); renderEmpty(); } }
     catch (error) { if (rev === epoch) notice(friendlyError(error), true); } finally { favorite.disabled = false; }
   });
   top.append(meta, favorite); article.append(top, node('h3', card.title || card.analysis?.summary || 'Анализ новости', 'card-title'));
@@ -139,22 +189,33 @@ function renderCard(card) {
   const questionSection = node('section', undefined, 'question-section'); questionSection.append(node('h4', 'Уточнить по этому анализу'), node('p', 'Ответ использует сохранённые источники и профиль компании. История сохраняется на сервере.', 'muted'));
   const history = node('div'); history.dataset.history = 'true'; questionSection.append(history);
   const form = node('form'), label = node('label', 'Ваш вопрос'), textarea = node('textarea'); textarea.rows = 3; textarea.required = true; textarea.minLength = 3; textarea.maxLength = 2000; textarea.placeholder = 'Какие условия договора нужно проверить?'; textarea.id = 'question-' + encodeURIComponent(card.id); label.htmlFor = textarea.id;
-  if (persisted.drafts?.[card.id]?.text) { textarea.value = persisted.drafts[card.id].text; if (persisted.drafts[card.id].key) draftRequests.set(card.id, persisted.drafts[card.id]); }
-  textarea.addEventListener('input', save);
-  const submit = node('button', 'Задать вопрос'); submit.type = 'submit'; const questionStatus = node('p', '', 'question-status'); questionStatus.dataset.questionStatus = 'true';
+  if (persisted.drafts?.[card.id]?.text) { textarea.value = persisted.drafts[card.id].text; if (persisted.drafts[card.id].key && !draftRequests.has(card.id)) { const restored = { ...persisted.drafts[card.id] }; if (restored.status === 'submitting' && !restored.job_id) restored.status = 'submission_unknown'; draftRequests.set(card.id, restored); } }
+  textarea.addEventListener('input', () => { const tracked = draftRequests.get(card.id); if (tracked && !['queued','running','deferred','unknown','submission_unknown','submitting','succeeded'].includes(tracked.status) && tracked.text !== textarea.value.trim()) draftRequests.delete(card.id); save(); });
+  const submit = node('button', 'Задать вопрос', 'question-submit'); submit.type = 'submit'; const questionStatus = node('p', '', 'question-status'); questionStatus.dataset.questionStatus = 'true';
   form.append(label, textarea, submit, questionStatus); questionSection.append(form); details.append(questionSection); article.append(details);
   form.addEventListener('submit', async event => {
-    event.preventDefault(); if (card.stale || submit.disabled) return;
+    event.preventDefault(); if (submit.disabled || !cards.has(card.id)) return;
     const text = textarea.value.trim(); if (text.length < 3) return;
-    const previous = draftRequests.get(card.id), key = previous?.text === text ? previous.key : crypto.randomUUID();
-    draftRequests.set(card.id, { key, text }); save(); submit.disabled = true; const rev = epoch, cid = company;
+    const previous = draftRequests.get(card.id);
+    const retry = ['failed', 'superseded'].includes(previous?.status);
+    const key = !retry && previous?.text === text ? previous.key : crypto.randomUUID();
+    const record = { key, text, status: 'submitting' };
+    draftRequests.set(card.id, record); save(); questionState(card.id);
+    const cid = company, selectedRole = role;
     try {
-      const job = unbox(await request(`/v1/live/analyses/${encodeURIComponent(card.id)}/questions`, { company_id: cid, question: text, idempotency_key: key }));
-      if (rev !== epoch) return;
-      textarea.value = ''; draftRequests.delete(card.id); save(); questionStatus.textContent = jobState(job) + '. Ответ появится здесь автоматически.';
-      await refreshJobs(rev);
-    } catch (error) { if (rev === epoch) questionStatus.textContent = friendlyError(error); }
-    finally { if (rev === epoch) submit.disabled = Boolean(cards.get(card.id)?.stale); }
+      const job = unbox(await request('/v1/live/analyses/' + encodeURIComponent(card.id) + '/questions', { company_id: cid, question: text, idempotency_key: key }));
+      if (draftRequests.get(card.id) !== record) return;
+      Object.assign(record, { job_id: job.id, status: job.status }); save();
+      if (company !== cid || role !== selectedRole) return;
+      jobs = [job, ...jobs.filter(item => item.id !== job.id)]; questionState(card.id);
+      await refreshJobs(epoch);
+    } catch (error) {
+      if (draftRequests.get(card.id) !== record) return;
+      if (record.job_id) { recordError('Обновление состояния вопроса', error, cid, selectedRole); if (company === cid && role === selectedRole) questionState(card.id); return; }
+      record.status = error.status && error.status < 500 && error.code !== 'MODEL_OUTCOME_UNKNOWN' ? 'failed' : 'submission_unknown';
+      recordError('Отправка вопроса', error, cid, selectedRole); save();
+      if (company === cid && role === selectedRole) questionState(card.id);
+    }
   });
   details.addEventListener('toggle', () => {
     if (details.open) { expanded.add(card.id); void refreshDetails(card.id); } else expanded.delete(card.id);
@@ -169,12 +230,12 @@ async function refreshDetails(id) {
   try {
     const value = unbox(await request(`/v1/live/analyses/${encodeURIComponent(id)}?${query({ company_id: cid, audience_role: role })}`));
     if (rev !== epoch || !elements.has(id)) return;
-    if(value.card?.stale) {preserveReader(()=>{removeCard(id);renderEmpty();});return;}
     const article = elements.get(id), history = article.querySelector('[data-history]');
-    const historyKey = JSON.stringify(value.history || []);
+    const successfulHistory = (value.history || []).filter(item => (item.status === undefined || ['succeeded','ready'].includes(item.status)) && typeof (item.answer ?? item.response?.data?.answer) === 'string' && (item.answer ?? item.response?.data?.answer).trim());
+    const historyKey = JSON.stringify(successfulHistory);
     if (history.dataset.revision !== historyKey) {
       history.dataset.revision = historyKey; history.replaceChildren();
-      for (const item of value.history || []) {
+      for (const item of successfulHistory) {
         const message = node('div', undefined, 'history-message'); message.append(node('strong', item.question), node('p', item.answer || item.response?.data?.answer || ''));
         const answer = item.response?.data;
         if (answer?.limitations?.length) message.append(node('p', answer.limitations.join(' '), 'condition'));
@@ -182,6 +243,7 @@ async function refreshDetails(id) {
         history.append(message);
       }
     }
+    if (value.card && !readyCard(value.card)) { removeCard(id); updateCardCount(); renderEmpty(); return; }
     if (value.card) { cards.set(id, value.card); cardControls(value.card, article); }
     const versions = article.querySelector('[data-versions]'); const versionKey = JSON.stringify(value.versions || []);
     if (versions.dataset.revision !== versionKey) {
@@ -202,51 +264,57 @@ async function refreshDetails(id) {
         }
       }
     }
-    const latest=jobs.filter(job=>job.kind==='question'&&job.analysis_id===id).sort((a,b)=>b.created_at-a.created_at)[0];
-    const pending=latest&&['queued','running','deferred','unknown','failed'].includes(latest.status)?[latest]:[];
-    article.querySelector('[data-question-status]').textContent = pending.length ? pending.map(job => jobState(job) + (job.error ? ': ' + reasonText(job.error) : '')).join(' · ') : (value.history?.length ? 'История сохранена.' : '');
-  } catch (error) { if (rev === epoch) elements.get(id)?.querySelector('[data-question-status]')?.replaceChildren(node('span', friendlyError(error))); }
+    const tracked = draftRequests.get(id), job = questionJob(id);
+    const received = tracked && successfulHistory.some(item => item.question === tracked.text &&
+      ((tracked.job_id && item.job_id === tracked.job_id) || (job?.status === 'succeeded' && new Date(item.created_at).getTime() >= new Date(job.created_at).getTime())));
+    if (received) {
+      const field = article.querySelector('textarea');
+      if (field.value.trim() === tracked.text) field.value = '';
+      draftRequests.delete(id); delete persisted.drafts?.[id]; save();
+    }
+    questionState(id);
+    if (received || (!tracked && successfulHistory.length && !['queued','running','deferred','unknown','failed'].includes(job?.status))) {
+      article.querySelector('[data-question-status]').textContent = 'Ответ сохранён.';
+      article.querySelector('[data-question-status]').dataset.pending = 'false';
+      article.querySelector('.question-submit').disabled = false;
+      article.querySelector('textarea').readOnly = false;
+    }
+  } catch (error) { if (rev === epoch) { recordError('Обновление диалога', error); questionState(id); const status = elements.get(id)?.querySelector('[data-question-status]'); if (status) { status.dataset.pending = 'false'; status.textContent = 'Не удалось обновить ответ. Вопрос и предыдущий диалог сохранены.'; } } }
   finally { detailsLoading.delete(id); }
 }
 function renderEmpty() {
   $('empty').hidden = cards.size > 0;
-  if (!company) { $('empty-title').textContent = 'Начните с компании'; $('empty-description').textContent = 'Выберите профиль из базы. Подбор запускается только после нажатия «Включить подбор».'; return; }
-  if (favorites) { $('empty-title').textContent = 'В избранном пока пусто'; $('empty-description').textContent = 'Сохраните важную карточку кнопкой «В избранное». Закладки сохраняются и при обновлении анализа.'; return; }
-  const subscription = runtime?.subscriptions?.find(item => item.company_id === company && item.audience_role === role);
-  $('empty-title').textContent = !subscription?.enabled ? 'Подбор ещё не включён' : generationEnabled ? 'Проверенные выводы готовятся' : 'Новости собираются. Выводы ожидают модель';
-  $('empty-description').textContent = !subscription?.enabled ? 'Нажмите «Включить подбор». Сервис отберёт значимые события по профилю компании и поставит их в очередь.' : generationEnabled ? 'После отбора и проверки готовые карточки появятся здесь. Состояние обработки показано над лентой, подробности — в журнале событий.' : 'Реальные новости и очередь сохраняются. После настройки ключа Qwen обработка продолжится; выдуманные ответы здесь не показываются.';
-}
-function removeCard(id) {
-  elements.get(id)?.remove(); elements.delete(id); cards.delete(id);
-}
-function reconcileFeed(page) {
-  const visible=Array.isArray(page.visible_ids)?new Set(page.visible_ids):null;
-  preserveReader(()=>{
-    for(const [id,card] of cards)if(card.stale||card.company_id!==company||card.audience_role!==role||visible&&!visible.has(id))removeCard(id);
-    for(const card of page.items||[])if(card.stale||card.company_id!==company||card.audience_role!==role)removeCard(card.id);
-    renderEmpty();
-  });
+  if (!company) { $('empty-title').textContent = 'Начните с компании'; $('empty-description').textContent = 'Выберите профиль, чтобы открыть сохранённые выводы.'; return; }
+  if (favorites) { $('empty-title').textContent = 'В избранном пока пусто'; $('empty-description').textContent = 'Сохраните готовую карточку кнопкой «В избранное».'; return; }
+  $('empty-title').textContent = runningForView() ? 'Готовим выводы' : 'Готовых выводов пока нет';
+  $('empty-description').textContent = runningForView() ? 'После успешного завершения карточки появятся здесь автоматически.' : 'Здесь появятся только успешно подготовленные результаты для выбранной компании и роли.';
 }
 function applyPage(page, { reset = false, fresh = false } = {}) {
   preserveReader(() => {
     if (reset) { cards.clear(); elements.clear(); $('feed').replaceChildren(); }
+    if (fresh) { const ids = new Set(Array.isArray(page.visible_ids) ? page.visible_ids : (page.items || []).filter(readyCard).map(card => card.id)); for (const id of cards.keys()) if (!ids.has(id)) removeCard(id); }
     for (const card of page.items || []) {
-      if(card.stale||card.company_id!==company||card.audience_role!==role)continue;
+      if (!readyCard(card)) { if (elements.has(card.id)) removeCard(card.id); continue; }
       const sameArticle = [...cards.values()].find(previous => previous.news_id === card.news_id && previous.audience_role === card.audience_role && previous.id !== card.id);
       if (sameArticle && fresh) { elements.get(sameArticle.id)?.remove(); cards.delete(sameArticle.id); elements.delete(sameArticle.id); }
       if (elements.has(card.id)) { cards.set(card.id, card); cardControls(card, elements.get(card.id)); continue; }
       const article = renderCard(card); cards.set(card.id, card); elements.set(card.id, article); $('feed').append(article);
     }
     for (const card of [...cards.values()].sort((a, b) => b.seq - a.seq)) $('feed').append(elements.get(card.id));
-    cursor = page.next_cursor; $('load-more').hidden = !cursor; renderEmpty();
+    const total = page.total_ready ?? page.total;
+    if (fresh && !Number.isSafeInteger(total)) feedTotal = null;
+    cursor = page.next_cursor; $('load-more').hidden = !cursor; if (Number.isSafeInteger(total) && total >= 0) feedTotal = total;
+    if (typeof page.has_running_tasks === 'boolean') feedRunning = page.has_running_tasks;
+    if (Number.isSafeInteger(page.running_tasks) && page.running_tasks >= 0) { feedRunningCount = page.running_tasks; feedRunning = page.running_tasks > 0; } updateCardCount(); renderEmpty();
+    for (const id of cards.keys()) questionState(id);
   });
   for (const id of expanded) if (elements.has(id)) void refreshDetails(id);
 }
 async function refreshFeed(rev = epoch, { append = false, initial = false } = {}) {
   if (!company) return;
-  const page = unbox(await request('/v1/live/feed?' + scopeQuery({ limit: 20, cursor: append ? cursor : null, favorites: favorites ? 1 : null })));
+  let page = unbox(await request('/v1/live/feed?' + scopeQuery({ limit: 20, cursor: append ? cursor : null, favorites: favorites ? 1 : null })));
   if (rev !== epoch) return;
-  reconcileFeed(page);
+  if (!Array.isArray(page.items)) throw new Error('Feed response has no items');
   if (append) applyPage(page);
   else if (initial || firstFeed) {
     applyPage(page, { reset: true }); firstFeed = false;
@@ -263,14 +331,19 @@ async function refreshFeed(rev = epoch, { append = false, initial = false } = {}
     restoreReader();
   }
   else {
-    const fresh = (page.items || []).filter(card => !card.stale&&card.company_id===company&&card.audience_role===role&&!cards.has(card.id));
-    // Status changes do not replace content the user is currently reading.
-    for (const card of page.items || []) if (elements.has(card.id)) { cards.set(card.id, card); cardControls(card, elements.get(card.id)); }
-    if (fresh.length) { pendingPage = page; $('new-cards').textContent = `Новые выводы: ${fresh.length}. Показать`; $('new-cards').hidden = false; }
-    else { pendingPage=null; $('new-cards').hidden=true; renderEmpty(); }
+    // Reconcile the loaded window, including removals omitted by a ready-only API.
+    const oldest = Math.min(...[...cards.values()].map(card => Number(card.seq)));
+    let next = page.next_cursor, items = [...(page.items || [])], pages = 1;
+    while (next && pages < 10 && items.length && Number(items.at(-1).seq) > oldest) {
+      const more = unbox(await request('/v1/live/feed?' + scopeQuery({ limit: 20, cursor: next, favorites: favorites ? 1 : null })));
+      if (rev !== epoch) return;
+      if (!Array.isArray(more.items)) throw new Error('Feed page has no items');
+      items.push(...more.items); next = more.next_cursor; pages++;
+    }
+    page = { ...page, items, next_cursor: next }; applyPage(page, { fresh: true });
   }
 }
-function reasonText(reason) {
+function reasonText(reason, status) {
   const value = String(reason || '');
   const descriptions = {
     official_key_rate_context_for_all_companies: 'Решение Банка России: общий денежно-кредитный контекст',
@@ -305,7 +378,7 @@ function reasonText(reason) {
   if (/budget|quota|limit|429/iu.test(value)) return 'Ожидает освобождения бюджета';
   if (/supersed|revision|obsolete/iu.test(value)) return 'Новость обновлена; требуется новая версия';
   if (/contract|validat|grounding|invalid_result/iu.test(value)) return 'Ответ не прошёл проверку и не опубликован';
-  if (/timeout|unavailable|connection|fetch|502|503|504|lease|worker/iu.test(value)) return 'Временная ошибка; задача будет повторена';
+  if (/timeout|unavailable|connection|fetch|502|503|504|lease|worker/iu.test(value)) return status === 'failed' ? 'Задача завершилась без результата.' : 'Сервис временно недоступен.';
   if (/irrelevant|relevance|score/iu.test(value)) return 'Не достигнут порог значимости для компании';
   if (/duplicate/iu.test(value)) return 'Повторная публикация того же события';
   if (/full_text|excerpt|text_required|incomplete_text/iu.test(value)) return 'Ожидает загрузки полного текста';
@@ -315,31 +388,24 @@ function reasonText(reason) {
 function jobState(job) { return ({ unknown: 'Исход запроса уточняется; повторная отправка заблокирована', queued: 'В очереди', running: 'Готовится и проверяется', deferred: 'Отложено', succeeded: 'Готово', failed: 'Требует проверки', superseded: 'Заменено новой версией' })[job.status] || 'Обрабатывается'; }
 const roleLabel = () => ({ cfo: 'Финансовый директор', ceo: 'Генеральный директор', treasury: 'Казначейство' })[role];
 function renderActivity() {
-  const queue = runtime?.queue?.jobs || {}, collector = unbox(runtime?.collector) || {};
-  const activeSubscription = runtime?.subscriptions?.some(item => item.company_id === company && item.audience_role === role && item.enabled);
-  let busy = false, title = 'Выберите компанию', description = 'После выбора загрузятся сохранённые результаты.';
+  let busy = false, title = company ? (cards.size ? 'Готовые выводы доступны' : 'Готовых выводов пока нет') : 'Выберите компанию';
+  let description = company ? 'Лента обновляется автоматически.' : 'После выбора загрузятся сохранённые результаты.';
   if (activityAction) { busy = true; title = activityAction.title; description = 'Ожидаем подтверждения сервера.'; }
-  else if (activityRead) { busy = true; title = company ? 'Обновляем ленту и статусы' : 'Загружаем данные'; description = 'Читаем сохранённые результаты. Это не запускает модель.'; }
-  else if (connectionFailed) { title = 'Не удалось обновить все данные'; description = 'Показаны последние доступные результаты. Повторим проверку автоматически.'; }
-  else if (company && runtime?.recovery_review_required) { title = 'Обработка приостановлена'; description = 'После восстановления базы требуется проверка оператором.'; }
-  else if (company && runtime?.has_running_tasks === true) { busy = true; title = 'Готовятся и проверяются ответы'; description = 'Сервер выполняет задания компании. Готовые карточки появятся в ленте.'; }
-  else if (company && !generationEnabled) { title = 'Генерация пока недоступна'; description = 'Сохранённые результаты доступны. Для новых выводов требуется подключение модели.'; }
-  else if (company && Number(queue.unknown) > 0) { title = 'Результат запроса уточняется'; description = 'Повторная отправка заблокирована, чтобы избежать повторного расхода.'; }
-  else if (company && Number(queue.deferred) > 0) { title = 'Есть отложенные задания'; description = 'Причины и время следующей попытки доступны в журнале.'; }
-  else if (company && Number(queue.queued) > 0) { title = 'Новости ожидают обработки'; description = 'Задания компании сохранены в очереди. Выполнение ещё не подтверждено.'; }
-  else if (company && collector.running) { busy = true; title = 'Загружаются публикации'; description = 'Обновляется общая база новостей. Подбор для компании выполняется отдельно.'; }
-  else if (company) { title = activeSubscription ? 'Подбор включён' : 'Автоподбор выключен'; description = activeSubscription ? 'Ожидаем следующего отбора. Лента проверяется автоматически.' : 'Можно читать сохранённые выводы или включить подбор.'; }
-  $('activity-title').textContent = title;
-  $('activity-description').textContent = description;
-  $('activity-spinner').hidden = !busy;
-  $('activity').setAttribute('aria-busy', String(busy));
+  else if (activityRead) { busy = true; title = 'Обновляем ленту'; description = 'Загружаем сохранённые результаты.'; }
+  else if (company && runningForView()) { busy = true; title = 'Готовим выводы'; description = 'Готовые карточки появятся после успешного завершения.'; }
+  else if (connectionFailed) { description = 'Показаны последние доступные результаты. Проверим обновления автоматически.'; }
+  $('activity-title').textContent = title; $('activity-description').textContent = description;
+  $('activity-spinner').hidden = !busy; $('activity').setAttribute('aria-busy', String(busy));
+  const active = runningAnalyses();
+  $('queue-count').textContent = company ? count(feedRunningCount ?? active.length) : '—'; $('queue-summary').textContent = company ? 'Для выбранной компании и роли' : 'Выберите компанию';
 }
 function renderJobs() {
   if ($('event-journal').hidden) return;
   const selection = runtime?.selection;
   $('journal-description').textContent = 'Отбор: ' + roleLabel() + (selection?.scanned_at ? ' · ' + date(selection.scanned_at) : ' · ещё не выполнялся') + '. Задания ниже относятся к выбранной компании и роли. Это последний отбор и до 100 последних заданий, не полный архив.';
   const rows = [
-    ...jobs.map(job => ({ title: job.kind === 'question' ? 'Вопрос: ' + job.title : job.title, status: jobState(job), detail: job.error ? reasonText(job.error) : '', url: cards.get(job.analysis_id)?.analysis?.sources?.find(source => source.kind === 'news')?.url || selection?.items?.find(item => item.news_id === job.news_id)?.source_url, time: job.updated_at, category: 'Задание компании', state: job.status })),
+    ...clientErrors.filter(item => item.company === company && item.role === role).map(item => ({ ...item, category: 'Действие в интерфейсе', status: item.code, state: 'failed' })),
+    ...jobs.map(job => ({ title: job.kind === 'question' ? 'Вопрос: ' + job.title : job.title, status: jobState(job), detail: job.error ? (job.status === 'failed' ? 'Ответ не опубликован. ' : '') + reasonText(job.error, job.status) : '', url: cards.get(job.analysis_id)?.analysis?.sources?.find(source => source.kind === 'news')?.url || selection?.items?.find(item => item.news_id === job.news_id)?.source_url, time: job.updated_at, category: 'Задание компании', state: job.status })),
     ...(selection?.items || []).map(item => ({ title: item.title, status: item.selected ? 'Отобрано для обработки' : reasonText(item.reason), url: item.source_url, category: 'Последний отбор · ' + roleLabel(), state: 'selection' }))
   ];
   journalPage = Math.min(journalPage, Math.max(0, Math.ceil(rows.length / 25) - 1));
@@ -361,17 +427,19 @@ function renderJobs() {
 async function refreshJobs(rev = epoch) {
   if (!company) return;
   const value = unbox(await request('/v1/live/jobs?' + scopeQuery({ limit: 100 }))); if (rev !== epoch) return; jobs = value.items || []; renderJobs();
-  for (const id of expanded) if (elements.has(id)) void refreshDetails(id);
+  for (const id of cards.keys()) questionState(id);
+  renderEmpty(); renderActivity(); save();
+  for (const id of new Set([...expanded, ...draftRequests.keys()])) if (elements.has(id)) void refreshDetails(id);
 }
 function displayRuntime(value) {
   runtime = value; generationEnabled = Boolean(value.generation_enabled);
   $('model-notice').hidden = generationEnabled && !value.recovery_review_required;
-  $('model-notice').textContent = value.recovery_review_required ? 'Генерация приостановлена: после восстановления базы требуется проверка оператором. Сохранённые карточки доступны.' : 'Генерация Qwen пока не подключена. Сбор новостей, отбор и сохранение очереди работают. Выводы появятся после настройки ключа модели.';
+  $('model-notice').textContent = value.recovery_review_required ? 'Генерация приостановлена: после восстановления базы требуется проверка оператором. Сохранённые карточки доступны.' : 'Генерация пока не подключена. Сбор новостей, отбор и сохранение очереди работают. Выводы появятся после настройки ключа модели.';
   const collector = unbox(value.collector) || {}, feeds = collector.feeds || [];
   const queue = value.queue?.jobs || value.queue || {};
   $('queue-count').textContent = count((Number(queue.queued) || 0) + (Number(queue.running) || 0) + (Number(queue.deferred) || 0));
-  $('queue-summary').textContent = `В работе: ${count(value.running_tasks)} · отложено: ${count(queue.deferred || 0)}${queue.unknown ? ' · исход уточняется: ' + count(queue.unknown) : ''}`;
-  $('card-count').textContent = count(favorites ? value.favorites_count : value.available_count);
+  $('queue-summary').textContent = `В работе: ${count(queue.running || 0)} · отложено: ${count(queue.deferred || 0)}${queue.unknown ? ' · исход уточняется: ' + count(queue.unknown) : ''}`;
+  updateCardCount();
   const budget = value.budget;
   $('budget-count').textContent = budget?.error ? 'Недоступен' : budget ? `${count(budget.used?.calls)} / ${count(budget.limits?.calls)}` : 'Нет данных';
   $('budget-summary').textContent = budget?.error ? 'Не удалось получить расход модели. Значения не подтверждены.' : budget ? `Вызовы за день · токены: ${count(budget.used?.tokens)}${budget.resets_at ? ' · сброс ' + date(budget.resets_at) : ''}` : 'Сервер не передал данные о расходе.';
@@ -408,8 +476,9 @@ async function refresh(rev = epoch, initial = false) {
   const errors = results.filter(item => item.status === 'rejected');
   connectionFailed = Boolean(errors.length);
   renderActivity();
-  $('connection').textContent = errors.length ? 'Связь с сервисом прервана' : 'Обновлено ' + new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); $('connection').dataset.offline = String(Boolean(errors.length));
-  if (errors.length && initial) notice(friendlyError(errors[0].reason), true);
+  $('connection').textContent = errors.length ? 'Проверяем обновления' : 'Обновлено ' + new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); $('connection').dataset.offline = String(Boolean(errors.length));
+  for (const error of errors) recordError('Обновление результатов', error.reason);
+  if (errors.length && initial) notice('Не удалось загрузить все результаты. Повторим проверку автоматически.');
 }
 async function companies() {
   const revision = ++companyListEpoch;
@@ -422,8 +491,8 @@ async function companies() {
   } catch (error) { notice(friendlyError(error), true); }
 }
 async function chooseCompany(id) {
-  save(); const rev = ++epoch; activityRead = false; activityAction = null; connectionFailed = false; journalPage = 0; $('event-journal').hidden = true; $('journal-toggle').setAttribute('aria-expanded', 'false'); $('journal-toggle').disabled = true; $('feed-description').textContent = 'Загружаем сохранённую ленту выбранной компании и роли.'; company = ''; $('company-list').value = ''; clearSummary(); runtime = null; firstFeed = true; cursor = null; pendingPage = null; jobs = [];
-  cards.clear(); elements.clear(); $('feed').replaceChildren(); $('journal-events').replaceChildren(); $('new-cards').hidden = true; $('load-more').hidden = true; $('subscribe').disabled = true; $('scan').disabled = true; $('pause-subscription').hidden = true;
+  save(); requestedCompany = id; feedTotal = null; feedRunning = null; feedRunningCount = null; const rev = ++epoch; activityRead = false; activityAction = null; connectionFailed = false; journalPage = 0; $('event-journal').hidden = true; $('journal-toggle').setAttribute('aria-expanded', 'false'); $('journal-toggle').disabled = true; $('feed-description').textContent = 'Загружаем сохранённую ленту выбранной компании и роли.'; company = ''; $('company-list').value = ''; clearSummary(); runtime = null; firstFeed = true; cursor = null; jobs = [];
+  cards.clear(); elements.clear(); $('feed').replaceChildren(); $('journal-events').replaceChildren(); $('load-more').hidden = true; $('subscribe').disabled = true; $('scan').disabled = true; $('pause-subscription').hidden = true;
   if (!id) { $('profile').textContent = 'Профиль не выбран'; renderEmpty(); renderActivity(); return; }
   activityRead = true; renderActivity();
   $('profile').textContent = 'Загружаю профиль…';
@@ -443,7 +512,7 @@ async function subscription(enabled) {
   catch (error) { if (rev === epoch) notice(friendlyError(error), true); } finally { if (activityAction === action) { activityAction = null; $('pause-subscription').disabled = false; renderActivity(); $('scan').disabled = !runtime?.subscriptions?.some(item => item.company_id === cid && item.audience_role === selectedRole && item.enabled); } if (company === cid && role === selectedRole && !runtime?.subscriptions?.some(item => item.company_id === cid && item.audience_role === selectedRole && item.enabled)) $('subscribe').disabled = false; }
 }
 function setFavoriteFilter(selected) {
-  favorites = selected; epoch++; firstFeed = true; pendingPage = null; $('new-cards').hidden = true;
+  save(); favorites = selected; epoch++; feedTotal = null; feedRunning = null; feedRunningCount = null; firstFeed = true;
   $('all-cards').classList.toggle('active', !selected); $('all-cards').setAttribute('aria-pressed', String(!selected)); $('favorite-cards').classList.toggle('active', selected); $('favorite-cards').setAttribute('aria-pressed', String(selected));
   cards.clear(); elements.clear(); $('feed').replaceChildren(); save(); renderEmpty(); if (company) void refresh(epoch, true);
 }
@@ -451,7 +520,7 @@ $('company-form').addEventListener('submit', event => { event.preventDefault(); 
 $('company-list').addEventListener('change', () => { if ($('company-list').value) void chooseCompany($('company-list').value); });
 $('more-companies').addEventListener('click', () => { companyOffset += 100; void companies(); });
 $('role').value = role;
-$('role').addEventListener('change', () => { role = $('role').value; const selected = company; void chooseCompany(selected); });
+$('role').addEventListener('change', () => { role = $('role').value; const selected = requestedCompany || company; void chooseCompany(selected); });
 $('subscribe').addEventListener('click', () => void subscription(true)); $('pause-subscription').addEventListener('click', () => void subscription(false));
 $('scan').addEventListener('click', async () => { if (!company || activityAction || $('scan').disabled) return; const rev = epoch, action = { title: 'Обновляем подбор новостей' }; activityAction = action; renderActivity(); $('scan').disabled = true; try { await request('/v1/live/scan', { company_id: company, audience_role: role }); if (rev === epoch) { notice('Подбор обновлён. Задачи сохраняются в очереди.'); await refresh(rev); } } catch (error) { if (rev === epoch) notice(friendlyError(error), true); } finally { if (activityAction === action) { activityAction = null; renderActivity(); $('scan').disabled = !runtime?.subscriptions?.some(item => item.company_id === company && item.audience_role === role && item.enabled); } } });
 $('journal-toggle').addEventListener('click', () => { const open = $('event-journal').hidden; $('event-journal').hidden = !open; $('journal-toggle').setAttribute('aria-expanded', String(open)); renderJobs(); });
@@ -459,7 +528,6 @@ $('journal-close').addEventListener('click', () => { $('event-journal').hidden =
 $('journal-prev').addEventListener('click', () => { journalPage = Math.max(0, journalPage - 1); renderJobs(); });
 $('journal-next').addEventListener('click', () => { journalPage++; renderJobs(); });
 $('all-cards').addEventListener('click', () => setFavoriteFilter(false)); $('favorite-cards').addEventListener('click', () => setFavoriteFilter(true));
-$('new-cards').addEventListener('click', () => { if (!pendingPage) return; applyPage(pendingPage, { fresh: true }); pendingPage = null; $('new-cards').hidden = true; save(); });
 $('load-more').addEventListener('click', async () => { if (!cursor) return; const rev = epoch; $('load-more').disabled = true; try { await refreshFeed(rev, { append: true }); save(); } catch (error) { if (rev === epoch) notice(friendlyError(error), true); } finally { $('load-more').disabled = false; } });
 let scrollTimer; window.addEventListener('scroll', () => { clearTimeout(scrollTimer); scrollTimer = setTimeout(save, 200); }, { passive: true });
 window.addEventListener('pagehide', save);

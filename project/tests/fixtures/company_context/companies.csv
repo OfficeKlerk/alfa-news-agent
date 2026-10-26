@@ -1,6 +1,0 @@
-SYNTHETIC_U;MAINOKVED_CODE;MAINOKVED_NAME;REVENUE_COMPANY;REGION;CITY;GROUP_ID;CL_PRODUCT_LOA_MARK;CL_PRODUCT_DEP_MARK;FTS_FLAG;FTS_COUNTRY_NAME;AMOUNT_WORKERS_FNS_GRADATION;AMOUNT_WORKERS_SPARK_GRADATION
-U_A;24.10;Производство стали;20000000000;Свердловская область;Екатеринбург;G_1;1.0;0.0;1.0;КИТАЙ, ТУРЦИЯ;501-1000;
-U_B;24.10;Производство стали;10000000000;Челябинская область;Челябинск;G_1;0.0;1.0;0.0;;101-500;
-U_C;46.90;Оптовая торговля;15000000000;Москва;Москва;;0.0;0.0;0.0;;;
-U_D;24.10;Производство стали;20000000000;;;;0.0;;0.0;КИТАЙ;;
-U_E;;;;;;;неизвестно;;;;;

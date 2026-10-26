@@ -1,5 +1,7 @@
 # Alfa News Agent
 
+**Единая сборка 26.10.2026:** актуальный master `b95896e` объединён с серверными исправлениями из вложенной папки архива. Рабочий каталог один: здесь находятся `package.json`, `server/`, `integration/` и `contracts/`. Состав, перенос изменений и проверка ZIP: [START_HERE.md](START_HERE.md). Правила публикации: [FEED_PUBLICATION.md](docs/integration/FEED_PUBLICATION.md); новый интерфейс: [READY_RESULTS_UI.md](docs/integration/READY_RESULTS_UI.md).
+
 **Итоговая перепроверка задачи 2:** [контекст для независимой задачи 3 с нуля](TASK3_CONTEXT.md), запуск `python scripts/accept_task3.py`; [новые проверки и исправления](docs/reports/TASK2_RECHECK_20261025.md).
 
 **Обновление задачи 2, 25.10.2026:** [журнал платных операций, личная история и миграция](docs/integration/DURABLE_EXECUTION.md); [состав исправлений и результаты проверок](docs/reports/TASK2_DELIVERY_20261025.md). Неопределённый исход вызова блокирует повторную отправку. Избранное и вопросы live-ленты теперь личные.

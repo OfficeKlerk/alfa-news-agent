@@ -1,1 +1,0 @@
-HTTP smoke passed: Python payment context/rank → Node retrieval/agent → analysis/history; exact payment block retained, legacy API and company isolation

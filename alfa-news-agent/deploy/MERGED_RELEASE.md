@@ -2,7 +2,7 @@
 
 Обновление задачи 2: перед обновлением/восстановлением прочитать `docs/integration/DURABLE_EXECUTION.md`. Gateway и agent обновлять вместе; unknown не переотправляется автоматически, старые общие вопросы не присваиваются пользователю.
 
-Актуальная оценка: `docs/reports/MERGED_PIPELINE_REVIEW_20261025.md`; задачи: `deploy/NEXT_TASKS_3_PEOPLE.md`. Материалы `verification/` и прежний отчёт DELIVERY_REVIEW относятся к отдельным сборкам. В новой поставке проект лежит в корне ZIP, актуальный манифест — `delivery-task2/MANIFEST.json`.
+Проект находится в единственной папке с корневым `package.json`. Установка и запуск выполняются оттуда; вложенных копий нет. Состав исходников и контрольные суммы — `config/source-manifest.json`. Историческая оценка: `docs/reports/MERGED_PIPELINE_REVIEW_20261025.md`; задачи: `deploy/NEXT_TASKS_3_PEOPLE.md`.
 
 Node 24.13–24.x, Python 3.12, Linux/macOS (supervisor использует fcntl); для теста HTTPS IdP нужен openssl. Входные реальные CSV/база компаний и секреты не включены. Установить `npm ci`, создать venv, `pip install -r requirements-dev.txt -c requirements.lock`, `npm run build`.
 

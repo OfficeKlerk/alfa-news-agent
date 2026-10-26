@@ -71,7 +71,7 @@ GitHub: https://github.com/AzatBadretdinov/alfa-news-agent
 
 Рекомендуемая воспроизводимая среда: **Linux/Ubuntu или WSL2, Python 3.12, Node >=24.13 и <25, npm, OpenSSL**. Chrome/Docker не нужны для локального автоматического комплекта; локальные HTTPS-тесты используют openssl. Установка зависимостей требует доступа к npm/PyPI или полного кэша.
 
-1. Распакуй полный ZIP в **новый каталог**. Найди `package.json`, `requirements-dev.txt`, `scripts/accept_task3.py` и этот файл. Все команды выполнять оттуда, не из `delivery-task2/`.
+1. Распакуй полный ZIP в **новый каталог**. Найди `package.json`, `requirements-dev.txt`, `scripts/accept_task3.py` и этот файл. Все команды выполнять из единственного корня проекта.
 2. Не подставляй настоящие ключи и не копируй production `.env`/базы в тестовый каталог.
 3. Выполни:
 
@@ -92,7 +92,7 @@ python scripts/accept_task3.py
 
 ## Одна команда — что именно происходит
 
-`python scripts/accept_task3.py` проверяет версии/зависимости и хеши известных исходников по `delivery-task2/SOURCE_MANIFEST.json`, затем запускает:
+`python scripts/accept_task3.py` проверяет версии/зависимости и хеши известных исходников по `config/source-manifest.json`, затем запускает:
 
 1. Генератор контрактов `--check`, TypeScript typecheck и build.
 2. Все Node tests, все Python tests, проверку bundled news-модуля.
