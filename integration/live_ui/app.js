@@ -9,11 +9,11 @@ let persisted = {};
 try { persisted = JSON.parse(localStorage.getItem(STORAGE) || '{}'); } catch { /* Browsing remains available without storage. */ }
 let company = '', role = ['cfo', 'ceo', 'treasury'].includes(persisted.role) ? persisted.role : 'cfo';
 let favorites = Boolean(persisted.favorites), epoch = 0, companyOffset = 0, companyListEpoch = 0, polling = false, generationEnabled = false;
-let cursor = null, pendingPage = null, runtime = null, jobs = [], firstFeed = true;
+let cursor = null, pendingPage = null, runtime = null, jobs = [], firstFeed = true, journalPage = 0, activityRead = false, activityAction = null, connectionFailed = false;
 const cards = new Map(), elements = new Map(), detailsLoading = new Set(), draftRequests = new Map();
 const expanded = new Set(Array.isArray(persisted.expanded) ? persisted.expanded : []);
 const date = value => Number.isFinite(new Date(value).getTime()) ? new Date(value).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Дата не указана';
-const count = value => Number.isFinite(Number(value)) ? new Intl.NumberFormat('ru-RU').format(Number(value)) : '—';
+const count = value => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value)) ? new Intl.NumberFormat('ru-RU').format(Number(value)) : '—';
 const unbox = value => value?.data ?? value;
 function safeUrl(value) { try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password ? url.href : null; } catch { return null; } }
 function notice(message, error = false) { $('notice').textContent = message; $('notice').dataset.error = String(error); $('notice').hidden = !message; }
@@ -21,9 +21,9 @@ function friendlyError(error) {
   if (error.name === 'AbortError' || error.name === 'TimeoutError') return 'Сервис не ответил вовремя. Сохранённые данные остаются доступны; запрос можно повторить.';
   if (error.status === 403) return 'Нет доступа к выбранной компании или операции.';
   if (error.status === 404) return 'Запись не найдена. Проверьте компанию или обновите ленту.';
+  if (error.code === 'MODEL_OUTCOME_UNKNOWN') return 'Результат запроса уточняется. Повторная отправка не выполняется.';
   if (error.status === 409) return 'Данные изменились. Обновите карточку перед повторной отправкой.';
   if (error.status === 422 || error.status === 400) return 'Проверьте введённые данные.';
-  if (error.code === 'MODEL_OUTCOME_UNKNOWN') return 'Результат запроса уточняется. Повторная отправка не выполняется.';
   if (error.status === 429) return 'Достигнут лимит обработки. Сбор продолжится, новые ответы будут подготовлены позже.';
   if (error.status >= 500) return 'Один из сервисов временно недоступен. Повторная проверка выполнится автоматически.';
   return 'Не удалось связаться с сервисом. Проверьте локальный запуск и повторите действие.';
@@ -34,7 +34,7 @@ async function request(path, body) {
     const response = await fetch(path, { method: body === undefined ? 'GET' : 'POST', signal: controller.signal, headers: { Accept: 'application/json', ...(viewerKey ? {'X-Viewer-Key':viewerKey} : {}), ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
     if(response.status === 401) window.location.assign("/auth/login");
     let value; try { value = await response.json(); } catch { const error = new Error('Invalid response'); error.status = response.status || 502; throw error; }
-    if(value.error?.code==='SESSION_CHANGED'){ $('feed').replaceChildren(); $('jobs').replaceChildren(); window.location.reload(); throw new Error('Session changed'); }
+    if(value.error?.code==='SESSION_CHANGED'){ $('feed').replaceChildren(); $('journal-events').replaceChildren(); window.location.reload(); throw new Error('Session changed'); }
     if (!response.ok) { const error = new Error(value.error?.message || 'API error'); error.status = response.status; error.code = value.error?.code; throw error; }
     return value;
   } finally { clearTimeout(timer); }
@@ -212,7 +212,7 @@ function renderEmpty() {
   if (favorites) { $('empty-title').textContent = 'В избранном пока пусто'; $('empty-description').textContent = 'Сохраните важную карточку кнопкой «В избранное». Закладки сохраняются и при обновлении анализа.'; return; }
   const subscription = runtime?.subscriptions?.find(item => item.company_id === company && item.audience_role === role);
   $('empty-title').textContent = !subscription?.enabled ? 'Подбор ещё не включён' : generationEnabled ? 'Проверенные выводы готовятся' : 'Новости собираются. Выводы ожидают модель';
-  $('empty-description').textContent = !subscription?.enabled ? 'Нажмите «Включить подбор». Сервис отберёт значимые события по профилю компании и поставит их в очередь.' : generationEnabled ? 'После отбора и проверки готовые карточки появятся здесь. Состояние обработки показано справа.' : 'Реальные новости и очередь сохраняются. После настройки ключа Qwen обработка продолжится; выдуманные ответы здесь не показываются.';
+  $('empty-description').textContent = !subscription?.enabled ? 'Нажмите «Включить подбор». Сервис отберёт значимые события по профилю компании и поставит их в очередь.' : generationEnabled ? 'После отбора и проверки готовые карточки появятся здесь. Состояние обработки показано над лентой, подробности — в журнале событий.' : 'Реальные новости и очередь сохраняются. После настройки ключа Qwen обработка продолжится; выдуманные ответы здесь не показываются.';
 }
 function applyPage(page, { reset = false, fresh = false } = {}) {
   preserveReader(() => {
@@ -277,6 +277,10 @@ function reasonText(reason) {
     explicit_industry_mismatch: 'Указанная отрасль не совпадает с профилем компании',
     target_role_mismatch: 'Указанная категория получателей не совпадает с профилем',
     below_relevance_threshold: 'Не достигнут порог значимости',
+    already_processed_or_queued: 'Уже обработано или находится в очереди',
+    company_daily_limit: 'Достигнут дневной лимит компании',
+    previous_generation_failed: 'Предыдущая попытка завершилась ошибкой',
+    material_revision_queued: 'Изменённая новость направлена на повторный анализ',
     awaiting_full_text: 'Ожидает загрузки полного текста',
     insufficient_source_text: 'Недостаточно текста для проверяемого вывода',
     source_text_truncated: 'Текст неполный; требуется проверка источника'
@@ -294,40 +298,68 @@ function reasonText(reason) {
   return 'Обработка отложена; подробности доступны в журнале сервиса';
 }
 function jobState(job) { return ({ unknown: 'Исход запроса уточняется; повторная отправка заблокирована', queued: 'В очереди', running: 'Готовится и проверяется', deferred: 'Отложено', succeeded: 'Готово', failed: 'Требует проверки', superseded: 'Заменено новой версией' })[job.status] || 'Обрабатывается'; }
+const roleLabel = () => ({ cfo: 'Финансовый директор', ceo: 'Генеральный директор', treasury: 'Казначейство' })[role];
+function renderActivity() {
+  const queue = runtime?.queue?.jobs || {}, collector = unbox(runtime?.collector) || {};
+  const activeSubscription = runtime?.subscriptions?.some(item => item.company_id === company && item.audience_role === role && item.enabled);
+  let busy = false, title = 'Выберите компанию', description = 'После выбора загрузятся сохранённые результаты.';
+  if (activityAction) { busy = true; title = activityAction.title; description = 'Ожидаем подтверждения сервера.'; }
+  else if (activityRead) { busy = true; title = company ? 'Обновляем ленту и статусы' : 'Загружаем данные'; description = 'Читаем сохранённые результаты. Это не запускает модель.'; }
+  else if (connectionFailed) { title = 'Не удалось обновить все данные'; description = 'Показаны последние доступные результаты. Повторим проверку автоматически.'; }
+  else if (company && runtime?.recovery_review_required) { title = 'Обработка приостановлена'; description = 'После восстановления базы требуется проверка оператором.'; }
+  else if (company && !generationEnabled) { title = 'Генерация пока недоступна'; description = 'Сохранённые результаты доступны. Для новых выводов требуется подключение модели.'; }
+  else if (company && Number(queue.running) > 0) { busy = true; title = 'Готовятся и проверяются ответы'; description = 'Сервер выполняет задания компании. Готовые карточки появятся в ленте.'; }
+  else if (company && Number(queue.unknown) > 0) { title = 'Результат запроса уточняется'; description = 'Повторная отправка заблокирована, чтобы избежать повторного расхода.'; }
+  else if (company && Number(queue.deferred) > 0) { title = 'Есть отложенные задания'; description = 'Причины и время следующей попытки доступны в журнале.'; }
+  else if (company && Number(queue.queued) > 0) { title = 'Новости ожидают обработки'; description = 'Задания компании сохранены в очереди. Выполнение ещё не подтверждено.'; }
+  else if (company && collector.running) { busy = true; title = 'Загружаются публикации'; description = 'Обновляется общая база новостей. Подбор для компании выполняется отдельно.'; }
+  else if (company) { title = activeSubscription ? 'Подбор включён' : 'Автоподбор выключен'; description = activeSubscription ? 'Ожидаем следующего отбора. Лента проверяется автоматически.' : 'Можно читать сохранённые выводы или включить подбор.'; }
+  $('activity-title').textContent = title;
+  $('activity-description').textContent = description;
+  $('activity-spinner').hidden = !busy;
+  $('activity').setAttribute('aria-busy', String(busy));
+}
 function renderJobs() {
-  const visible = jobs.filter(job => job.status !== 'superseded').slice(0, 12); $('jobs').replaceChildren();
-  $('jobs-summary').textContent = visible.length ? 'Сохранённые задачи выбранной компании.' : 'Новых задач пока нет. Подбор запускается отдельно от просмотра ленты.';
-  for (const job of visible) {
-    const item = node('div', undefined, 'job'); item.append(node('p', job.kind === 'question' ? 'Уточняющий вопрос' : (job.title || 'Анализ отобранной новости'), 'job-title'));
-    const state = node('div', jobState(job), 'job-state'); state.dataset.state = job.status; item.append(state);
-    if (job.error && !['succeeded', 'superseded'].includes(job.status)) item.append(node('p', reasonText(job.error), 'job-error'));
-    if (['queued', 'deferred'].includes(job.status) && job.next_attempt > Date.now()) item.append(node('p', 'Следующая попытка: ' + date(job.next_attempt), 'muted'));
-    $('jobs').append(item);
+  if ($('event-journal').hidden) return;
+  const selection = runtime?.selection;
+  $('journal-description').textContent = 'Отбор: ' + roleLabel() + (selection?.scanned_at ? ' · ' + date(selection.scanned_at) : ' · ещё не выполнялся') + '. Задания ниже относятся к компании и могут включать другие роли. Это последний отбор и до 100 последних заданий, не полный архив.';
+  const rows = [
+    ...jobs.map(job => ({ title: job.kind === 'question' ? 'Вопрос: ' + job.title : job.title, status: jobState(job), detail: job.error ? reasonText(job.error) : '', url: cards.get(job.analysis_id)?.analysis?.sources?.find(source => source.kind === 'news')?.url || selection?.items?.find(item => item.news_id === job.news_id)?.source_url, time: job.updated_at, category: 'Задание компании', state: job.status })),
+    ...(selection?.items || []).map(item => ({ title: item.title, status: item.selected ? 'Отобрано для обработки' : reasonText(item.reason), url: item.source_url, category: 'Последний отбор · ' + roleLabel(), state: 'selection' }))
+  ];
+  journalPage = Math.min(journalPage, Math.max(0, Math.ceil(rows.length / 25) - 1));
+  $('journal-events').replaceChildren();
+  for (const entry of rows.slice(journalPage * 25, (journalPage + 1) * 25)) {
+    const row = node('article', undefined, 'journal-event');
+    row.append(node('p', entry.category + (entry.time ? ' · ' + date(entry.time) : ''), 'muted'), node('h4', entry.title || 'Событие без заголовка'));
+    const status = node('p', entry.status, 'job-state'); status.dataset.state = entry.state; row.append(status);
+    if (entry.detail) row.append(node('p', entry.detail, 'job-error'));
+    const link = sourceLink({ url: entry.url }, 'Открыть новость ↗');
+    row.append(link || node('p', 'Ссылка не передана для этого задания.', 'muted'));
+    $('journal-events').append(row);
   }
-  if (!visible.length && runtime?.selection?.items?.length) {
-    for (const item of runtime.selection.items.filter(item => item.selected).slice(0, 5)) { const row = node('div', undefined, 'job'); row.append(node('p', item.title, 'job-title'), node('p', reasonText(item.reason), 'muted')); $('jobs').append(row); }
-  }
+  if (!rows.length) $('journal-events').append(node('p', 'Событий пока нет. Просмотр журнала не запускает подбор.', 'muted'));
+  $('journal-page').textContent = rows.length ? (journalPage * 25 + 1) + '–' + Math.min(rows.length, (journalPage + 1) * 25) + ' из ' + rows.length : '0 событий';
+  $('journal-prev').disabled = journalPage === 0;
+  $('journal-next').disabled = (journalPage + 1) * 25 >= rows.length;
 }
 async function refreshJobs(rev = epoch) {
   if (!company) return;
-  const value = unbox(await request('/v1/live/jobs?' + scopeQuery())); if (rev !== epoch) return; jobs = value.items || []; renderJobs();
+  const value = unbox(await request('/v1/live/jobs?' + scopeQuery({ limit: 100 }))); if (rev !== epoch) return; jobs = value.items || []; renderJobs();
   for (const id of expanded) if (elements.has(id)) void refreshDetails(id);
 }
 function displayRuntime(value) {
   runtime = value; generationEnabled = Boolean(value.generation_enabled);
-  $('model-notice').hidden = generationEnabled;
+  $('model-notice').hidden = generationEnabled && !value.recovery_review_required;
   $('model-notice').textContent = value.recovery_review_required ? 'Генерация приостановлена: после восстановления базы требуется проверка оператором. Сохранённые карточки доступны.' : 'Генерация Qwen пока не подключена. Сбор новостей, отбор и сохранение очереди работают. Выводы появятся после настройки ключа модели.';
   const collector = unbox(value.collector) || {}, feeds = collector.feeds || [];
-  const successful = feeds.filter(feed => feed.last_success).length, failed = feeds.filter(feed => feed.last_error).length;
-  $('source-count').textContent = feeds.length ? `${successful} / ${feeds.length}` : '—';
-  $('source-summary').textContent = `${collector.enabled ? 'Автосбор включён' : 'Автосбор выключен'}${failed ? ` · ошибок: ${failed}` : ''}${collector.article_count !== undefined ? ' · публикаций: ' + count(collector.article_count) : ''}`;
   const queue = value.queue?.jobs || value.queue || {};
   $('queue-count').textContent = count((Number(queue.queued) || 0) + (Number(queue.running) || 0) + (Number(queue.deferred) || 0));
-  $('queue-summary').textContent = `В работе: ${count(queue.running || 0)} · отложено: ${count(queue.deferred || 0)}`;
+  $('queue-summary').textContent = `В работе: ${count(queue.running || 0)} · отложено: ${count(queue.deferred || 0)}${queue.unknown ? ' · исход уточняется: ' + count(queue.unknown) : ''}`;
   $('card-count').textContent = count(value.queue?.analyses ?? cards.size);
   const budget = value.budget;
-  $('budget-count').textContent = budget ? `${count(budget.used?.calls ?? 0)} / ${count(budget.limits?.calls)}` : 'Не используется';
-  $('budget-summary').textContent = budget ? `Вызовы за день · токены: ${count(budget.used?.tokens || 0)}${budget.resets_at ? ' · сброс ' + date(budget.resets_at) : ''}` : 'Внешние вызовы не выполнялись';
+  $('budget-count').textContent = budget?.error ? 'Недоступен' : budget ? `${count(budget.used?.calls)} / ${count(budget.limits?.calls)}` : 'Нет данных';
+  $('budget-summary').textContent = budget?.error ? 'Не удалось получить расход модели. Значения не подтверждены.' : budget ? `Вызовы за день · токены: ${count(budget.used?.tokens)}${budget.resets_at ? ' · сброс ' + date(budget.resets_at) : ''}` : 'Сервер не передал данные о расходе.';
   $('collector-summary').textContent = `${collector.running ? 'Сейчас загружаются публикации.' : 'Источники проверяются по расписанию.'}${collector.last_success ? ' Последняя успешная загрузка: ' + date(collector.last_success) + '.' : ''}${collector.full_text_count !== undefined ? ' Полных текстов: ' + count(collector.full_text_count) + '.' : ''}${collector.full_text_errors ? ' Не удалось загрузить полный текст: ' + count(collector.full_text_errors) + '.' : ''}`;
   $('sources-status').replaceChildren();
   for (const feed of feeds) {
@@ -337,20 +369,31 @@ function displayRuntime(value) {
     const link = sourceLink({ url: feed.url }, 'Открыть источник'); if (link) item.append(link); $('sources-status').append(item);
   }
   const subscription = value.subscriptions?.find(item => item.company_id === company && item.audience_role === role);
-  $('subscribe').textContent = subscription?.enabled ? 'Подбор включён' : 'Включить подбор'; $('subscribe').disabled = !company || Boolean(subscription?.enabled);
-  $('pause-subscription').hidden = !subscription?.enabled; $('scan').disabled = !company;
-  if (value.selection?.considered !== undefined) $('feed-description').textContent = `Проверено событий: ${count(value.selection.considered)} · значимых: ${count(value.selection.eligible)} · поставлено в очередь: ${count(value.selection.queued)}. Просмотр ленты не вызывает модель.`;
-  renderEmpty(); renderJobs();
+  $('subscribe').textContent = subscription?.enabled ? 'Подбор включён' : 'Включить подбор'; $('subscribe').disabled = !company || Boolean(subscription?.enabled) || Boolean(activityAction);
+  $('pause-subscription').hidden = !subscription?.enabled; $('scan').disabled = !company || !subscription?.enabled || Boolean(activityAction);
+  $('journal-toggle').disabled = !company;
+  $('feed-description').textContent = value.selection?.considered !== undefined ? `Последний отбор${value.selection.scanned_at ? ' · ' + date(value.selection.scanned_at) : ''} · ${roleLabel()}: проверено ${count(value.selection.considered)}, значимых ${count(value.selection.eligible)}, добавлено в очередь ${count(value.selection.queued)}. Просмотр не вызывает модель.` : 'Отбор для выбранной компании и роли ещё не выполнялся. Просмотр ленты не вызывает модель.';
+  if (!company) clearSummary();
+  renderEmpty(); renderJobs(); renderActivity();
+}
+function clearSummary() {
+  $('queue-count').textContent = '—'; $('queue-summary').textContent = 'Выберите компанию';
+  $('card-count').textContent = '—'; $('budget-count').textContent = '—';
+  $('budget-summary').textContent = 'Расход загрузится после выбора компании';
 }
 async function refreshStatus(rev = epoch) {
   if (!company) { const v=unbox(await request("/v1/runtime")); if(rev===epoch) displayRuntime({...v,subscriptions:[]}); return; }
   const value = unbox(await request('/v1/live/status' + (company ? '?' + scopeQuery() : ''))); if (rev !== epoch) return; displayRuntime(value);
 }
 async function refresh(rev = epoch, initial = false) {
+  activityRead = true; renderActivity();
   const tasks = [refreshStatus(rev), ...(company ? [refreshFeed(rev, { initial }), refreshJobs(rev)] : [])];
   const results = await Promise.allSettled(tasks); if (rev !== epoch) return;
+  activityRead = false;
   const errors = results.filter(item => item.status === 'rejected');
-  $('connection').textContent = errors.length ? 'Связь с сервисом прервана' : 'Обновляется автоматически'; $('connection').dataset.offline = String(Boolean(errors.length));
+  connectionFailed = Boolean(errors.length);
+  renderActivity();
+  $('connection').textContent = errors.length ? 'Связь с сервисом прервана' : 'Обновлено ' + new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); $('connection').dataset.offline = String(Boolean(errors.length));
   if (errors.length && initial) notice(friendlyError(errors[0].reason), true);
 }
 async function companies() {
@@ -359,27 +402,30 @@ async function companies() {
     const value = unbox(await request('/v1/companies?' + query({ offset: companyOffset, limit: 100 }))); if (revision !== companyListEpoch) return;
     $('company-list').replaceChildren(node('option', 'Выберите из списка')); $('company-list').firstChild.value = '';
     for (const item of value.items || []) { const id = typeof item === 'string' ? item : item.company_id || item.id; const option = node('option', id); option.value = id; $('company-list').append(option); }
+    $('company-list').value = Array.from($('company-list').children).some(option => option.value === company) ? company : '';
     $('more-companies').hidden = (value.items || []).length < 100;
   } catch (error) { notice(friendlyError(error), true); }
 }
 async function chooseCompany(id) {
-  save(); const rev = ++epoch; company = ''; runtime = null; firstFeed = true; cursor = null; pendingPage = null; jobs = [];
-  cards.clear(); elements.clear(); $('feed').replaceChildren(); $('jobs').replaceChildren(); $('new-cards').hidden = true; $('load-more').hidden = true; $('subscribe').disabled = true; $('scan').disabled = true; $('pause-subscription').hidden = true;
-  if (!id) { $('profile').textContent = 'Профиль не выбран'; renderEmpty(); return; }
+  save(); const rev = ++epoch; activityRead = false; activityAction = null; connectionFailed = false; journalPage = 0; $('event-journal').hidden = true; $('journal-toggle').setAttribute('aria-expanded', 'false'); $('journal-toggle').disabled = true; $('feed-description').textContent = 'Загружаем сохранённую ленту выбранной компании и роли.'; company = ''; $('company-list').value = ''; clearSummary(); runtime = null; firstFeed = true; cursor = null; pendingPage = null; jobs = [];
+  cards.clear(); elements.clear(); $('feed').replaceChildren(); $('journal-events').replaceChildren(); $('new-cards').hidden = true; $('load-more').hidden = true; $('subscribe').disabled = true; $('scan').disabled = true; $('pause-subscription').hidden = true;
+  if (!id) { $('profile').textContent = 'Профиль не выбран'; renderEmpty(); renderActivity(); return; }
+  activityRead = true; renderActivity();
   $('profile').textContent = 'Загружаю профиль…';
   try {
     const value = await request('/v1/companies/' + encodeURIComponent(id)); if (rev !== epoch) return;
     const profile = value.data; company = profile.company_id; $('company-id').value = company;
+    $('company-list').value = Array.from($('company-list').children).some(option => option.value === company) ? company : '';
     $('profile').textContent = `${company} · ${profile.industry?.name || 'Отрасль не указана'} · ${profile.geography?.region || 'Регион не указан'}`;
-    if (value.meta?.mode === 'mock') { company = ''; $('profile').textContent += ' · учебный профиль не используется в live-ленте'; renderEmpty(); return; }
+    if (value.meta?.mode === 'mock') { company = ''; activityRead = false; $('profile').textContent += ' · учебный профиль не используется в live-ленте'; renderEmpty(); renderActivity(); return; }
     notice('Компания выбрана. Загружаю сохранённые результаты.'); $('subscribe').disabled = false; $('scan').disabled = false;
     await refresh(rev, true); if (rev === epoch) { save(); notice(''); }
-  } catch (error) { if (rev === epoch) { $('profile').textContent = 'Профиль не загружен'; notice(friendlyError(error), true); renderEmpty(); } }
+  } catch (error) { if (rev === epoch) { activityRead = false; connectionFailed = true; $('profile').textContent = 'Профиль не загружен'; notice(friendlyError(error), true); renderEmpty(); renderActivity(); } }
 }
 async function subscription(enabled) {
-  if (!company) return; const cid = company, selectedRole = role, rev = epoch; $('subscribe').disabled = true; $('pause-subscription').disabled = true;
-  try { await request('/v1/live/subscriptions', { company_id: cid, audience_role: selectedRole, limit: 5, min_score: 0.2, enabled }); if (rev !== epoch) return; notice(enabled ? 'Подбор включён. Значимые новости будут обработаны в фоне.' : 'Автоматический подбор приостановлен. Сохранённые карточки доступны.'); await refresh(rev); }
-  catch (error) { if (rev === epoch) notice(friendlyError(error), true); } finally { $('pause-subscription').disabled = false; if (rev === epoch && !runtime?.subscriptions?.some(item => item.company_id === cid && item.audience_role === selectedRole && item.enabled)) $('subscribe').disabled = false; }
+  if (!company) return; const cid = company, selectedRole = role, rev = epoch; if (activityAction) return; const action = { title: enabled ? 'Включаем подбор' : 'Останавливаем автоподбор' }; activityAction = action; renderActivity(); $('scan').disabled = true; $('subscribe').disabled = true; $('pause-subscription').disabled = true;
+  try { await request('/v1/live/subscriptions', { company_id: cid, audience_role: selectedRole, limit: 5, min_score: 0.2, enabled }); if (rev !== epoch) return; notice(enabled ? 'Подбор включён. Значимые новости будут обработаны в фоне.' : 'Автоподбор остановлен для компании и роли. Уже поставленные задания, включая вопросы, могут завершиться и расходовать бюджет.'); await refresh(rev); }
+  catch (error) { if (rev === epoch) notice(friendlyError(error), true); } finally { if (activityAction === action) { activityAction = null; $('pause-subscription').disabled = false; renderActivity(); $('scan').disabled = !runtime?.subscriptions?.some(item => item.company_id === cid && item.audience_role === selectedRole && item.enabled); } if (company === cid && role === selectedRole && !runtime?.subscriptions?.some(item => item.company_id === cid && item.audience_role === selectedRole && item.enabled)) $('subscribe').disabled = false; }
 }
 function setFavoriteFilter(selected) {
   favorites = selected; epoch++; firstFeed = true; pendingPage = null; $('new-cards').hidden = true;
@@ -392,7 +438,11 @@ $('more-companies').addEventListener('click', () => { companyOffset += 100; void
 $('role').value = role;
 $('role').addEventListener('change', () => { role = $('role').value; const selected = company; void chooseCompany(selected); });
 $('subscribe').addEventListener('click', () => void subscription(true)); $('pause-subscription').addEventListener('click', () => void subscription(false));
-$('scan').addEventListener('click', async () => { if (!company) return; const rev = epoch; $('scan').disabled = true; try { await request('/v1/live/scan', { company_id: company, audience_role: role }); if (rev === epoch) { notice('Подбор обновлён. Задачи сохраняются в очереди.'); await refresh(rev); } } catch (error) { if (rev === epoch) notice(friendlyError(error), true); } finally { if (rev === epoch) $('scan').disabled = false; } });
+$('scan').addEventListener('click', async () => { if (!company || activityAction || $('scan').disabled) return; const rev = epoch, action = { title: 'Обновляем подбор новостей' }; activityAction = action; renderActivity(); $('scan').disabled = true; try { await request('/v1/live/scan', { company_id: company, audience_role: role }); if (rev === epoch) { notice('Подбор обновлён. Задачи сохраняются в очереди.'); await refresh(rev); } } catch (error) { if (rev === epoch) notice(friendlyError(error), true); } finally { if (activityAction === action) { activityAction = null; renderActivity(); $('scan').disabled = !runtime?.subscriptions?.some(item => item.company_id === company && item.audience_role === role && item.enabled); } } });
+$('journal-toggle').addEventListener('click', () => { const open = $('event-journal').hidden; $('event-journal').hidden = !open; $('journal-toggle').setAttribute('aria-expanded', String(open)); renderJobs(); });
+$('journal-close').addEventListener('click', () => { $('event-journal').hidden = true; $('journal-toggle').setAttribute('aria-expanded', 'false'); });
+$('journal-prev').addEventListener('click', () => { journalPage = Math.max(0, journalPage - 1); renderJobs(); });
+$('journal-next').addEventListener('click', () => { journalPage++; renderJobs(); });
 $('all-cards').addEventListener('click', () => setFavoriteFilter(false)); $('favorite-cards').addEventListener('click', () => setFavoriteFilter(true));
 $('new-cards').addEventListener('click', () => { if (!pendingPage) return; applyPage(pendingPage, { fresh: true }); pendingPage = null; $('new-cards').hidden = true; save(); });
 $('load-more').addEventListener('click', async () => { if (!cursor) return; const rev = epoch; $('load-more').disabled = true; try { await refreshFeed(rev, { append: true }); save(); } catch (error) { if (rev === epoch) notice(friendlyError(error), true); } finally { $('load-more').disabled = false; } });
@@ -401,5 +451,14 @@ window.addEventListener('pagehide', save);
 $('all-cards').classList.toggle('active', !favorites); $('all-cards').setAttribute('aria-pressed', String(!favorites)); $('favorite-cards').classList.toggle('active', favorites); $('favorite-cards').setAttribute('aria-pressed', String(favorites));
 await companies();
 if (persisted.company) await chooseCompany(String(persisted.company)); else await refresh();
-const timer = setInterval(async () => { if (polling || document.hidden) return; polling = true; try { await refresh(); } finally { polling = false; } }, 10000);
-window.addEventListener('pagehide', () => clearInterval(timer), { once: true });
+async function poll() {
+  if (polling || document.hidden || activityAction) return;
+  polling = true;
+  try { await refresh(); } finally { polling = false; }
+}
+let timer;
+function startPolling() { clearInterval(timer); timer = setInterval(poll, 10000); }
+startPolling();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) void poll(); });
+window.addEventListener('pageshow', () => { startPolling(); void poll(); });
+window.addEventListener('pagehide', () => clearInterval(timer));
