@@ -1,0 +1,6 @@
+# Opt in to the bundled news module already included in the Python image.
+services:
+  ml:
+    environment:
+      RANK_MODE: news-analysis
+      NEWS_MODULE_PATH: /app

@@ -1,0 +1,28 @@
+{
+  "release": "task2-final-20261025",
+  "base_commit": "fa6a7a9f08daf42c87e51dd5b2a1279e67a14766",
+  "base_tree": "80c18ab5c47198ea826b194abe475c47f08c7e5e",
+  "base_files_verified": 451,
+  "project_source_files": 465,
+  "changed_or_added_files": 37,
+  "github_mutations": false,
+  "paid_external_llm_calls": 0,
+  "previous_archive_sha256": "6698bc5fba6a1a75dcf5fac1e45149e4bd7ff031699d94cca98d293528925050",
+  "patch_reverse_and_reapply": "PASS",
+  "acceptance": "reaudit/REPORT.json",
+  "local_automation": "PASS",
+  "node_tests": 476,
+  "python_tests": 257,
+  "production_gate": "NOT_RUN",
+  "expert_semantic_gate": "NOT_RUN",
+  "handoff": "TASK3_CONTEXT.md",
+  "entrypoint": "python scripts/accept_task3.py",
+  "node_dependency_install": "fresh npm ci: PASS, 112 packages",
+  "notes": [
+    "Project is at ZIP root.",
+    "Unknown is not a failed payment; no blind retry.",
+    "SQLite supports concurrent processes on one local database, not independent multi-host replicas.",
+    "Historical verification is not the current acceptance report.",
+    "SOURCE_MANIFEST covers source files; CHECKSUMS covers all archive files except itself."
+  ]
+}

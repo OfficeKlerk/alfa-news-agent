@@ -1,0 +1,4738 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alfa:integration:v1",
+  "$defs": {
+    "Profile": {
+      "title": "Company business context 1.0",
+      "type": "object",
+      "required": [
+        "schema_version",
+        "company_id",
+        "industry",
+        "scale",
+        "company_attributes",
+        "bank_products",
+        "foreign_trade",
+        "geography",
+        "dataset_position",
+        "group",
+        "related_companies",
+        "related_companies_total",
+        "related_companies_truncated",
+        "counterparties",
+        "payment_summary",
+        "data_quality",
+        "provenance",
+        "relevance_signals"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "company_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "industry": {
+          "type": "object",
+          "required": [
+            "okved_code",
+            "name",
+            "sector",
+            "okved_division"
+          ],
+          "properties": {
+            "okved_code": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sector": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "okved_division": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "scale": {
+          "type": "object",
+          "required": [
+            "revenue_raw",
+            "revenue_unit",
+            "revenue_rub",
+            "is_large_business",
+            "employees_band",
+            "employees_fns_band",
+            "employees_spark_band"
+          ],
+          "properties": {
+            "revenue_raw": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "revenue_unit": {
+              "enum": [
+                "unknown",
+                "rub",
+                "thousand_rub"
+              ]
+            },
+            "revenue_rub": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "is_large_business": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "employees_band": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "employees_fns_band": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "employees_spark_band": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "company_attributes": {
+          "type": "object"
+        },
+        "bank_products": {
+          "type": "object",
+          "required": [
+            "rko",
+            "guarantee",
+            "loan",
+            "leasing",
+            "deposit",
+            "payroll",
+            "factoring"
+          ],
+          "properties": {
+            "rko": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "guarantee": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "loan": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "leasing": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "deposit": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "payroll": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "factoring": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          }
+        },
+        "foreign_trade": {
+          "type": "object",
+          "required": [
+            "has_fts",
+            "countries",
+            "trade_direction",
+            "currencies"
+          ],
+          "properties": {
+            "has_fts": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "countries": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            },
+            "trade_direction": {
+              "type": "null"
+            },
+            "currencies": {
+              "type": "null"
+            }
+          }
+        },
+        "geography": {
+          "type": "object",
+          "required": [
+            "city",
+            "region"
+          ],
+          "properties": {
+            "city": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "region": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "dataset_position": {
+          "type": "object",
+          "required": [
+            "available",
+            "market_share"
+          ],
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "market_share": {
+              "type": "null"
+            },
+            "share_of_observed_revenue": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "group": {
+          "type": "object",
+          "required": [
+            "group_id",
+            "members",
+            "members_total",
+            "members_truncated",
+            "source"
+          ],
+          "properties": {
+            "group_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "members": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "members_total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "members_truncated": {
+              "type": "boolean"
+            },
+            "source": {
+              "type": "object",
+              "required": [
+                "source",
+                "file",
+                "records",
+                "records_total",
+                "records_truncated"
+              ],
+              "properties": {
+                "source": {
+                  "enum": [
+                    "companies",
+                    "links",
+                    "payments"
+                  ]
+                },
+                "file": {
+                  "type": "string"
+                },
+                "records": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 2
+                  }
+                },
+                "records_total": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "records_truncated": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "related_companies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "company_id",
+              "shared_people_count",
+              "source"
+            ],
+            "properties": {
+              "company_id": {
+                "type": "string"
+              },
+              "shared_people_count": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "source": {
+                "type": "object",
+                "required": [
+                  "source",
+                  "file",
+                  "records",
+                  "records_total",
+                  "records_truncated"
+                ],
+                "properties": {
+                  "source": {
+                    "enum": [
+                      "companies",
+                      "links",
+                      "payments"
+                    ]
+                  },
+                  "file": {
+                    "type": "string"
+                  },
+                  "records": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 2
+                    }
+                  },
+                  "records_total": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "records_truncated": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "related_companies_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "related_companies_truncated": {
+          "type": "boolean"
+        },
+        "counterparties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "company_id",
+              "direction",
+              "pay_amount",
+              "pay_count",
+              "share_of_direction",
+              "role",
+              "company_card_available",
+              "industry",
+              "source"
+            ],
+            "properties": {
+              "company_id": {
+                "type": "string"
+              },
+              "direction": {
+                "enum": [
+                  "in",
+                  "out"
+                ]
+              },
+              "pay_amount": {
+                "type": "number",
+                "minimum": 0
+              },
+              "pay_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "share_of_direction": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 1
+              },
+              "role": {
+                "enum": [
+                  "получатель платежей",
+                  "отправитель платежей"
+                ]
+              },
+              "company_card_available": {
+                "type": "boolean"
+              },
+              "industry": {
+                "type": "object"
+              },
+              "source": {
+                "type": "object",
+                "required": [
+                  "source",
+                  "file",
+                  "records",
+                  "records_total",
+                  "records_truncated"
+                ],
+                "properties": {
+                  "source": {
+                    "enum": [
+                      "companies",
+                      "links",
+                      "payments"
+                    ]
+                  },
+                  "file": {
+                    "type": "string"
+                  },
+                  "records": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 2
+                    }
+                  },
+                  "records_total": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "records_truncated": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "payment_summary": {
+          "type": "object",
+          "required": [
+            "available",
+            "incoming_amount",
+            "outgoing_amount",
+            "counterparties_truncated",
+            "concentration",
+            "currency",
+            "period"
+          ],
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "incoming_amount": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "outgoing_amount": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "currency": {
+              "type": "null"
+            },
+            "period": {
+              "type": "null"
+            },
+            "counterparty_context": {
+              "type": "object",
+              "required": [
+                "available",
+                "method",
+                "scope",
+                "evidence",
+                "limitation",
+                "in",
+                "out"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "method": {
+                  "const": "observed_payment_environment_v1"
+                },
+                "scope": {
+                  "const": "all_observed_nonself_payments"
+                },
+                "evidence": {
+                  "type": "object",
+                  "required": [
+                    "sources",
+                    "fields",
+                    "join"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "sources": {
+                      "const": [
+                        "payments",
+                        "companies"
+                      ]
+                    },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "join": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "limitation": {
+                  "type": "string"
+                },
+                "in": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "required": [
+                    "amount_total",
+                    "counterparties_count",
+                    "coverage",
+                    "industry_distribution",
+                    "group_distribution"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "amount_total": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "counterparties_count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "coverage": {
+                      "type": "object",
+                      "required": [
+                        "company_card",
+                        "industry",
+                        "group_membership"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "company_card": {
+                          "type": "object",
+                          "required": [
+                            "known_amount",
+                            "unknown_amount",
+                            "known_share",
+                            "unknown_share"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "known_amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "unknown_amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "known_share": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            "unknown_share": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            }
+                          }
+                        },
+                        "industry": {
+                          "type": "object",
+                          "required": [
+                            "known_amount",
+                            "unknown_amount",
+                            "known_share",
+                            "unknown_share"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "known_amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "unknown_amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "known_share": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            "unknown_share": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            }
+                          }
+                        },
+                        "group_membership": {
+                          "type": "object",
+                          "required": [
+                            "known_amount",
+                            "unknown_amount",
+                            "known_share",
+                            "unknown_share"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "known_amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "unknown_amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "known_share": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            "unknown_share": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "industry_distribution": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "okved_division",
+                          "sector",
+                          "amount",
+                          "share_of_direction",
+                          "counterparties_count",
+                          "counterparty_ids",
+                          "counterparty_ids_truncated"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "okved_division": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^\\d{2}$"
+                          },
+                          "sector": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "amount": {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          "share_of_direction": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "counterparties_count": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "counterparty_ids": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "maxItems": 20,
+                            "uniqueItems": true
+                          },
+                          "counterparty_ids_truncated": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    },
+                    "group_distribution": {
+                      "type": "object",
+                      "required": [
+                        "same_group",
+                        "other_group",
+                        "unknown"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "same_group": {
+                          "type": "object",
+                          "required": [
+                            "amount",
+                            "share_of_direction",
+                            "counterparties_count",
+                            "counterparty_ids",
+                            "counterparty_ids_truncated"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "share_of_direction": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            "counterparties_count": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "counterparty_ids": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "maxItems": 20,
+                              "uniqueItems": true
+                            },
+                            "counterparty_ids_truncated": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "other_group": {
+                          "type": "object",
+                          "required": [
+                            "amount",
+                            "share_of_direction",
+                            "counterparties_count",
+                            "counterparty_ids",
+                            "counterparty_ids_truncated"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "share_of_direction": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            "counterparties_count": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "counterparty_ids": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "maxItems": 20,
+                              "uniqueItems": true
+                            },
+                            "counterparty_ids_truncated": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "unknown": {
+                          "type": "object",
+                          "required": [
+                            "amount",
+                            "share_of_direction",
+                            "counterparties_count",
+                            "counterparty_ids",
+                            "counterparty_ids_truncated"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "share_of_direction": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            "counterparties_count": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "counterparty_ids": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "maxItems": 20,
+                              "uniqueItems": true
+                            },
+                            "counterparty_ids_truncated": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "out": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "required": [
+                    "amount_total",
+                    "counterparties_count",
+                    "coverage",
+                    "industry_distribution",
+                    "group_distribution"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "amount_total": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "counterparties_count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "coverage": {
+                      "type": "object",
+                      "required": [
+                        "company_card",
+                        "industry",
+                        "group_membership"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "company_card": {
+                          "type": "object",
+                          "required": [
+                            "known_amount",
+                            "unknown_amount",
+                            "known_share",
+                            "unknown_share"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "known_amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "unknown_amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "known_share": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            "unknown_share": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            }
+                          }
+                        },
+                        "industry": {
+                          "type": "object",
+                          "required": [
+                            "known_amount",
+                            "unknown_amount",
+                            "known_share",
+                            "unknown_share"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "known_amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "unknown_amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "known_share": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            "unknown_share": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            }
+                          }
+                        },
+                        "group_membership": {
+                          "type": "object",
+                          "required": [
+                            "known_amount",
+                            "unknown_amount",
+                            "known_share",
+                            "unknown_share"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "known_amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "unknown_amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "known_share": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            "unknown_share": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "industry_distribution": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "okved_division",
+                          "sector",
+                          "amount",
+                          "share_of_direction",
+                          "counterparties_count",
+                          "counterparty_ids",
+                          "counterparty_ids_truncated"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "okved_division": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^\\d{2}$"
+                          },
+                          "sector": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "amount": {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          "share_of_direction": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "counterparties_count": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "counterparty_ids": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "maxItems": 20,
+                            "uniqueItems": true
+                          },
+                          "counterparty_ids_truncated": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    },
+                    "group_distribution": {
+                      "type": "object",
+                      "required": [
+                        "same_group",
+                        "other_group",
+                        "unknown"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "same_group": {
+                          "type": "object",
+                          "required": [
+                            "amount",
+                            "share_of_direction",
+                            "counterparties_count",
+                            "counterparty_ids",
+                            "counterparty_ids_truncated"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "share_of_direction": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            "counterparties_count": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "counterparty_ids": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "maxItems": 20,
+                              "uniqueItems": true
+                            },
+                            "counterparty_ids_truncated": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "other_group": {
+                          "type": "object",
+                          "required": [
+                            "amount",
+                            "share_of_direction",
+                            "counterparties_count",
+                            "counterparty_ids",
+                            "counterparty_ids_truncated"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "share_of_direction": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            "counterparties_count": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "counterparty_ids": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "maxItems": 20,
+                              "uniqueItems": true
+                            },
+                            "counterparty_ids_truncated": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "unknown": {
+                          "type": "object",
+                          "required": [
+                            "amount",
+                            "share_of_direction",
+                            "counterparties_count",
+                            "counterparty_ids",
+                            "counterparty_ids_truncated"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "amount": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "share_of_direction": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            "counterparties_count": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "counterparty_ids": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "maxItems": 20,
+                              "uniqueItems": true
+                            },
+                            "counterparty_ids_truncated": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "available": {
+                        "const": true
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "in": {
+                        "type": "object"
+                      },
+                      "out": {
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "else": {
+                    "properties": {
+                      "in": {
+                        "type": "null"
+                      },
+                      "out": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "data_quality": {
+          "type": "object",
+          "required": [
+            "missing_fields",
+            "warnings",
+            "conflicting_fields",
+            "company_records_total"
+          ],
+          "properties": {
+            "missing_fields": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "conflicting_fields": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "company_records_total": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "required": [
+            "company",
+            "company_raw_fields",
+            "sources",
+            "snapshot_built_at",
+            "signal_method",
+            "company_record_variants"
+          ],
+          "properties": {
+            "company": {
+              "type": "object",
+              "required": [
+                "source",
+                "file",
+                "records",
+                "records_total",
+                "records_truncated"
+              ],
+              "properties": {
+                "source": {
+                  "enum": [
+                    "companies",
+                    "links",
+                    "payments"
+                  ]
+                },
+                "file": {
+                  "type": "string"
+                },
+                "records": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 2
+                  }
+                },
+                "records_total": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "records_truncated": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "company_raw_fields": {
+              "type": "object"
+            },
+            "company_record_variants": {
+              "type": "array"
+            },
+            "sources": {
+              "type": "object"
+            },
+            "signal_method": {
+              "enum": [
+                "deterministic_rules_v1",
+                "deterministic_rules_v2"
+              ]
+            }
+          }
+        },
+        "relevance_signals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "topic",
+              "reason",
+              "weight",
+              "evidence",
+              "entities"
+            ],
+            "properties": {
+              "topic": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "weight": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "evidence": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "pattern": "^/"
+                }
+              },
+              "entities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "mode": {
+          "enum": [
+            "mock",
+            "demo",
+            "live"
+          ]
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_id",
+        "mode",
+        "warnings"
+      ]
+    },
+    "Error": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                "VALIDATION_ERROR",
+                "NOT_FOUND",
+                "CONFLICT",
+                "BUSY",
+                "DEPENDENCY_UNAVAILABLE",
+                "DEPENDENCY_TIMEOUT",
+                "CONTRACT_VIOLATION",
+                "INTERNAL_ERROR",
+                "PAYLOAD_TOO_LARGE",
+                "UNSUPPORTED_MEDIA_TYPE",
+                "FORBIDDEN",
+                "UNAUTHORIZED",
+                "MODEL_OUTCOME_UNKNOWN",
+                "OPERATION_CONFLICT",
+                "SESSION_CHANGED",
+                "MODEL_CANCELLED",
+                "MODEL_OPERATION_CLOSED",
+                "MODEL_AUTH_ERROR",
+                "MODEL_LIMIT",
+                "MODEL_TIMEOUT",
+                "MODEL_UNAVAILABLE",
+                "MODEL_RESPONSE_INVALID"
+              ]
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1
+            },
+            "retryable": {
+              "type": "boolean"
+            },
+            "diagnostics": {
+              "$ref": "#/$defs/ResponseDiagnostics"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retryable"
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_id",
+        "error"
+      ]
+    },
+    "FieldIssue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "enum": [
+            "parse",
+            "schema",
+            "grounding"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "pattern": "^/"
+        },
+        "rule": {
+          "enum": [
+            "Expected a JSON object",
+            "Expected type",
+            "Required field missing",
+            "Unexpected field",
+            "Duplicate items",
+            "Value outside contract constraints",
+            "Too few items",
+            "Too many items",
+            "String is too short",
+            "String is too long",
+            "Number is below minimum",
+            "Number exceeds maximum",
+            "String does not match required pattern",
+            "Value is not an allowed enum member",
+            "Value does not match required format",
+            "Value does not match required constant",
+            "Invalid business profile path",
+            "Payment aggregation metadata is not a business fact",
+            "Unknown profile path",
+            "Profile path must select a concrete value",
+            "Blank limitation",
+            "Unchanged rate or unconfirmed applicability allows review only, not new risks/opportunities",
+            "Blank claim text",
+            "Unknown claim source",
+            "Quote must contain at least eight nonblank characters",
+            "Claim text must equal its verbatim quote",
+            "Quote source has the wrong evidence kind",
+            "Quote not found in selected evidence",
+            "AI claim quote must be empty",
+            "AI claim needs the selected company source",
+            "AI claim needs a selected news source",
+            "AI claim needs business profile paths",
+            "AI claim needs nonblank conditions",
+            "Unknown business field needs missing data and limitation",
+            "Unsupported numeric assertion",
+            "AI financial figures must be verbatim fact/bank quotes, not company impact",
+            "Unknown claim index",
+            "Wrong evidence type for section",
+            "Unsupported section number",
+            "Section financial figures must be verbatim fact/bank quotes",
+            "Section and grounding length mismatch",
+            "Recommendation needs condition and required data",
+            "Recommendation condition and required data must match: condition must match its AI claim",
+            "Recommendation condition and required data must match: required_data must match missing_data",
+            "Unsupported limitation or missing-data number",
+            "Financial figures are not allowed in limitations or missing_data",
+            "Unused claim",
+            "Payment statistic needs matching coverage paths",
+            "Unconfirmed linkage must not be stated as proven absence",
+            "Freshness-only ranking explanation is not supported by contributions",
+            "Product flags do not establish debt or contract terms",
+            "Unknown product flag must remain unknown",
+            "Trade flags do not establish direction or payment currency",
+            "Unknown payment metadata must remain unknown",
+            "Product mark contradicts the snapshot",
+            "Question profile assertion needs matching claim and profile path",
+            "Payment assertion contradicts the snapshot",
+            "Profile claim assertion needs matching profile path",
+            "Industry relation assertion contradicts prepared event",
+            "Too many claims for a compact answer",
+            "Too many bank claims",
+            "Repeated claim text",
+            "Speculative absence enumeration",
+            "Project participation or budget funding is not established",
+            "Prompt rule copied into the answer"
+          ]
+        },
+        "expected": {
+          "enum": [
+            "string",
+            "object",
+            "array",
+            "integer",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        "limit": {
+          "type": "number",
+          "minimum": -1000000000.0,
+          "maximum": 1000000000.0
+        }
+      },
+      "required": [
+        "stage",
+        "path",
+        "rule"
+      ]
+    },
+    "ResponseDiagnostics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FieldIssue"
+          },
+          "minItems": 1,
+          "maxItems": 10
+        },
+        "generation_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2
+        },
+        "max_attempts": {
+          "const": 2
+        },
+        "draft_saved": {
+          "type": "boolean"
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "attempt": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2
+              },
+              "issues": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/FieldIssue"
+                },
+                "minItems": 1,
+                "maxItems": 10
+              }
+            },
+            "required": [
+              "attempt",
+              "issues"
+            ]
+          },
+          "maxItems": 2
+        }
+      },
+      "required": [
+        "issues"
+      ]
+    },
+    "Evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "kind": {
+          "enum": [
+            "company",
+            "news",
+            "bank"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri",
+          "pattern": "^https?://"
+        },
+        "excerpt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "document_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "page": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "published_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "is_mock": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "title",
+        "url",
+        "excerpt",
+        "document_id",
+        "page",
+        "published_at",
+        "is_mock"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "bank"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "document_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https?://"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "news"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https?://"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Event": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "news_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event_type": {
+          "enum": [
+            "rate_change",
+            "fx_change",
+            "commodity_price_change",
+            "trade_restriction",
+            "regional_event",
+            "company_event",
+            "tax_change",
+            "other"
+          ]
+        },
+        "published_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "event_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "fact_status": {
+          "enum": [
+            "reported",
+            "confirmed",
+            "disputed"
+          ]
+        },
+        "okved_divisions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^\\d{2}$"
+          }
+        },
+        "countries": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "regions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "company_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+          }
+        },
+        "entity_mapping_source": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/Evidence"
+              },
+              {
+                "properties": {
+                  "kind": {
+                    "const": "news"
+                  }
+                }
+              }
+            ]
+          },
+          "minItems": 1
+        },
+        "is_mock": {
+          "type": "boolean"
+        },
+        "split_group_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "content": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "scope": {
+              "enum": [
+                "article_full",
+                "feed_content",
+                "feed_excerpt",
+                "provided"
+              ]
+            },
+            "material_revision": {
+              "type": "string",
+              "minLength": 1
+            },
+            "version_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "scope",
+            "material_revision",
+            "version_id",
+            "warnings"
+          ]
+        },
+        "event_details": {
+          "$ref": "#/$defs/EventDetails"
+        }
+      },
+      "required": [
+        "news_id",
+        "event_id",
+        "title",
+        "text",
+        "event_type",
+        "published_at",
+        "event_at",
+        "fact_status",
+        "okved_divisions",
+        "countries",
+        "regions",
+        "company_ids",
+        "entity_mapping_source",
+        "sources",
+        "is_mock"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "company_ids": {
+                "minItems": 1
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "entity_mapping_source": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "EventDetails": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "direction": {
+          "enum": [
+            "increase",
+            "decrease",
+            "unchanged",
+            "unknown"
+          ]
+        },
+        "magnitude": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "magnitude_unit": {
+          "enum": [
+            "bps",
+            "percentage_points",
+            "percent",
+            "unknown"
+          ]
+        },
+        "effective_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "decision_status": {
+          "enum": [
+            "announced",
+            "effective",
+            "forecast",
+            "unknown"
+          ]
+        },
+        "target_roles": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "importer",
+              "exporter",
+              "buyer",
+              "seller",
+              "borrower",
+              "depositor"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "target_okved_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^\\d{2}(?:\\.\\d{1,2}){0,2}$"
+          },
+          "uniqueItems": true
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "field": {
+                "enum": [
+                  "direction",
+                  "magnitude",
+                  "magnitude_unit",
+                  "effective_at",
+                  "decision_status",
+                  "target_roles",
+                  "target_okved_codes",
+                  "event_type",
+                  "event_at",
+                  "okved_divisions",
+                  "subject_okved_codes"
+                ]
+              },
+              "quote": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              "source_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "field",
+              "quote",
+              "source_ids"
+            ]
+          },
+          "maxItems": 100
+        },
+        "subject_okved_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^\\d{2}(?:\\.\\d{1,2}){0,2}$"
+          },
+          "uniqueItems": true
+        },
+        "taxonomy_origin": {
+          "const": "rule_inference"
+        },
+        "taxonomy_version": {
+          "const": "business-subjects-v1"
+        }
+      },
+      "required": [
+        "direction",
+        "magnitude",
+        "magnitude_unit",
+        "effective_at",
+        "decision_status",
+        "target_roles",
+        "target_okved_codes",
+        "evidence"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "subject_okved_codes"
+            ],
+            "properties": {
+              "subject_okved_codes": {
+                "minItems": 1
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "taxonomy_origin",
+              "taxonomy_version"
+            ]
+          }
+        }
+      ]
+    },
+    "Reason": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "profile_paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^/"
+          }
+        }
+      },
+      "required": [
+        "code",
+        "text",
+        "profile_paths"
+      ]
+    },
+    "RankedItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "news_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "score": {
+          "type": "number"
+        },
+        "score_kind": {
+          "enum": [
+            "mock",
+            "manual_feature_baseline",
+            "logistic_relevance_uncalibrated"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Reason"
+          },
+          "minItems": 1
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "feature_version": {
+          "enum": [
+            "company_event_v1",
+            "company_event_v2"
+          ]
+        },
+        "feature_contributions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "feature": {
+                "type": "string",
+                "minLength": 1
+              },
+              "value": {
+                "type": "number"
+              },
+              "coefficient": {
+                "type": "number"
+              },
+              "contribution": {
+                "type": "number"
+              },
+              "scale": {
+                "enum": [
+                  "raw_score",
+                  "logit"
+                ]
+              },
+              "profile_paths": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^/"
+                }
+              },
+              "source_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+                }
+              }
+            },
+            "required": [
+              "feature",
+              "value",
+              "coefficient",
+              "contribution",
+              "scale",
+              "profile_paths",
+              "source_ids"
+            ]
+          }
+        }
+      },
+      "required": [
+        "news_id",
+        "event_id",
+        "score",
+        "score_kind",
+        "reasons",
+        "warnings"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "score_kind": {
+                "enum": [
+                  "mock",
+                  "logistic_relevance_uncalibrated"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "score": {
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "RankRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Event"
+          },
+          "maxItems": 100
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "company_id",
+        "events",
+        "as_of",
+        "limit"
+      ]
+    },
+    "RankData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RankedItem"
+          }
+        },
+        "excluded_future_news_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+          }
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "feedback_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "model_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "company_id",
+        "as_of",
+        "items",
+        "excluded_future_news_ids",
+        "truncated"
+      ]
+    },
+    "FeedbackRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ranking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "ratings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "event_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+              },
+              "policy_group_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+              },
+              "label": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "source_reviewed": {
+                "const": true
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "event_id",
+              "policy_group_id",
+              "label",
+              "source_reviewed",
+              "reason"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "ranking_id",
+        "company_id",
+        "ratings"
+      ]
+    },
+    "FeedbackData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "accepted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "duplicates": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "accepted",
+        "duplicates"
+      ]
+    },
+    "LearningStatusData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "active_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "paused": {
+          "type": "boolean"
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "train": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "validation": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "gate": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "train",
+            "validation",
+            "gate"
+          ]
+        },
+        "consumed_gate_groups": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "last_run": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "thresholds": {
+          "type": "object"
+        },
+        "feature_versions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "required": [
+        "active_version",
+        "paused",
+        "labels",
+        "consumed_gate_groups",
+        "last_run",
+        "thresholds"
+      ]
+    },
+    "SearchRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "news_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "since": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "candidate_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "query",
+        "as_of",
+        "limit",
+        "news_id"
+      ]
+    },
+    "SearchData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Event"
+          }
+        },
+        "total_candidates": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "next_offset": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      },
+      "required": [
+        "items"
+      ]
+    },
+    "IngestRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 300
+        },
+        "text": {
+          "type": "string",
+          "minLength": 30,
+          "maxLength": 18000
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?://",
+          "maxLength": 2000
+        },
+        "published": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 100
+        },
+        "modified": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 100
+        }
+      },
+      "required": [
+        "title",
+        "text",
+        "url"
+      ]
+    },
+    "IngestData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "item": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Event"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "news_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "date_status": {
+          "enum": [
+            "valid",
+            "missing",
+            "invalid",
+            "future"
+          ]
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "ingestion_status": {
+          "enum": [
+            "inserted",
+            "updated",
+            "duplicate"
+          ]
+        }
+      },
+      "required": [
+        "item",
+        "news_id",
+        "date_status",
+        "warnings"
+      ]
+    },
+    "FeedRefreshRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {},
+      "required": []
+    },
+    "FeedRefreshData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "processed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed_hosts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "inserted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "updated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "duplicates": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "quarantined": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "processed",
+        "failed_hosts"
+      ]
+    },
+    "FeedStatusData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "running": {
+          "type": "boolean"
+        },
+        "poll_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "last_success": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "feeds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https://"
+              },
+              "last_attempt": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+              },
+              "last_success": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+              },
+              "last_error": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "next_attempt": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+              },
+              "consecutive_failures": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "enum": [
+                  "rss",
+                  "json",
+                  "html"
+                ]
+              },
+              "article_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "full_text_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "inline_full_text_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "excerpt_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "discovered_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "pending_full_text_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "full_text_errors": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "url",
+              "last_attempt",
+              "last_success",
+              "last_error",
+              "next_attempt",
+              "consecutive_failures"
+            ]
+          },
+          "maxItems": 64
+        }
+      },
+      "required": [
+        "enabled",
+        "running",
+        "poll_seconds",
+        "last_success",
+        "feeds"
+      ]
+    },
+    "RagRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        }
+      },
+      "required": [
+        "query",
+        "as_of",
+        "limit"
+      ]
+    },
+    "RagData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/Evidence"
+              },
+              {
+                "properties": {
+                  "kind": {
+                    "const": "bank"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "items",
+        "limitations"
+      ]
+    },
+    "ResolveRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+          },
+          "maxItems": 50,
+          "uniqueItems": true
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        }
+      },
+      "required": [
+        "source_ids",
+        "as_of"
+      ]
+    },
+    "ResolveData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        },
+        "unknown_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+          }
+        }
+      },
+      "required": [
+        "items",
+        "unknown_ids"
+      ]
+    },
+    "AnalyzeRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "news_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "audience_role": {
+          "enum": [
+            "cfo",
+            "ceo",
+            "treasury"
+          ]
+        }
+      },
+      "required": [
+        "company_id",
+        "news_id",
+        "as_of",
+        "audience_role"
+      ]
+    },
+    "Claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "fact",
+            "bank",
+            "ai"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quote": {
+          "type": "string"
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+          },
+          "minItems": 1
+        },
+        "profile_paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^/",
+            "maxLength": 500
+          },
+          "minItems": 1,
+          "maxItems": 20,
+          "uniqueItems": true
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "minItems": 1,
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "kind",
+        "text",
+        "quote",
+        "source_ids"
+      ]
+    },
+    "Grounding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 29
+          },
+          "minItems": 1,
+          "maxItems": 30,
+          "uniqueItems": true
+        },
+        "why_relevant": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 29
+          },
+          "minItems": 1,
+          "maxItems": 30,
+          "uniqueItems": true
+        },
+        "risks": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 29
+            },
+            "minItems": 1,
+            "maxItems": 30,
+            "uniqueItems": true
+          },
+          "maxItems": 10
+        },
+        "opportunities": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 29
+            },
+            "minItems": 1,
+            "maxItems": 30,
+            "uniqueItems": true
+          },
+          "maxItems": 10
+        },
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "claim_indexes": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 29
+                },
+                "minItems": 1,
+                "maxItems": 30,
+                "uniqueItems": true
+              },
+              "condition": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "required_data": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "pattern": "\\S"
+                },
+                "maxItems": 10,
+                "minItems": 1
+              }
+            },
+            "required": [
+              "claim_indexes",
+              "condition",
+              "required_data"
+            ]
+          },
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "summary",
+        "why_relevant",
+        "risks",
+        "opportunities",
+        "recommendations"
+      ]
+    },
+    "GeneratedAnalysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 6000,
+          "pattern": "\\S"
+        },
+        "why_relevant": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 6000,
+          "pattern": "\\S"
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "minItems": 2,
+          "maxItems": 30
+        },
+        "risks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "pattern": "\\S"
+          },
+          "maxItems": 10
+        },
+        "opportunities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "pattern": "\\S"
+          },
+          "maxItems": 10
+        },
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "pattern": "\\S"
+          },
+          "maxItems": 10
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "pattern": "\\S"
+          },
+          "maxItems": 20
+        },
+        "missing_data": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "pattern": "\\S"
+          },
+          "maxItems": 20
+        },
+        "grounding": {
+          "$ref": "#/$defs/Grounding"
+        }
+      },
+      "required": [
+        "summary",
+        "why_relevant",
+        "claims",
+        "risks",
+        "opportunities",
+        "recommendations",
+        "limitations",
+        "missing_data",
+        "grounding"
+      ]
+    },
+    "Trace": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "step": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "step",
+        "detail"
+      ]
+    },
+    "Analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "news_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "why_relevant": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "minItems": 1
+        },
+        "risks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "opportunities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "minItems": 1
+        },
+        "trace": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Trace"
+          }
+        },
+        "mode": {
+          "enum": [
+            "mock",
+            "demo",
+            "live"
+          ]
+        },
+        "missing_data": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "pattern": "\\S"
+          },
+          "maxItems": 20
+        },
+        "grounding": {
+          "$ref": "#/$defs/Grounding"
+        }
+      },
+      "required": [
+        "id",
+        "company_id",
+        "news_id",
+        "created_at",
+        "summary",
+        "why_relevant",
+        "claims",
+        "risks",
+        "opportunities",
+        "recommendations",
+        "limitations",
+        "sources",
+        "trace",
+        "mode"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "live"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "grounding",
+              "missing_data"
+            ]
+          }
+        }
+      ]
+    },
+    "AgentRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "profile": {
+          "$ref": "#/$defs/Profile"
+        },
+        "event": {
+          "$ref": "#/$defs/Event"
+        },
+        "ranked_item": {
+          "$ref": "#/$defs/RankedItem"
+        },
+        "research": {
+          "$ref": "#/$defs/RagData"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "audience_role": {
+          "enum": [
+            "cfo",
+            "ceo",
+            "treasury"
+          ]
+        },
+        "is_mock": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "company_id",
+        "profile",
+        "event",
+        "ranked_item",
+        "research",
+        "as_of",
+        "audience_role",
+        "is_mock"
+      ]
+    },
+    "AnalysisEventRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "event": {
+          "$ref": "#/$defs/Event"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "audience_role": {
+          "enum": [
+            "cfo",
+            "ceo",
+            "treasury"
+          ]
+        },
+        "expected_context_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "company_id",
+        "event",
+        "as_of",
+        "audience_role"
+      ]
+    },
+    "PreparedContextData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "input": {
+          "$ref": "#/$defs/AgentRequest"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "minItems": 2
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "serialized_bytes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "input",
+        "sources",
+        "sha256",
+        "serialized_bytes"
+      ]
+    },
+    "QuestionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "question": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "company_id",
+        "question"
+      ]
+    },
+    "AgentQuestionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "question": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 2000
+        },
+        "analysis": {
+          "$ref": "#/$defs/Analysis"
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "question": {
+                "type": "string",
+                "minLength": 1
+              },
+              "answer": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "question",
+              "answer"
+            ]
+          },
+          "maxItems": 10
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "audience_role": {
+          "enum": [
+            "cfo",
+            "ceo",
+            "treasury"
+          ]
+        },
+        "prepared_input": {
+          "$ref": "#/$defs/AgentRequest"
+        }
+      },
+      "required": [
+        "company_id",
+        "question",
+        "analysis",
+        "history"
+      ]
+    },
+    "Answer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "analysis_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "answer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+          },
+          "minItems": 1
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "minItems": 2,
+          "maxItems": 30
+        },
+        "claim_indexes": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 29
+          },
+          "minItems": 1,
+          "maxItems": 30,
+          "uniqueItems": true
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "pattern": "\\S"
+          },
+          "maxItems": 20
+        },
+        "missing_data": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "pattern": "\\S"
+          },
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "analysis_id",
+        "company_id",
+        "answer",
+        "source_ids"
+      ]
+    },
+    "GeneratedAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "answer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000,
+          "pattern": "\\S"
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "minItems": 2,
+          "maxItems": 30
+        },
+        "claim_indexes": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 29
+          },
+          "minItems": 1,
+          "maxItems": 30,
+          "uniqueItems": true
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "pattern": "\\S"
+          },
+          "maxItems": 20
+        },
+        "missing_data": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "pattern": "\\S"
+          },
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "answer",
+        "claims",
+        "claim_indexes",
+        "limitations",
+        "missing_data"
+      ]
+    },
+    "CompaniesData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+          }
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "items",
+        "offset",
+        "limit"
+      ]
+    },
+    "HealthData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "service": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "status",
+        "service"
+      ]
+    },
+    "RuntimeData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "generation_enabled": {
+          "type": "boolean"
+        },
+        "viewer_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        }
+      },
+      "required": [
+        "generation_enabled"
+      ]
+    },
+    "LiveSubscribeRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "audience_role": {
+          "enum": [
+            "cfo",
+            "ceo",
+            "treasury"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "min_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "company_id",
+        "audience_role"
+      ]
+    },
+    "LiveScanRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "audience_role": {
+          "enum": [
+            "cfo",
+            "ceo",
+            "treasury"
+          ]
+        }
+      },
+      "required": [
+        "company_id",
+        "audience_role"
+      ]
+    },
+    "LiveQuestionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "question": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 2000
+        },
+        "idempotency_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        }
+      },
+      "required": [
+        "company_id",
+        "question",
+        "idempotency_key"
+      ]
+    },
+    "LiveFavoriteRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "favorite": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "company_id",
+        "favorite"
+      ]
+    },
+    "LiveCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "news_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "audience_role": {
+          "enum": [
+            "cfo",
+            "ceo",
+            "treasury"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "created_at": {
+          "type": "number",
+          "minimum": 0
+        },
+        "stale": {
+          "type": "boolean"
+        },
+        "favorite": {
+          "type": "boolean"
+        },
+        "analysis": {
+          "$ref": "#/$defs/Analysis"
+        }
+      },
+      "required": [
+        "id",
+        "seq",
+        "company_id",
+        "news_id",
+        "revision",
+        "audience_role",
+        "title",
+        "created_at",
+        "stale",
+        "favorite",
+        "analysis"
+      ]
+    },
+    "LiveFeedData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LiveCard"
+          },
+          "maxItems": 100
+        },
+        "next_cursor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "visible_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+          },
+          "uniqueItems": true
+        },
+        "available_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "favorites_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "running_tasks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "has_running_tasks": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "items",
+        "next_cursor",
+        "total",
+        "visible_ids",
+        "available_count",
+        "favorites_count",
+        "running_tasks",
+        "has_running_tasks"
+      ]
+    },
+    "LiveSubscriptionData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "audience_role": {
+          "enum": [
+            "cfo",
+            "ceo",
+            "treasury"
+          ]
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "min_score": {
+          "type": "number"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "next_scan": {
+          "type": "number",
+          "minimum": 0
+        },
+        "last_scan": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "error": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "company_id",
+        "audience_role",
+        "limit",
+        "min_score",
+        "enabled",
+        "next_scan",
+        "last_scan",
+        "error"
+      ]
+    },
+    "LiveJobData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "kind": {
+          "enum": [
+            "analysis",
+            "question"
+          ]
+        },
+        "audience_role": {
+          "enum": [
+            "cfo",
+            "ceo",
+            "treasury"
+          ]
+        },
+        "company_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "news_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "analysis_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "queued",
+            "running",
+            "deferred",
+            "succeeded",
+            "failed",
+            "superseded",
+            "unknown"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "attempts": {
+          "type": "integer"
+        },
+        "error": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "next_attempt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "created_at": {
+          "type": "number",
+          "minimum": 0
+        },
+        "updated_at": {
+          "type": "number",
+          "minimum": 0
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnalysisResponse"
+            },
+            {
+              "$ref": "#/$defs/AnswerResponse"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "audience_role",
+        "company_id",
+        "news_id",
+        "analysis_id",
+        "status",
+        "title",
+        "attempts",
+        "error",
+        "next_attempt",
+        "created_at",
+        "updated_at",
+        "result"
+      ]
+    },
+    "LiveJobsData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LiveJobData"
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "items"
+      ]
+    },
+    "LiveFavoriteData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+        },
+        "favorite": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "favorite"
+      ]
+    },
+    "LiveDetailData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "card": {
+          "$ref": "#/$defs/LiveCard"
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "question": {
+                "type": "string",
+                "minLength": 1
+              },
+              "answer": {
+                "type": "string",
+                "minLength": 1
+              },
+              "response": {
+                "$ref": "#/$defs/AnswerResponse"
+              },
+              "created_at": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "question",
+              "answer",
+              "response",
+              "created_at"
+            ]
+          }
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_:.\\-]{1,160}$"
+              },
+              "revision": {
+                "type": "string",
+                "minLength": 1
+              },
+              "created_at": {
+                "type": "number",
+                "minimum": 0
+              },
+              "stale": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "revision",
+              "created_at",
+              "stale"
+            ]
+          }
+        }
+      },
+      "required": [
+        "card",
+        "history",
+        "versions"
+      ]
+    },
+    "AgentOperationData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "not_found",
+            "succeeded",
+            "failed",
+            "running",
+            "unknown",
+            "recoverable"
+          ]
+        },
+        "response": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnalysisResponse"
+            },
+            {
+              "$ref": "#/$defs/AnswerResponse"
+            }
+          ]
+        },
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "status": {
+              "type": "integer",
+              "minimum": 400,
+              "maximum": 599
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "code",
+            "status",
+            "message"
+          ]
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "succeeded"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "response"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "failed"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "error"
+            ]
+          }
+        }
+      ]
+    },
+    "LiveStatusData": {
+      "type": "object",
+      "properties": {
+        "available_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "favorites_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "running_tasks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "has_running_tasks": {
+          "type": "boolean"
+        }
+      }
+    },
+    "BudgetStatusData": {
+      "type": "object"
+    },
+    "LiveFeedDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/LiveFeedData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "LiveSubscriptionDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/LiveSubscriptionData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "LiveJobDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/LiveJobData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "LiveJobsDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/LiveJobsData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "LiveFavoriteDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/LiveFavoriteData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "LiveDetailDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/LiveDetailData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "LiveStatusDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/LiveStatusData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "AgentOperationDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/AgentOperationData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "BudgetStatusDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/BudgetStatusData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "ProfileResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/Profile"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "CompaniesDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/CompaniesData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "RankDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/RankData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "SearchDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/SearchData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "RagDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/RagData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "ResolveDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/ResolveData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "AnalysisResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/Analysis"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "AnswerResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/Answer"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "HealthDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/HealthData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "FeedbackDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/FeedbackData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "LearningStatusDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/LearningStatusData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "PreparedContextDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/PreparedContextData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "IngestDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/IngestData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "FeedRefreshDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/FeedRefreshData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "FeedStatusDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/FeedStatusData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    },
+    "RuntimeDataResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/RuntimeData"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ]
+    }
+  }
+}

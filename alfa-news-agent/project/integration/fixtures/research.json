@@ -1,0 +1,5 @@
+[
+  {"id": "research:demo-bank:p1", "kind": "bank", "title": "Синтетический документ для теста RAG",
+   "url": "https://example.invalid/research/demo-bank.pdf#page=1", "excerpt": "Тестовый фрагмент: условия конкретных договоров нужно уточнить. Это не позиция Альфа-Банка.",
+   "document_id": "demo-bank", "page": 1, "published_at": "2026-10-20T00:00:00Z", "is_mock": true}
+]

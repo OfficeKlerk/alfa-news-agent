@@ -1,0 +1,98 @@
+{
+  "U_34911": [
+    {
+      "news_id": "rate-hold-2026-09",
+      "score": 0.9017,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "grain-export-duty",
+      "score": 0.8765,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "rub-weakens",
+      "score": 0.847,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "counterparty-trouble",
+      "score": 0.064,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "power-tariff-reform",
+      "score": 0.0351,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "road-program",
+      "score": 0.0233,
+      "score_kind": "manual_feature_baseline"
+    }
+  ],
+  "U_99262": [
+    {
+      "news_id": "counterparty-trouble",
+      "score": 1.1128,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "rate-hold-2026-09",
+      "score": 0.9017,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "road-program",
+      "score": 0.7733,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "grain-export-duty",
+      "score": 0.1734,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "rub-weakens",
+      "score": 0.047,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "power-tariff-reform",
+      "score": 0.0351,
+      "score_kind": "manual_feature_baseline"
+    }
+  ],
+  "U_4909": [
+    {
+      "news_id": "power-tariff-reform",
+      "score": 0.7851,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "counterparty-trouble",
+      "score": 0.064,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "rub-weakens",
+      "score": 0.047,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "grain-export-duty",
+      "score": 0.0385,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "road-program",
+      "score": 0.0233,
+      "score_kind": "manual_feature_baseline"
+    },
+    {
+      "news_id": "rate-hold-2026-09",
+      "score": 0.0017,
+      "score_kind": "manual_feature_baseline"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "origin": "verbatim_phrases_from_REPORT6_with_reconstructed_test_contexts",
+  "note": "Only REPORT6 and TEAM_TASKS6 were supplied; these are not original response or provider payload JSON. No real LLM acceptance is measured.",
+  "rejected_phrases": [
+    "В профиле компании отмечен продукт лизинга, что указывает на наличие обязательств.",
+    "Внешнеторговая деятельность не ведется.",
+    "Компания не осуществляет внешнеторговую деятельность."
+  ],
+  "allowed_phrases": [
+    "В снимке отмечен продукт лизинга; действующий договор и остаток неизвестны.",
+    "Нет отметки ФТС в снимке.",
+    "has_fts=false не доказывает отсутствие внешней торговли.",
+    "Отметка лизинга не указывает на наличие обязательств.",
+    "Если компания ведёт внешнюю торговлю, нужно уточнить договоры."
+  ]
+}

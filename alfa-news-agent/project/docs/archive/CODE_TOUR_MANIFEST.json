@@ -1,0 +1,127 @@
+{
+  "date": "2026-10-23",
+  "files": [
+    {
+      "path": "server/index.ts",
+      "lines": 15,
+      "sha256": "651b4b65178fbc6f2af642e0f9144af6262c25b28fdd5b8413a66ec2b96e6817"
+    },
+    {
+      "path": "server/types.ts",
+      "lines": 22,
+      "sha256": "2853008cd46cd22e2aacba03ae59d1a5798906f3bbeb8fec2bcc49bc1239d6e2"
+    },
+    {
+      "path": "server/config.ts",
+      "lines": 41,
+      "sha256": "7f6b9aa936b49f935ba177daa523ac083c3e65d03f51de97a6e4d5f4b5dcf00d"
+    },
+    {
+      "path": "server/db.ts",
+      "lines": 87,
+      "sha256": "a6901680b58f6384872d35135d0fc83369cb14e1bc9aae3adab2e45da71f5dfe"
+    },
+    {
+      "path": "server/app.ts",
+      "lines": 109,
+      "sha256": "f619ad38be19f375928bc1306783747b4027874bd9e76b7ce98afb3ff2af3dd3"
+    },
+    {
+      "path": "server/retrieval.ts",
+      "lines": 54,
+      "sha256": "fb3220b6a37e26f8c86895ece3672492af8dcdd57311741fd566ea2450fc367c"
+    },
+    {
+      "path": "server/news.ts",
+      "lines": 44,
+      "sha256": "09f685fae45d216dbbf83c062a781e9a251b4bedd168220a045329d8b5394c1a"
+    },
+    {
+      "path": "server/llm.ts",
+      "lines": 61,
+      "sha256": "37822dee24fd76b7f1d4ea08eef5acedb23557fb0220b43af6429f6459435f20"
+    },
+    {
+      "path": "server/agent.ts",
+      "lines": 152,
+      "sha256": "84826bf557c9b0d42136694ff4fe39d0b5ecf6271bdca8b1c422adb547bf11a4"
+    },
+    {
+      "path": "server/prompts.ts",
+      "lines": 2,
+      "sha256": "c7c87a4faeea3282aad4bebdee7a0ba39106930a1d604612118d226b0659d5d7"
+    },
+    {
+      "path": "frontend/app.js",
+      "lines": 132,
+      "sha256": "644d5b2d23c8100a329eadfeb509e9b207f898d30c90df9a4258de8f4a961229"
+    },
+    {
+      "path": "frontend/index.html",
+      "lines": 38,
+      "sha256": "efcb62e15cffecec3149042c7fb73bb73981c2dfc0a5080782091519e6ec0ea6"
+    },
+    {
+      "path": "frontend/styles.css",
+      "lines": 5,
+      "sha256": "eed80db42370c8933fcd07bf12306b608b48e423ca56c1cc249f7e52ee7f0223"
+    },
+    {
+      "path": ".env.example",
+      "lines": 16,
+      "sha256": "e7d2763e337f2e49d3da6d9b3cb848ee2fe97c5c1a55a15e6c53a90e76befff3"
+    },
+    {
+      "path": "Dockerfile",
+      "lines": 14,
+      "sha256": "254fbc7654a751b14896d72ad7cb0cf9e71ce1c5497fc4d7fde209ee976c9562"
+    },
+    {
+      "path": "compose.yaml",
+      "lines": 13,
+      "sha256": "574a574328e94a4ec10590ae8d6d6ed09b9c3052c157ac1ef0a5f78b3f2bbb93"
+    },
+    {
+      "path": "start_windows.bat",
+      "lines": 18,
+      "sha256": "3b6cd75bf6eb8e8557b9c7ec0f3a137fe8aa366b4dc8ee3e837257ec32fafaa6"
+    },
+    {
+      "path": ".nvmrc",
+      "lines": 1,
+      "sha256": "55ce66383dffcaf804e6d3b03993b0d332cb5d7c38e26e9f92fb78ab040dc70c"
+    },
+    {
+      "path": ".gitignore",
+      "lines": 7,
+      "sha256": "dd7a942820ae2866d4de55dce72125d55c414d4a82178cd04eec4a4446f5358e"
+    },
+    {
+      "path": ".dockerignore",
+      "lines": 7,
+      "sha256": "15715d881748c1b779de74a7aab179a40e046bdb135a8abc683693779d0209ca"
+    },
+    {
+      "path": "server/tests/app.test.ts",
+      "lines": 269,
+      "sha256": "c0792515f4e4c76fdb626b54bde113e2c955bf30172ab8f7b76bbe9ceb24a883"
+    },
+    {
+      "path": "package.json",
+      "lines": 27,
+      "sha256": "300205dc2b06d54c3c3e30f52a0377ae8b677ad6f406ee38e7feef254b594a9e"
+    },
+    {
+      "path": "tsconfig.json",
+      "lines": 20,
+      "sha256": "783609ef8670f7f40b36abdedc57ed8858d0c6c7b32059be01106907428a6d98"
+    },
+    {
+      "path": "package-lock.json",
+      "lines": 1632,
+      "sha256": "6d19e90f46460cad5824ea14a7dde4dd780d1b84e97ae00d363c69888f8ed644"
+    }
+  ],
+  "totalLines": 2786,
+  "cssRules": 215
+}
