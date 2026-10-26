@@ -62,8 +62,6 @@ const rules: Record<string, string> = {
   "Freshness-only ranking explanation is not supported by contributions": "Проверь ranking_evidence и все ненулевые feature_contributions, включая отрицательные. Только freshness_only_confirmed=true разрешает вывод об исключительно свежестном вкладе; иначе опиши ограничения без такого утверждения.",
 };
 export function repairInstruction(issue: FieldIssue, question = false, draft?: Json): string {
-  if (question && issue.rule === "Section financial figures must be verbatim fact/bank quotes")
-    return "Исправь поле answer. Если вопрос качественный (что уточнить/сделать), убери из answer проценты, суммы, даты и нумерацию; исходную дословную fact-цитату сохрани в claims и claim_indexes. Не повторяй числовое summary анализа. Если число необходимо вопросу, помести в answer отдельное полное предложение, дословно равное связанной fact/bank.quote, а качественное пояснение напиши отдельно. Не меняй смысл факта и не ослабляй его основание.";
   if (issue.rule === "Too few items") {
     // REPORT8 rate-hold-leasing call-05: one ai claim and an empty summary after "do not repeat".
     if (issue.path === "/claims") return "Нужно минимум два claims: одна дословная fact-цитата новости и минимум один ai-вывод. Требование уникальности запрещает только повтор того же text, а не второй claim. Не удаляй fact-цитату ради краткости.";
